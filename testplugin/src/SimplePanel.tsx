@@ -73,39 +73,11 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
       version: '1.0',
     },
   ];
-  //   const czml1 = [
-  //     {
-  //       id: 'document',
-  //       version: '1.0',
-  //     },
-  //     {
-  //       id: 'point',
-  //       availability: '2012-08-04T16:00:00Z/2012-08-04T16:03:00Z',
-  //       position: {
-  //         interval: '2012-08-04T16:00:00Z/2012-08-04T16:02:00Z',
-  //         epoch: '2012-08-04T16:00:00Z',
-  //         cartographicDegrees: [0, -60, 10, 150000, 120, -70, 18, 150000],
-  //       },
-  //     },
-  //   ];
 
-  //   setInterval(() => {
-  //     dat = dat + 1;
-  //     console.log('changed dat', dat);
-  //     if (viewer.current?.cesiumElement && viewer.current?.cesiumElement.dataSources.length) {
-  //       // viewer.current.cesiumElement is the Cesium Viewer
-  //       let myczml = viewer.current.cesiumElement.dataSources.getByName('myczml') as CesiumCzmlDataSource[];
-  //       if (myczml.length === 1) {
-  //         // myczml[0] is our CZMLDataSource
-  //         myczml[0].process(czml1);
-  //       }
-  //     }
-  //     //setblah(!blah);
-  //   }, 5000);
-  //console.log(buildModuleUrl('Assets/Textures/NaturalEarthII'));
+  // TODO: look into why I need this delay. Surely there's a smarter way of doing this
   setTimeout(() => {
+    // viewer.current.cesiumElement is the Cesium Viewer
     if (viewer.current?.cesiumElement && viewer.current?.cesiumElement.dataSources.length) {
-      // viewer.current.cesiumElement is the Cesium Viewer
       // Get the czml document we started at the top of this file
       let myczml = viewer.current.cesiumElement.dataSources.getByName('CosmosOrbitalDisplay') as CesiumCzmlDataSource[];
       // There should only ever be one
@@ -126,13 +98,12 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
         }
       }
     }
-  }, 2000);
+  }, 100);
 
-  const handlechange = (e: CesiumCzmlDataSource) => {
-    console.log('detected change');
-    //setdat(czml1);
-  };
-
+  //   const handlechange = (e: CesiumCzmlDataSource) => {
+  //     console.log('detected change');
+  //     //setdat(czml1);
+  //   };
   console.log('rerender globe panel');
 
   return (
@@ -154,11 +125,9 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
         navigationHelpButton={false}
         ref={viewer}
       >
-        <CzmlDataSource data={czml0} onChange={handlechange}></CzmlDataSource>
+        <CzmlDataSource data={czml0} /*onChange={handlechange}*/></CzmlDataSource>
         <Globe enableLighting />
       </Viewer>
-      Sample text
-      {console.log(JSON.stringify(data))}
     </div>
   );
 };
