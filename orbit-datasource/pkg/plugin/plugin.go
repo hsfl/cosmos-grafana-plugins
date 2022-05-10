@@ -82,8 +82,8 @@ func (d *SampleDatasource) QueryData(ctx context.Context, req *backend.QueryData
 
 type queryModel struct {
 	// WithStreaming bool `json:"withStreaming"`
-	EnableSimMode bool            `json:"enableSimMode"`
-	Sim           propagator_args `json:"sim"`
+	EnableSimMode bool              `json:"enableSimMode"`
+	SimNodeList   []propagator_args `json:"simNodeList"`
 }
 
 // Send an array of these to the propagator
@@ -166,6 +166,7 @@ func (d *SampleDatasource) query(_ context.Context, queryAPI api.QueryAPI, pCtx 
 	if response.Error != nil {
 		return response
 	}
+	log.DefaultLogger.Info("qm", "qm", qm)
 
 	// Perform different tasks depending on run mode: simulation or non-simulation
 	if qm.EnableSimMode {
@@ -184,21 +185,13 @@ func (d *SampleDatasource) SimMode(qm queryModel, pCtx backend.PluginContext) ba
 	// create data frame response.
 	frame := data.NewFrame("response")
 
-	var pargs []propagator_args
-	pargs = append(pargs, propagator_args{
-		Node_name: qm.Sim.Node_name,
-		Utc:       qm.Sim.Utc,
-		Px:        qm.Sim.Px,
-		Py:        qm.Sim.Py,
-		Pz:        qm.Sim.Pz,
-		Vx:        qm.Sim.Vx,
-		Vy:        qm.Sim.Vy,
-		Vz:        qm.Sim.Vz,
-		Runcount:  90,
-		StartUtc:  qm.Sim.Utc,
-	})
+	for i := range qm.SimNodeList {
+		qm.SimNodeList[i].StartUtc = qm.SimNodeList[i].Utc
+		qm.SimNodeList[i].Runcount = 90
+	}
+
 	// Call orbital propagator to generate full orbit
-	predicted_orbit, err := orbitalPropagatorCall(pargs)
+	predicted_orbit, err := orbitalPropagatorCall(qm.SimNodeList)
 	if err != nil {
 		log.DefaultLogger.Error("Error in orbitalPropagatorCall", err.Error())
 		response.Error = err
