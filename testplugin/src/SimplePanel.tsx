@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { PanelProps } from '@grafana/data';
-import { SimpleOptions } from 'types';
+import { CzmlPacket, SimpleOptions } from 'types';
 import {
   buildModuleUrl,
   TileMapServiceImageryProvider,
@@ -8,6 +8,8 @@ import {
   CzmlDataSource as CesiumCzmlDataSource,
 } from 'cesium';
 import { CesiumComponentRef, CzmlDataSource, Globe, Viewer } from 'resium';
+import { GlobeToolbar } from './GlobeToolbar';
+import './globe.css';
 
 require('../node_modules/cesium/Source/Widgets/widgets.css');
 
@@ -15,55 +17,11 @@ const globeTexture = new TileMapServiceImageryProvider({
   url: buildModuleUrl('Assets/Textures/NaturalEarthII'),
 });
 
-interface CzmlPacket {
-  id: string;
-  name?: string;
-  version?: string;
-  availability?: string;
-  position?: {
-    interval?: string;
-    epoch: string;
-    cartesian: Number[];
-    referenceFrame?: string;
-  };
-  point?: {
-    color: {
-      rgba: Number[];
-    };
-    outlineColor?: {
-      rgba: Number[];
-    };
-    outlineWidth?: Number;
-    pixelSize: Number;
-  };
-  model?: {
-    gltf: string;
-    scale: Number;
-    minimumPixelSize?: Number;
-  };
-  path?: {
-    material: {
-      polylineOutline: {
-        color: {
-          rgba: Number[];
-        };
-        outlineColor?: {
-          rgba: Number[];
-        };
-        outlineWidth?: Number;
-      };
-    };
-    width: Number;
-    leadTime?: Number;
-    trailTime?: Number;
-    resolution?: Number;
-  };
-}
-
 interface Props extends PanelProps<SimpleOptions> {}
 
 export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) => {
   const viewer = useRef<CesiumComponentRef<CesiumViewer>>(null);
+  const [dataState, setDataState] = useState(data);
   //let [dat, setdat] = useState<CzmlPacket[] | undefined>();
   //   let dat = 0;
   const czml0 = [
@@ -73,6 +31,10 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
       version: '1.0',
     },
   ];
+
+  useEffect(() => {
+    setDataState(data);
+  }, [data]);
 
   // TODO: look into why I need this delay. Surely there's a smarter way of doing this
   setTimeout(() => {
@@ -88,12 +50,12 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
         // values are the rows within that field
         let historical: string = data.series[0].fields.find((x) => x.name === 'historical')?.values.get(0);
         if (historical !== '') {
-          let czmlified: CzmlPacket = JSON.parse(historical);
+          const czmlified: CzmlPacket[] = JSON.parse(historical);
           myczml[0].process(czmlified);
         }
         let predicted: string = data.series[0].fields.find((x) => x.name === 'predicted')?.values.get(0);
         if (predicted !== '') {
-          let czmlified: CzmlPacket = JSON.parse(predicted);
+          const czmlified: CzmlPacket[] = JSON.parse(predicted);
           myczml[0].process(czmlified);
         }
       }
@@ -127,6 +89,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
       >
         <CzmlDataSource data={czml0} /*onChange={handlechange}*/></CzmlDataSource>
         <Globe enableLighting />
+        <GlobeToolbar data={String(dataState.series[0].fields.find((x) => x.name === 'predicted')?.values.get(0))} />
       </Viewer>
     </div>
   );

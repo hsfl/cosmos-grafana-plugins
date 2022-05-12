@@ -3,10 +3,10 @@ type Dests = 'iobcfm' | 'unibapfm';
 type Radios = 'RXS' | 'TXS' | 'UHF' | 'Simplex' | 'Net' | 'All';
 
 export interface SimpleOptions {
-  btnLabel: String;
+  btnLabel: string;
   route: Routes;
   dest: Dests;
-  cmdID: Number;
-  args: String;
+  cmdID: number;
+  args: string;
   radioout: Radios;
 }
