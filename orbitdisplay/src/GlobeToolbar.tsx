@@ -1,24 +1,25 @@
 import React, { useState } from 'react';
 import { Button, IconButton, Modal } from '@grafana/ui';
-import { CzmlPacket, HashNum } from 'types';
+import { CzmlPacket, HashNum, HashStr } from 'types';
 
 // Currently only works for simulated data from the orbital propagator
 // Sorts by timestamp
-const czmlToTabDelim = (czml: string) => {
-  let tabdata = '';
+const czmlToTabDelim = (czml: string): HashStr => {
+  let ret: HashStr = {};
   let czmljson: CzmlPacket[];
 
   try {
     czmljson = JSON.parse(czml);
   } catch (e) {
-    tabdata = 'Error in converting czml!\n';
+    let retstr = '';
+    retstr = 'Error in converting czml!\n';
     if (typeof e === 'string') {
-      tabdata += e + '\n';
+      retstr += e + '\n';
     } else if (e instanceof Error) {
-      tabdata += e.message + '\n';
+      retstr += e.message + '\n';
     }
-    tabdata += 'CZML string:\n' + czml + '\n';
-    return tabdata;
+    retstr += 'CZML string:\n' + czml + '\n';
+    return { error: retstr };
   }
 
   // List of unique node names
@@ -67,78 +68,64 @@ const czmlToTabDelim = (czml: string) => {
     }
   } // end for
 
-  // Add headers
-  tabdata += 'node_name\ttime\teci_x\teci_y\teci_z\tatt_w\tatt_x\tatt_y\tatt_z\n';
+  // Create separate files for each node
+  for (let node of nodes) {
+    // Add headers
+    let tabdata = 'node_name\ttime\teci_x\teci_y\teci_z\tatt_w\tatt_x\tatt_y\tatt_z\n';
 
-  // Advance iterators for each node in lidx until all iterators have reached their end,
-  // grabbing the earliest timestamp per iteration
-  while (true) {
-    let earliest_time = Number.MAX_VALUE;
-    let earliest_node = '';
-    // First get earliest time
-    for (let node of nodes) {
-      // Position check, will always be in data
-      const node_pos = czmljson[node2idx[node]].position!.cartesian;
+    // Position check, will always be in data
+    const node_pos = czmljson[node2idx[node]].position!.cartesian;
+    while (t_idx_map[node] + 3 < node_pos.length) {
       const pos_t_idx = t_idx_map[node];
-      if (pos_t_idx + 3 < node_pos.length) {
-        const mjd = epochs[node] + node_pos[pos_t_idx] / 86400;
-        // May also need to check for floating point non-equality depending on how we want to output stuff
-        if (mjd < earliest_time) {
-          earliest_time = mjd;
-          earliest_node = node;
+      const mjd = epochs[node] + node_pos[pos_t_idx] / 86400;
+
+      // Create entry for this timestamp
+      const name = czmljson[node2idx[node]].id;
+      const pos = czmljson[node2idx[node]].position!.cartesian;
+      const t_idx = t_idx_map[node];
+      //            node     mjd     eci x              eci y              eci z
+      tabdata += `${name}\t${mjd}\t${pos[t_idx + 1]}\t${pos[t_idx + 2]}\t${pos[t_idx + 3]}`;
+      // Additional orbital stuff, assumes aligned timestamps with positional data (same epochs and offsets)
+      // orientation
+      if (node + 'o' in node2idx) {
+        const node_ori = czmljson[node2idx[node]].orientation!.unitQuaternion;
+        const ori_t_idx = t_idx_map[node + 'o'];
+        if (ori_t_idx + 4 < node_ori.length) {
+          //              w                           x                           y
+          tabdata += `\t${node_ori[ori_t_idx + 1]}\t${node_ori[ori_t_idx + 2]}\t${node_ori[ori_t_idx + 3]}\t${
+            //z
+            node_ori[ori_t_idx + 4]
+          }`;
+          // Advance iterator to next utc timestamp
+          t_idx_map[node + 'o'] += 5;
         }
       }
-    }
-    // Nothing set if all iterators fully advanced
-    if (earliest_node === '') {
-      break;
-    }
-    // Create entry for earliest timestamp, then advance its iterator
-    const name = czmljson[node2idx[earliest_node]].id;
-    const pos = czmljson[node2idx[earliest_node]].position!.cartesian;
-    const t_idx = t_idx_map[earliest_node];
-    //            node     mjd               eci x              eci y              eci z
-    tabdata += `${name}\t${earliest_time}\t${pos[t_idx + 1]}\t${pos[t_idx + 2]}\t${pos[t_idx + 3]}`;
-    // Additional orbital stuff, assumes aligned timestamps with positional data (same epochs and offsets)
-    // orientation
-    if (earliest_node + 'o' in node2idx) {
-      const node_ori = czmljson[node2idx[earliest_node]].orientation!.unitQuaternion;
-      const ori_t_idx = t_idx_map[earliest_node + 'o'];
-      if (ori_t_idx + 4 < node_ori.length) {
-        //              w                           x                           y
-        tabdata += `\t${node_ori[ori_t_idx + 1]}\t${node_ori[ori_t_idx + 2]}\t${node_ori[ori_t_idx + 3]}\t${
-          //z
-          node_ori[ori_t_idx + 4]
-        }`;
-        // Advance iterator
-        t_idx_map[earliest_node + 'o'] += 5;
-      }
-    }
-    // Complete line
-    tabdata += '\n';
-    // Advance iterator
-    t_idx_map[earliest_node] += 4;
-  } // end while
+      // Advance iterator to next utc timestamp
+      t_idx_map[node] += 4;
+      tabdata += '\n';
+    } // end while
+    ret[node] = tabdata;
+  } // end for
 
-  return tabdata;
+  return ret;
 };
 
 export const GlobeToolbar = ({ data }: { data: string }) => {
   // List of formations, hardcoded for now
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  // Downloadable data file stored here
-  // let link:HTMLAnchorElement | null = null;
 
   // Convert czml string to tab-delimitted format then save file to Downloads
   const onSaveClick = () => {
     const t = new Date();
     const timestamp = `${t.getFullYear()}${t.getMonth()}${t.getDate()}${t.getHours()}${t.getMinutes()}${t.getSeconds()}${t.getMilliseconds()}`;
-    let link: HTMLAnchorElement = document.createElement('a');
-    const tabdata = czmlToTabDelim(data);
-    link.href = 'data:application/octet-stream,' + encodeURIComponent(tabdata);
-    const filename = `data${timestamp}.txt`;
-    link.download = filename;
-    link.click();
+    const nodedata = czmlToTabDelim(data);
+    for (const ndat of Object.keys(nodedata)) {
+      let link: HTMLAnchorElement = document.createElement('a');
+      link.href = 'data:application/octet-stream,' + encodeURIComponent(nodedata[ndat]);
+      const filename = `data-${ndat}-${timestamp}.txt`;
+      link.download = filename;
+      link.click();
+    }
   };
 
   const onModalClose = () => {
