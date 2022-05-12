@@ -1,10 +1,10 @@
 {
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "panel",
-  "name": "testplugin",
-  "id": "testorg-testplugin",
+  "name": "Orbit Display",
+  "id": "hsfl-orbitdisplay",
   "info": {
-    "description": "test plugin",
+    "description": "Display satellite orbits",
     "author": {
       "name": "ginoscott",
       "url": ""

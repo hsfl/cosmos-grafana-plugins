@@ -107,7 +107,7 @@ const czmlToTabDelim = (czml: string) => {
       if (ori_t_idx + 4 < node_ori.length) {
         //              w                           x                           y
         tabdata += `\t${node_ori[ori_t_idx + 1]}\t${node_ori[ori_t_idx + 2]}\t${node_ori[ori_t_idx + 3]}\t${
-        //z
+          //z
           node_ori[ori_t_idx + 4]
         }`;
         // Advance iterator
