@@ -1,9 +1,9 @@
 import { PanelPlugin } from '@grafana/data';
 import { SimpleOptions } from './types';
-import { SimplePanel } from './SimplePanel';
+import { OrbitDisplayPanel } from './OrbitDisplayPanel';
 
 // Plugin entry point
-export const plugin = new PanelPlugin<SimpleOptions>(SimplePanel).setPanelOptions((builder) => {
+export const plugin = new PanelPlugin<SimpleOptions>(OrbitDisplayPanel).setPanelOptions((builder) => {
   return builder
     .addTextInput({
       path: 'text',

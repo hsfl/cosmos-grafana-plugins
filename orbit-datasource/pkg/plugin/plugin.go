@@ -322,7 +322,7 @@ func toCzml(result *api.QueryTableResult) (czml_response, error) {
 			// czmlPacket[idx].Position.Epoch = result.Record().Time().Format(time.RFC3339)
 			czmlPacket[idx].Position.ReferenceFrame = "INERTIAL"
 			czmlPacket[idx].Model = &czmlModel{}
-			czmlPacket[idx].Model.Gltf = "./public/plugins/hsfl-orbitdisplay/img/HyTI.glb"
+			czmlPacket[idx].Model.Gltf = "./public/plugins/hsfl-orbit-display/img/HyTI.glb"
 			czmlPacket[idx].Model.Scale = 4.0
 			czmlPacket[idx].Model.MinimumPixelSize = 50
 			czmlPacket[idx].Path = &czmlPath{}

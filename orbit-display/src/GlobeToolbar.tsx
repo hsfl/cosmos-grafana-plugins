@@ -3,7 +3,6 @@ import { Button, IconButton, Modal } from '@grafana/ui';
 import { CzmlPacket, HashNum, HashStr } from 'types';
 
 // Currently only works for simulated data from the orbital propagator
-// Sorts by timestamp
 const czmlToTabDelim = (czml: string): HashStr => {
   let ret: HashStr = {};
   let czmljson: CzmlPacket[];
@@ -29,11 +28,11 @@ const czmlToTabDelim = (czml: string): HashStr => {
   let node2idx: HashNum = {};
   // To refer to starting epochs later
   let epochs: HashNum = {};
-  // Indexes into each list, use later for time sorting
+  // Indexes into each list, use later for time sorting (don't really need this anymore if I'm not sorting)
   let t_idx_map: HashNum = {};
 
   // Build up dicts for later use, primarily interested in position and attitudes
-  // note: this assumes one packet per node, may need adjust later
+  // note: this assumes one packet per node, may need to adjust later
   for (let i = 0; i < czmljson.length; i++) {
     // Not a node
     if (czmljson[i].id === 'document') {
@@ -110,6 +109,8 @@ const czmlToTabDelim = (czml: string): HashStr => {
   return ret;
 };
 
+// This component is for adding extra UI overlays onto the Cesium window
+// Refactor as needed to add other stuff
 export const GlobeToolbar = ({ data }: { data: string }) => {
   // List of formations, hardcoded for now
   const [modalIsOpen, setModalIsOpen] = useState(false);

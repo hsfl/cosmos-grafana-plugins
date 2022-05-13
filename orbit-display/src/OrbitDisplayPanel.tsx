@@ -19,7 +19,7 @@ const globeTexture = new TileMapServiceImageryProvider({
 
 interface Props extends PanelProps<SimpleOptions> {}
 
-export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) => {
+export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, height }) => {
   const viewer = useRef<CesiumComponentRef<CesiumViewer>>(null);
   const [dataState, setDataState] = useState(data);
   //let [dat, setdat] = useState<CzmlPacket[] | undefined>();
@@ -72,24 +72,24 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
     <div>
       <div id="cesiumContainer"></div>
       <Viewer
+        id="cesium-container-id"
+        ref={viewer}
         // Don't touch these three as it enables offline Cesium use
         imageryProvider={globeTexture}
         baseLayerPicker={false}
         geocoder={false}
-        // These two control the time controls
+        // These two display the time controls
         animation={true}
         timeline={true}
         // Various others to keep disabled
         fullscreenButton={false}
         homeButton={false}
-        id="cesium-container-id"
         infoBox={false}
         navigationHelpButton={false}
-        ref={viewer}
       >
         <CzmlDataSource data={czml0} /*onChange={handlechange}*/></CzmlDataSource>
         <Globe enableLighting />
-        <GlobeToolbar data={String(dataState.series[0].fields.find((x) => x.name === 'predicted')?.values.get(0))} />
+        <GlobeToolbar data={String(dataState.series[0]?.fields.find((x) => x.name === 'predicted')?.values.get(0))} />
       </Viewer>
     </div>
   );
