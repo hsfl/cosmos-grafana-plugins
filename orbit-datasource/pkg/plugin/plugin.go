@@ -7,6 +7,7 @@ import (
 	"math"
 	"math/rand"
 	"net"
+	"net/http"
 	"time"
 
 	"github.com/influxdata/influxdb-client-go/v2/api"
@@ -30,6 +31,7 @@ import (
 // instance created upon datasource settings changed.
 var (
 	_ backend.QueryDataHandler      = (*SampleDatasource)(nil)
+	_ backend.CallResourceHandler   = (*SampleDatasource)(nil)
 	_ backend.CheckHealthHandler    = (*SampleDatasource)(nil)
 	_ backend.StreamHandler         = (*SampleDatasource)(nil)
 	_ instancemgmt.InstanceDisposer = (*SampleDatasource)(nil)
@@ -42,7 +44,26 @@ func NewSampleDatasource(_ backend.DataSourceInstanceSettings) (instancemgmt.Ins
 
 // SampleDatasource is an example datasource which can respond to data queries, reports
 // its health and has streaming skills.
-type SampleDatasource struct{}
+type SampleDatasource struct {
+	backend.CallResourceHandler
+}
+
+// Support HTTP API for backend
+func (d *SampleDatasource) CallResource(ctx context.Context, req *backend.CallResourceRequest, sender backend.CallResourceResponseSender) error {
+	switch req.Path {
+	case "namespaces":
+
+		return sender.Send(&backend.CallResourceResponse{
+			Status: http.StatusOK,
+			Body:   []byte("Namespaces!"),
+		})
+	default:
+		return sender.Send(&backend.CallResourceResponse{
+			Status: http.StatusOK,
+			Body:   []byte("Default!"),
+		})
+	}
+}
 
 // Dispose here tells plugin SDK that plugin wants to clean up resources when a new instance
 // created. As soon as datasource settings change detected by SDK old datasource instance will
@@ -219,8 +240,8 @@ func (d *SampleDatasource) NonSimMode(queryAPI api.QueryAPI, pCtx backend.Plugin
 	result, err := queryAPI.Query(context.Background(),
 		`from(bucket: "SOH_Bucket")
 			|> range(start: -7d)
-			|> filter(fn: (r) => r["_measurement"] == "node1")
-			|> filter(fn: (r) => r["beacon_type"] == "EPSPVBeaconL")
+			|> filter(fn: (r) => r["_measurement"] == "node0")
+			|> filter(fn: (r) => r["beacon_type"] == "posbeacon")
 			|> filter(fn: (r) => r["_field"] == "node.loc.pos.eci.s.col[0]"
 						or r["_field"] == "node.loc.pos.eci.s.col[1]"
 						or r["_field"] == "node.loc.pos.eci.s.col[2]"
@@ -287,6 +308,7 @@ func toCzml(result *api.QueryTableResult) (czml_response, error) {
 	czmlPacket[idx].Version = "1.0"
 
 	// Reusable arrays for positional data
+	// TODO: replace with user input
 	px_name := "node.loc.pos.eci.s.col[0]"
 	py_name := "node.loc.pos.eci.s.col[1]"
 	pz_name := "node.loc.pos.eci.s.col[2]"
@@ -296,7 +318,8 @@ func toCzml(result *api.QueryTableResult) (czml_response, error) {
 
 	// For determining if orbital propagator needs to be called
 	targetTime := time.Now()
-	var latestTime time.Time
+	var latestTime time.Time = time.Date(1858, time.January, 0, 0, 0, 0, 0, time.UTC)
+	var earliestTime time.Time = time.Date(2262, time.January, 0, 0, 0, 0, 0, time.UTC)
 
 	// New table number is new point
 	var tableNum int = -1
@@ -307,6 +330,9 @@ func toCzml(result *api.QueryTableResult) (czml_response, error) {
 			break
 		}
 		// Observe when there is new grouping key producing new table
+		// Since we've grouped query results by the timestamp, it should be
+		// the case that each table contains one set of the values.
+		// (e.g., table 0 should contain pxyz & vxyz, then table 1 for the next timestamp, etc.)
 		if result.TableChanged() {
 			//log.DefaultLogger.Info("Table: ", result.TableMetadata().String())
 			tableNum = -1
@@ -316,7 +342,6 @@ func toCzml(result *api.QueryTableResult) (czml_response, error) {
 			czmlPacket = append(czmlPacket, czmlStruct{})
 			idx++
 			czmlPacket[idx].Id = result.Record().Measurement()
-			// czmlPacket[idx].Availability = ...
 			czmlPacket[idx].Position = &czmlPosition{}
 			// czmlPacket[idx].Position.Interval = ...
 			// czmlPacket[idx].Position.Epoch = result.Record().Time().Format(time.RFC3339)
@@ -336,7 +361,12 @@ func toCzml(result *api.QueryTableResult) (czml_response, error) {
 		if tableNum != result.Record().Table() {
 			tableNum = result.Record().Table()
 			// Save latest time to determine whether we need to call orbital predictor or not
-			latestTime = result.Record().Time()
+			if result.Record().Time().After(latestTime) {
+				latestTime = result.Record().Time()
+			}
+			if result.Record().Time().Before(earliestTime) {
+				earliestTime = result.Record().Time()
+			}
 			czmlPacket[idx].Position.Cartesian = append(czmlPacket[idx].Position.Cartesian, result.Record().Time().Format(time.RFC3339), 0, 0, 0)
 		}
 		// Populate positional fields
@@ -357,6 +387,10 @@ func toCzml(result *api.QueryTableResult) (czml_response, error) {
 			continue
 		}
 		//log.DefaultLogger.Info("Row: ", "Time", result.Record().Time(), result.Record().Field(), result.Record().Value(), "Table", result.Record().Table(), "Measurement", result.Record().Measurement())
+	}
+	// Complete Availability string, we need only set it once
+	if len(czmlPacket) > 1 {
+		czmlPacket[1].Availability = earliestTime.Format(time.RFC3339) + "/" + latestTime.Format(time.RFC3339)
 	}
 	czmlbytes, err := json.Marshal(czmlPacket)
 	if err != nil {
