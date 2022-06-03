@@ -1,6 +1,6 @@
 import { DataQuery, DataSourceJsonData } from '@grafana/data';
 
-interface SimFields {
+export interface SimFields {
   node_name: string;
   utc: number;
   px: number;
@@ -15,13 +15,13 @@ interface SimFields {
 export interface MyQuery extends DataQuery {
   queryText?: string;
   constant: number;
-  enableSimMode: boolean;
+  isSimMode: boolean;
   simNodeList: SimFields[];
 }
 
 export const defaultQuery: Partial<MyQuery> = {
   constant: 6.5,
-  enableSimMode: false,
+  isSimMode: false,
   simNodeList: [
     {
       node_name: '',
