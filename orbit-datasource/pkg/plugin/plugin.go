@@ -123,6 +123,7 @@ type propagator_args struct {
 	StartUtc  float64 `json:"startUtc"`
 }
 
+// Use with query to Influxdb
 type operational_args struct {
 	Node_name string `json:"node_name"`
 	Tag_name  string `json:"tag_name"`
@@ -331,7 +332,6 @@ func toCzml(qm queryModel, result *api.QueryTableResult) (czml_response, error) 
 	czmlPacket[idx].Version = "1.0"
 
 	// Reusable arrays for positional data
-	// TODO: replace with user input
 	px_name := qm.OpNodeList[0].Px
 	py_name := qm.OpNodeList[0].Py
 	pz_name := qm.OpNodeList[0].Pz
