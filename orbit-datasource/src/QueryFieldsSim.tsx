@@ -23,13 +23,13 @@ export const nodeSimParams = (idx: number, props: Props, query: Partial<MyQuery>
         {idx === 0 ? (
           <span>
             <InlineField
-              labelWidth={22}
+              labelWidth={21.8}
               label="Simulation Mode"
               tooltip="Generate a full orbit from initial conditions in simulation mode"
             >
               <InlineSwitch
                 value={isSimMode || false}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => onisSimModeChange(e, props)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => onIsSimModeChange(e, props)}
               />
             </InlineField>
           </span>
@@ -185,7 +185,7 @@ export const onSimFieldsChange = (
 };
 
 // Handler for when Simulation mode toggle is clicked
-const onisSimModeChange = (event: ChangeEvent<HTMLInputElement>, props: Props) => {
+const onIsSimModeChange = (event: ChangeEvent<HTMLInputElement>, props: Props) => {
   const { onChange, query } = props;
   onChange({ ...query, isSimMode: event.target.checked });
 };

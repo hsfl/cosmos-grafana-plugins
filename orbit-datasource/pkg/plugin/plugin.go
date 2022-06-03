@@ -103,8 +103,9 @@ func (d *SampleDatasource) QueryData(ctx context.Context, req *backend.QueryData
 
 type queryModel struct {
 	// WithStreaming bool `json:"withStreaming"`
-	EnableSimMode bool              `json:"enableSimMode"`
-	SimNodeList   []propagator_args `json:"simNodeList"`
+	EnableSimMode bool               `json:"enableSimMode"`
+	SimNodeList   []propagator_args  `json:"simNodeList"`
+	OpNodeList    []operational_args `json:"opNodeList"`
 }
 
 // Send an array of these to the propagator
@@ -120,6 +121,18 @@ type propagator_args struct {
 	Simdt     float64 `json:"simdt,omitempty"`
 	Runcount  int32   `json:"runcount,omitempty"`
 	StartUtc  float64 `json:"startUtc"`
+}
+
+type operational_args struct {
+	Node_name string `json:"node_name"`
+	Tag_name  string `json:"tag_name"`
+	Tag_value string `json:"tag_value"`
+	Px        string `json:"px"`
+	Py        string `json:"py"`
+	Pz        string `json:"pz"`
+	Vx        string `json:"vx"`
+	Vy        string `json:"vy"`
+	Vz        string `json:"vz"`
 }
 
 var buffer = make([]byte, 60000)
@@ -193,7 +206,7 @@ func (d *SampleDatasource) query(_ context.Context, queryAPI api.QueryAPI, pCtx 
 	if qm.EnableSimMode {
 		response = d.SimMode(qm, pCtx)
 	} else {
-		response = d.NonSimMode(queryAPI, pCtx)
+		response = d.OperationalMode(qm, queryAPI, pCtx)
 	}
 
 	return response
@@ -230,7 +243,7 @@ func (d *SampleDatasource) SimMode(qm queryModel, pCtx backend.PluginContext) ba
 	return response
 }
 
-func (d *SampleDatasource) NonSimMode(queryAPI api.QueryAPI, pCtx backend.PluginContext) backend.DataResponse {
+func (d *SampleDatasource) OperationalMode(qm queryModel, queryAPI api.QueryAPI, pCtx backend.PluginContext) backend.DataResponse {
 	response := backend.DataResponse{}
 
 	// create data frame response.
@@ -238,18 +251,28 @@ func (d *SampleDatasource) NonSimMode(queryAPI api.QueryAPI, pCtx backend.Plugin
 
 	// Get flux query result
 	result, err := queryAPI.Query(context.Background(),
-		`from(bucket: "SOH_Bucket")
-			|> range(start: -7d)
-			|> filter(fn: (r) => r["_measurement"] == "node0")
-			|> filter(fn: (r) => r["beacon_type"] == "posbeacon")
-			|> filter(fn: (r) => r["_field"] == "node.loc.pos.eci.s.col[0]"
-						or r["_field"] == "node.loc.pos.eci.s.col[1]"
-						or r["_field"] == "node.loc.pos.eci.s.col[2]"
-						or r["_field"] == "node.loc.pos.eci.v.col[0]"
-						or r["_field"] == "node.loc.pos.eci.v.col[1]"
-						or r["_field"] == "node.loc.pos.eci.v.col[2]")
-			|> group(columns: ["_measurement", "_time"])
-			//|> last()`)
+		fmt.Sprintf(
+			`from(bucket: "SOH_Bucket")
+				|> range(start: -7d)
+				|> filter(fn: (r) => r["_measurement"] == "%s")
+				|> filter(fn: (r) => r["%s"] == "%s")
+				|> filter(fn: (r) => r["_field"] == "%s"
+							or r["_field"] == "%s"
+							or r["_field"] == "%s"
+							or r["_field"] == "%s"
+							or r["_field"] == "%s"
+							or r["_field"] == "%s")
+				|> group(columns: ["_measurement", "_time"])
+				//|> last()`,
+			qm.OpNodeList[0].Node_name,
+			qm.OpNodeList[0].Tag_name,
+			qm.OpNodeList[0].Tag_value,
+			qm.OpNodeList[0].Px,
+			qm.OpNodeList[0].Py,
+			qm.OpNodeList[0].Pz,
+			qm.OpNodeList[0].Vx,
+			qm.OpNodeList[0].Vy,
+			qm.OpNodeList[0].Vz))
 
 	if err != nil {
 		log.DefaultLogger.Error("query error", err.Error())
@@ -257,7 +280,7 @@ func (d *SampleDatasource) NonSimMode(queryAPI api.QueryAPI, pCtx backend.Plugin
 		return response
 	}
 
-	czmlresp, err := toCzml(result)
+	czmlresp, err := toCzml(qm, result)
 	if err != nil {
 		log.DefaultLogger.Error("Error in toCzml", err.Error())
 		response.Error = err
@@ -298,7 +321,7 @@ type czml_response struct {
 }
 
 // Take query result and convert to czml format
-func toCzml(result *api.QueryTableResult) (czml_response, error) {
+func toCzml(qm queryModel, result *api.QueryTableResult) (czml_response, error) {
 	// Start czml response construction
 	var czmlPacket []czmlStruct
 	czmlPacket = append(czmlPacket, czmlStruct{})
@@ -309,12 +332,12 @@ func toCzml(result *api.QueryTableResult) (czml_response, error) {
 
 	// Reusable arrays for positional data
 	// TODO: replace with user input
-	px_name := "node.loc.pos.eci.s.col[0]"
-	py_name := "node.loc.pos.eci.s.col[1]"
-	pz_name := "node.loc.pos.eci.s.col[2]"
-	vx_name := "node.loc.pos.eci.v.col[0]"
-	vy_name := "node.loc.pos.eci.v.col[1]"
-	vz_name := "node.loc.pos.eci.v.col[2]"
+	px_name := qm.OpNodeList[0].Px
+	py_name := qm.OpNodeList[0].Py
+	pz_name := qm.OpNodeList[0].Pz
+	vx_name := qm.OpNodeList[0].Vx
+	vy_name := qm.OpNodeList[0].Vy
+	vz_name := qm.OpNodeList[0].Vz
 
 	// For determining if orbital propagator needs to be called
 	targetTime := time.Now()

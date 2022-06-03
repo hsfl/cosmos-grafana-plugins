@@ -6,7 +6,7 @@ import { QueryEditorProps } from '@grafana/data';
 import { DataSource } from './datasource';
 import { defaultQuery, MyDataSourceOptions, MyQuery } from './types';
 import { nodeSimParams } from 'QueryFieldsSim';
-import { nodeQueryParams } from 'QueryFieldsOperational';
+import { nodeOpParams } from 'QueryFieldsOperational';
 
 type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 
@@ -16,7 +16,7 @@ type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 // the user is finished typing could be better.
 export const QueryEditor = (props: Props) => {
   const query = defaults(props.query, defaultQuery);
-  const { isSimMode, simNodeList } = query;
+  const { isSimMode, opNodeList, simNodeList } = query;
 
   // Handle Run Propagator click, TODO: move to separate plugin
   const onSubmitClick = () => {
@@ -27,20 +27,49 @@ export const QueryEditor = (props: Props) => {
   // Add a node to the query
   const onAddNodeClick = () => {
     const { onChange, query } = props;
-    onChange({
-      ...query,
-      simNodeList: [...simNodeList, { node_name: '', utc: 0, px: 0, py: 0, pz: 0, vx: 0, vy: 0, vz: 0 }],
-    });
+    if (isSimMode) {
+      onChange({
+        ...query,
+        simNodeList: [...simNodeList, { node_name: '', utc: 0, px: 0, py: 0, pz: 0, vx: 0, vy: 0, vz: 0 }],
+      });
+    } else {
+      onChange({
+        ...query,
+        opNodeList: [
+          ...opNodeList,
+          {
+            node_name: '',
+            tag_name: opNodeList[0].tag_name,
+            tag_value: opNodeList[0].tag_value,
+            px: opNodeList[0].px,
+            py: opNodeList[0].py,
+            pz: opNodeList[0].pz,
+            vx: opNodeList[0].vx,
+            vy: opNodeList[0].vy,
+            vz: opNodeList[0].vz,
+          },
+        ],
+      });
+    }
   };
 
   // Remove last node from query
   const onRemoveNodeClick = () => {
     const { onChange, query } = props;
-    if (query.simNodeList.length > 1) {
-      onChange({
-        ...query,
-        simNodeList: simNodeList.slice(0, -1),
-      });
+    if (isSimMode) {
+      if (query.simNodeList.length > 1) {
+        onChange({
+          ...query,
+          simNodeList: simNodeList.slice(0, -1),
+        });
+      }
+    } else {
+      if (query.opNodeList.length > 1) {
+        onChange({
+          ...query,
+          opNodeList: opNodeList.slice(0, -1),
+        });
+      }
     }
   };
 
@@ -51,7 +80,7 @@ export const QueryEditor = (props: Props) => {
 
   // For querying the database for existing values, using the propagator to provide if necessary
   const OperationalMode = () => {
-    return nodeQueryParams(props, query);
+    return opNodeList.map((el, i) => nodeOpParams(i, props, query));
   };
 
   return (
