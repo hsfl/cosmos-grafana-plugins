@@ -9,6 +9,7 @@ import { firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { PropagatorArgs } from './types';
 import { addToCache, getData } from './utils/caching';
+import { currentMJD, numEqual } from 'utils/utilFunctions';
 
 interface Props extends PanelProps<SimpleOptions> {}
 
@@ -20,25 +21,38 @@ interface CallResourcesResponse {
 const propArgsCacheName = 'CosmosSimPanelNodeList';
 const cacheURL = 'http://localhost:3000/';
 
+const defaultTime = currentMJD();
+const defaultecipx = -5014944.9754353;
+const defaultecipy = 4559800.15742258;
+const defaultecipz = 40947.5065633976;
+const defaultecivx = -2999.70852659995;
+const defaultecivy = -3355.15564920299;
+const defaultecivz = 6170.92704728395;
+
+// Replacer function for JSON.stringify, ignores null values
+const ignoreNull = (key: string, value: any) => {
+  return value === null ? undefined : value;
+};
+
 export const CosmosSimPanel: React.FC<Props> = ({ width, height, options, data, replaceVariables }) => {
   const [page, setPage] = useState(1);
   const [propagatorArgs, setPropagatorArgs] = useState<PropagatorArgs>({
-    start: 0,
+    start: defaultTime,
     end: null,
-    runcount: 1,
+    runcount: 90,
     simdt: 60,
     telem: ['poseci'],
     nodes: [
       {
-        node_name: '',
-        utc: 0,
+        node_name: 'node0',
+        utc: defaultTime,
         eci: {
-          px: 0,
-          py: 0,
-          pz: 0,
-          vx: 0,
-          vy: 0,
-          vz: 0,
+          px: defaultecipx,
+          py: defaultecipy,
+          pz: defaultecipz,
+          vx: defaultecivx,
+          vy: defaultecivy,
+          vz: defaultecivz,
         },
         phys: null,
         kep: null,
@@ -59,7 +73,7 @@ export const CosmosSimPanel: React.FC<Props> = ({ width, height, options, data, 
   }, []);
 
   const onSubmitClick = async () => {
-    const payload = propagatorArgs;
+    const payload = JSON.parse(JSON.stringify(propagatorArgs, ignoreNull));
     const ds = await getDataSourceSrv().get('orbit-datasource');
     try {
       const observable = getBackendSrv()
@@ -73,8 +87,10 @@ export const CosmosSimPanel: React.FC<Props> = ({ width, height, options, data, 
       console.log('success!', resp.data);
       const events = await SystemJS.load('app/core/app_events');
       events.emit(AppEvents.alertSuccess, [resp.status + ' (' + resp.statusText + ')']);
-      // Cache successful params
-      addToCache(propArgsCacheName, cacheURL, propagatorArgs);
+      // Cache successful params if some stuff were modified
+      if (!numEqual(propagatorArgs.start, defaultTime)) {
+        addToCache(propArgsCacheName, cacheURL, propagatorArgs);
+      }
     } catch (error: any) {
       const events = await SystemJS.load('app/core/app_events');
       events.emit(AppEvents.alertError, [error.status + ' (' + error.statusText + ')']);
@@ -84,21 +100,23 @@ export const CosmosSimPanel: React.FC<Props> = ({ width, height, options, data, 
 
   // Add a node
   const onAddNodeClick = () => {
+    let useDefaults = numEqual(propagatorArgs.start, defaultTime);
     setPropagatorArgs((p) => {
       return {
         ...p,
         nodes: [
           ...p.nodes,
           {
-            node_name: '',
-            utc: 0,
+            node_name: 'node' + p.nodes.length.toString(),
+            utc: useDefaults ? defaultTime : 0,
             eci: {
-              px: 0,
-              py: 0,
-              pz: 0,
-              vx: 0,
-              vy: 0,
-              vz: 0,
+              // Vague offset values taken from a previous run of a string-of-pearls formation
+              px: useDefaults ? defaultecipx + 200 * (p.nodes.length + 1) : 0,
+              py: useDefaults ? defaultecipy + 200 * (p.nodes.length + 1) : 0,
+              pz: useDefaults ? defaultecipz - 200 * (p.nodes.length + 1) : 0,
+              vx: useDefaults ? defaultecivx - 0.5 * (p.nodes.length + 1) : 0,
+              vy: useDefaults ? defaultecivy + 0.4 * (p.nodes.length + 1) : 0,
+              vz: useDefaults ? defaultecivz + 0.03 * (p.nodes.length + 1) : 0,
             },
             phys: null,
             kep: null,

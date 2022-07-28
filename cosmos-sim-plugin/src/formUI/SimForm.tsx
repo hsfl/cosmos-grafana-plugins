@@ -1,6 +1,7 @@
 import React from 'react';
 import { InlineField, InlineFieldRow, Input, MultiSelect, Tooltip } from '@grafana/ui';
 import { PropagatorArgs, telemDesc, telemList, TelemSelect, telemType } from '../types';
+import { currentMJD } from 'utils/utilFunctions';
 
 //const inputWidth = 17;
 
@@ -19,6 +20,8 @@ export const simForm = (
   propagatorArgs: PropagatorArgs,
   setPropagatorArgs: (value: React.SetStateAction<PropagatorArgs>) => void
 ) => {
+  const defaultTime = currentMJD();
+
   // Update state when SimForm updates a number field
   const handleSimChangeNumber = (e: React.FormEvent<HTMLInputElement>) => {
     const target = e.target as HTMLInputElement;
@@ -38,7 +41,12 @@ export const simForm = (
           label="Start"
           tooltip="Start time of the propagator. All nodes will be forward-propagated to this start time and then run together."
         >
-          <Input name="start" type="number" value={propagatorArgs.start ?? 0} onChange={handleSimChangeNumber} />
+          <Input
+            name="start"
+            type="number"
+            value={propagatorArgs.start ?? defaultTime}
+            onChange={handleSimChangeNumber}
+          />
         </InlineField>
         <InlineField
           label="Runcount"

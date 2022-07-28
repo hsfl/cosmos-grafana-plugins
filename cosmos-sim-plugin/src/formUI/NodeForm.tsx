@@ -85,7 +85,7 @@ export const nodeForm = (
             name="node_name"
             width={inputWidth}
             type="text"
-            value={node.node_name || ''}
+            value={node.node_name || 'node' + page.toString()}
             onChange={handleNodeChangeString}
           />
         </InlineField>
