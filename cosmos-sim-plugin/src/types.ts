@@ -24,7 +24,7 @@ export interface SimpleOptions {
 
 // For propagator setup
 export interface NodeProps {
-  node_name: string;
+  name: string;
   utc: number | null;
   eci: EciPos | null;
   phys: PhysPos | null;
@@ -74,4 +74,5 @@ export interface PropagatorArgs {
   simdt: number;
   telem: telemType[];
   nodes: NodeProps[];
+  db: boolean;
 }

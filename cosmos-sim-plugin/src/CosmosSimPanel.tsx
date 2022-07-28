@@ -21,7 +21,8 @@ interface CallResourcesResponse {
 const propArgsCacheName = 'CosmosSimPanelNodeList';
 const cacheURL = 'http://localhost:3000/';
 
-const defaultTime = currentMJD();
+// Start 5 hours ago so that we can see some stuff displayed elsewhere too (since Grafana dashboard default is last 6 hours)
+const defaultTime = currentMJD(-300 / 86400);
 const defaultecipx = -5014944.9754353;
 const defaultecipy = 4559800.15742258;
 const defaultecipz = 40947.5065633976;
@@ -41,10 +42,10 @@ export const CosmosSimPanel: React.FC<Props> = ({ width, height, options, data, 
     end: null,
     runcount: 90,
     simdt: 60,
-    telem: ['poseci'],
+    telem: ['poseci', 'veleci'],
     nodes: [
       {
-        node_name: 'node0',
+        name: 'node0',
         utc: defaultTime,
         eci: {
           px: defaultecipx,
@@ -60,6 +61,7 @@ export const CosmosSimPanel: React.FC<Props> = ({ width, height, options, data, 
         force: null,
       },
     ],
+    db: true,
   });
 
   useEffect(() => {
@@ -107,7 +109,7 @@ export const CosmosSimPanel: React.FC<Props> = ({ width, height, options, data, 
         nodes: [
           ...p.nodes,
           {
-            node_name: 'node' + p.nodes.length.toString(),
+            name: 'node' + p.nodes.length.toString(),
             utc: useDefaults ? defaultTime : 0,
             eci: {
               // Vague offset values taken from a previous run of a string-of-pearls formation

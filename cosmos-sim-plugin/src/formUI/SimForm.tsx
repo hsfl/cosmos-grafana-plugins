@@ -20,7 +20,7 @@ export const simForm = (
   propagatorArgs: PropagatorArgs,
   setPropagatorArgs: (value: React.SetStateAction<PropagatorArgs>) => void
 ) => {
-  const defaultTime = currentMJD();
+  const defaultTime = currentMJD(-300 / 86400);
 
   // Update state when SimForm updates a number field
   const handleSimChangeNumber = (e: React.FormEvent<HTMLInputElement>) => {

@@ -1,9 +1,11 @@
 package plugin
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math"
 	"math/rand"
 	"net"
@@ -52,10 +54,34 @@ type SampleDatasource struct {
 func (d *SampleDatasource) CallResource(ctx context.Context, req *backend.CallResourceRequest, sender backend.CallResourceResponseSender) error {
 	switch req.Path {
 	case "namespaces":
-
 		return sender.Send(&backend.CallResourceResponse{
 			Status: http.StatusOK,
 			Body:   []byte("Namespaces!"),
+		})
+	// Used by upload-json-telegraf plugin, req.Body is a JSON-encoded string in byte form
+	case "jsonupload":
+		err := SendToTelegraf(string(req.Body))
+		if err != nil {
+			return sender.Send(&backend.CallResourceResponse{
+				Status: http.StatusInternalServerError,
+				Body:   []byte("Encountered an error"),
+			})
+		}
+		return sender.Send(&backend.CallResourceResponse{
+			Status: http.StatusOK,
+			Body:   []byte("Successfully uploaded JSON to database!"),
+		})
+	case "propagator_db":
+		response, err := SendToCOSMOSWeb(req.Body)
+		if err != nil {
+			return sender.Send(&backend.CallResourceResponse{
+				Status: http.StatusInternalServerError,
+				Body:   []byte("Encountered an error:" + err.Error()),
+			})
+		}
+		return sender.Send(&backend.CallResourceResponse{
+			Status: http.StatusOK,
+			Body:   []byte(response),
 		})
 	default:
 		return sender.Send(&backend.CallResourceResponse{
@@ -63,6 +89,67 @@ func (d *SampleDatasource) CallResource(ctx context.Context, req *backend.CallRe
 			Body:   []byte("Default!"),
 		})
 	}
+}
+
+// Send JSON to Telegraf endpoint
+// msg: json encoded string
+func SendToTelegraf(msg string) error {
+	// This is the telegraf simdata port
+	// Attempt tcp connection (UDP packets have a size limit)
+	const TELEGRAF_PORT int = 10097
+	url := "telegraf:" + fmt.Sprint(TELEGRAF_PORT)
+	conn, err := net.Dial("tcp", url)
+	if err != nil {
+		log.DefaultLogger.Error("TCP connect error", err.Error())
+		return err
+	}
+	defer conn.Close()
+	// Send message
+	_, err = fmt.Fprintf(conn, msg)
+	if err != nil {
+		log.DefaultLogger.Error("TCP send error", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+// Send JSON to COSMOS Web backend api endpoint
+// msg: json encoded string
+func SendToCOSMOSWeb(data []byte) (string, error) {
+	// This is the cosmos web api port
+	const COSMOSWEBBACKEND_PORT int = 10090
+	// Convert docker's network hostname to an actual ip address
+	host := "cosmos_web_backend"
+	addr, err := net.LookupIP(host)
+	if err != nil {
+		log.DefaultLogger.Error("Host to IP error", err.Error())
+		return "", err
+	}
+	// use the ip instead of the hostname
+	url := fmt.Sprintf("http://%s:%d/sim/propagator_db", fmt.Sprint(addr[0]), COSMOSWEBBACKEND_PORT)
+	return APICall(data, url)
+}
+
+// msg: json encoded string
+// endpoint: URL of API endpoint
+func APICall(data []byte, endpoint string) (string, error) {
+	// Attempt tcp connection (UDP packets have a size limit)
+	buf := bytes.NewBuffer(data)
+	resp, err := http.Post(endpoint, "application/json", buf)
+	// POST
+	if err != nil {
+		log.DefaultLogger.Error("Error in POST", err.Error())
+		return "", err
+	}
+	defer resp.Body.Close()
+	// Read response body
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.DefaultLogger.Error("Error reading body of POST response", err.Error())
+	}
+
+	return string(body), nil
 }
 
 // Dispose here tells plugin SDK that plugin wants to clean up resources when a new instance
@@ -201,7 +288,7 @@ func (d *SampleDatasource) query(_ context.Context, queryAPI api.QueryAPI, pCtx 
 	if response.Error != nil {
 		return response
 	}
-	log.DefaultLogger.Info("qm", "qm", qm)
+	log.DefaultLogger.Info("queryModel", "qm", qm)
 
 	// Perform different tasks depending on run mode: simulation or non-simulation
 	if qm.EnableSimMode {
@@ -250,30 +337,88 @@ func (d *SampleDatasource) OperationalMode(qm queryModel, queryAPI api.QueryAPI,
 	// create data frame response.
 	frame := data.NewFrame("response")
 
+	// Not used for now. This is for actual data, but I'm currently just testing simdata
+	// operationalQuery := fmt.Sprintf(
+	// 	`from(bucket: "SOH_Bucket")
+	// 		|> range(start: -2y)
+	// 		|> filter(fn: (r) => r["_measurement"] == "%s"
+	// 		or r["_measurement"] == "%s"
+	// 		or r["_measurement"] == "%s"
+	// 		or r["_measurement"] == "%s"
+	// 		or r["_measurement"] == "%s")
+	// 		|> filter(fn: (r) => r["%s"] == "%s")
+	// 		|> filter(fn: (r) => r["_field"] == "%s"
+	// 					or r["_field"] == "%s"
+	// 					or r["_field"] == "%s"
+	// 					or r["_field"] == "%s"
+	// 					or r["_field"] == "%s"
+	// 					or r["_field"] == "%s")
+	// 		|> group(columns: ["_measurement", "_time"])
+	// 		//|> last()`,
+	// 	qm.OpNodeList[0].Node_name,
+	// 	qm.OpNodeList[1].Node_name,
+	// 	qm.OpNodeList[2].Node_name,
+	// 	qm.OpNodeList[3].Node_name,
+	// 	qm.OpNodeList[4].Node_name,
+	// 	qm.OpNodeList[0].Tag_name,
+	// 	qm.OpNodeList[0].Tag_value,
+	// 	qm.OpNodeList[0].Px,
+	// 	qm.OpNodeList[0].Py,
+	// 	qm.OpNodeList[0].Pz,
+	// 	qm.OpNodeList[0].Vx,
+	// 	qm.OpNodeList[0].Vy,
+	// 	qm.OpNodeList[0].Vz)
+
+	nameList := ""
+	for idx, elem := range qm.OpNodeList {
+		nameList += elem.Node_name
+		if idx < len(qm.OpNodeList)-1 {
+			nameList += "|"
+		}
+	}
+
+	fieldList := fmt.Sprintf(`%s|%s|%s|%s|%s|%s|%s`,
+		"utc",
+		qm.OpNodeList[0].Px,
+		qm.OpNodeList[0].Py,
+		qm.OpNodeList[0].Pz,
+		qm.OpNodeList[0].Vx,
+		qm.OpNodeList[0].Vy,
+		qm.OpNodeList[0].Vz,
+	)
+
+	simQuery := fmt.Sprintf(
+		`bucket = "%s"
+measurement = "%s"
+latest = from(bucket: bucket)
+	|> range(start: -3d)
+	|> filter(fn: (r) => r["_measurement"] == measurement)
+	|> keep(columns: ["_time"])
+	|> sort(columns: ["_time"], desc: false)
+	|> last(column: "_time")
+	|> findColumn(fn: (key) => true, column: "_time")
+starttime = time(v: uint(v: latest[0])-uint(v: %d))
+from(bucket: "Simulator_Data")
+	|> range(start: starttime)
+	|> filter(fn: (r) => r["_measurement"] == measurement)
+	|> filter(fn: (r) => r["%s"] =~ /(%s)/)
+	|> filter(fn: (r) => r["_field"] =~ /(%s)/)
+	|> keep(columns: ["%s", "_time", "_value", "_field"])
+	|> group(columns: ["%s", "_time"])`,
+		"Simulator_Data",
+		"simdata",
+		// Note: 1274 records (two nodes at runcount=90, simdt=60) were stored in .004 seconds
+		// So ten times that number, .04 seconds "should" be fine
+		40000000,
+		"name", // should be tagname?
+		nameList,
+		fieldList,
+		"name",
+		"name", // should be tagname?
+	)
+
 	// Get flux query result
-	result, err := queryAPI.Query(context.Background(),
-		fmt.Sprintf(
-			`from(bucket: "SOH_Bucket")
-				|> range(start: -7d)
-				|> filter(fn: (r) => r["_measurement"] == "%s")
-				|> filter(fn: (r) => r["%s"] == "%s")
-				|> filter(fn: (r) => r["_field"] == "%s"
-							or r["_field"] == "%s"
-							or r["_field"] == "%s"
-							or r["_field"] == "%s"
-							or r["_field"] == "%s"
-							or r["_field"] == "%s")
-				|> group(columns: ["_measurement", "_time"])
-				//|> last()`,
-			qm.OpNodeList[0].Node_name,
-			qm.OpNodeList[0].Tag_name,
-			qm.OpNodeList[0].Tag_value,
-			qm.OpNodeList[0].Px,
-			qm.OpNodeList[0].Py,
-			qm.OpNodeList[0].Pz,
-			qm.OpNodeList[0].Vx,
-			qm.OpNodeList[0].Vy,
-			qm.OpNodeList[0].Vz))
+	result, err := queryAPI.Query(context.Background(), simQuery)
 
 	if err != nil {
 		log.DefaultLogger.Error("query error", err.Error())
@@ -321,6 +466,14 @@ type czml_response struct {
 	predicted  string
 }
 
+func mjdToTime(mjd float64) time.Time {
+	unix := (mjd - 40587) * 86400
+	unixs := math.Floor(unix)
+	unixns := (unix - unixs) * 1000000000
+	timestamp := time.Unix(int64(unixs), int64(unixns))
+	return timestamp
+}
+
 // Take query result and convert to czml format
 func toCzml(qm queryModel, result *api.QueryTableResult) (czml_response, error) {
 	// Start czml response construction
@@ -340,9 +493,9 @@ func toCzml(qm queryModel, result *api.QueryTableResult) (czml_response, error) 
 	vz_name := qm.OpNodeList[0].Vz
 
 	// For determining if orbital propagator needs to be called
-	targetTime := time.Now()
-	var latestTime time.Time = time.Date(1858, time.January, 0, 0, 0, 0, 0, time.UTC)
-	var earliestTime time.Time = time.Date(2262, time.January, 0, 0, 0, 0, 0, time.UTC)
+	//targetTime := time.Now()
+	var latestTime float64 = 0
+	var earliestTime float64 = 2547239.50000000 // Dec 31, 2261
 
 	// New table number is new point
 	var tableNum int = -1
@@ -361,10 +514,10 @@ func toCzml(qm queryModel, result *api.QueryTableResult) (czml_response, error) 
 			tableNum = -1
 		}
 		// Add a new packet entry for new node
-		if result.Record().Measurement() != czmlPacket[idx].Id {
+		if result.Record().ValueByKey("name").(string) != czmlPacket[idx].Id {
 			czmlPacket = append(czmlPacket, czmlStruct{})
 			idx++
-			czmlPacket[idx].Id = result.Record().Measurement()
+			czmlPacket[idx].Id = result.Record().ValueByKey("name").(string)
 			czmlPacket[idx].Position = &czmlPosition{}
 			// czmlPacket[idx].Position.Interval = ...
 			// czmlPacket[idx].Position.Epoch = result.Record().Time().Format(time.RFC3339)
@@ -384,16 +537,21 @@ func toCzml(qm queryModel, result *api.QueryTableResult) (czml_response, error) 
 		if tableNum != result.Record().Table() {
 			tableNum = result.Record().Table()
 			// Save latest time to determine whether we need to call orbital predictor or not
-			if result.Record().Time().After(latestTime) {
-				latestTime = result.Record().Time()
-			}
-			if result.Record().Time().Before(earliestTime) {
-				earliestTime = result.Record().Time()
-			}
-			czmlPacket[idx].Position.Cartesian = append(czmlPacket[idx].Position.Cartesian, result.Record().Time().Format(time.RFC3339), 0, 0, 0)
+			czmlPacket[idx].Position.Cartesian = append(czmlPacket[idx].Position.Cartesian, 0, 0, 0, 0)
 		}
 		// Populate positional fields
 		switch result.Record().Field() {
+		case "utc":
+			// Convert mjd to time.Time and RFC3339 string format
+			mjd := result.Record().Value().(float64)
+			timestamp := mjdToTime(mjd)
+			czmlPacket[idx].Position.Cartesian[len(czmlPacket[idx].Position.Cartesian)-4] = timestamp.Format(time.RFC3339)
+			if mjd > latestTime {
+				latestTime = mjd
+			}
+			if mjd < earliestTime {
+				earliestTime = mjd
+			}
 		case px_name:
 			czmlPacket[idx].Position.Cartesian[len(czmlPacket[idx].Position.Cartesian)-3] = result.Record().Value().(float64)
 		case py_name:
@@ -413,7 +571,8 @@ func toCzml(qm queryModel, result *api.QueryTableResult) (czml_response, error) 
 	}
 	// Complete Availability string, we need only set it once
 	if len(czmlPacket) > 1 {
-		czmlPacket[1].Availability = earliestTime.Format(time.RFC3339) + "/" + latestTime.Format(time.RFC3339)
+
+		czmlPacket[2].Availability = mjdToTime(earliestTime).Format(time.RFC3339) + "/" + mjdToTime(latestTime).Format(time.RFC3339)
 	}
 	czmlbytes, err := json.Marshal(czmlPacket)
 	if err != nil {
@@ -421,10 +580,10 @@ func toCzml(qm queryModel, result *api.QueryTableResult) (czml_response, error) 
 		return czml_response{}, err
 	}
 
-	dt := math.Abs(latestTime.Sub(targetTime).Minutes())
+	//dt := math.Abs(latestTime.Sub(targetTime).Minutes())
 	// Need to call orbital propagator to generate remainder of ~90min orbit
 	predicted_orbit := ""
-	if dt < 50 {
+	/*if dt < 50 {
 		var pargs []propagator_args
 		for i := range czmlPacket {
 			if i == 0 {
@@ -454,8 +613,9 @@ func toCzml(qm queryModel, result *api.QueryTableResult) (czml_response, error) 
 			log.DefaultLogger.Error("Error in orbitalPropagatorCall", err.Error())
 			return czml_response{}, err
 		}
-	}
+	}*/
 
+	// return czml_response{historical: string(czmlbytes), predicted: predicted_orbit}, nil
 	return czml_response{historical: string(czmlbytes), predicted: predicted_orbit}, nil
 }
 
