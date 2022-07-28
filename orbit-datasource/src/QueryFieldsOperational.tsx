@@ -16,8 +16,8 @@ export const nodeOpParams = (idx: number, props: Props, query: Partial<MyQuery> 
           <Input
             width={20}
             type="text"
-            value={opNodeList[idx].node_name || ''}
-            onChange={(e) => onOpFieldsChange(e, idx, 'node_name', props, opNodeList)}
+            value={opNodeList[idx].name || ''}
+            onChange={(e) => onOpFieldsChange(e, idx, 'name', props, opNodeList)}
           />
         </InlineField>
         {idx === 0 ? (
@@ -131,12 +131,10 @@ export const onOpFieldsChange = (
 ) => {
   const { onChange, query } = props;
   switch (field) {
-    case 'node_name':
+    case 'name':
       onChange({
         ...query,
-        opNodeList: opNodeList.map((el, i) =>
-          i === idx ? { ...el, node_name: event.currentTarget.value } : { ...el }
-        ),
+        opNodeList: opNodeList.map((el, i) => (i === idx ? { ...el, name: event.currentTarget.value } : { ...el })),
       });
       break;
     case 'tag_name':

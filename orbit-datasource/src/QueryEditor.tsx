@@ -18,19 +18,13 @@ export const QueryEditor = (props: Props) => {
   const query = defaults(props.query, defaultQuery);
   const { isSimMode, opNodeList, simNodeList } = query;
 
-  // Handle Run Propagator click, TODO: move to separate plugin
-  const onSubmitClick = () => {
-    const { onRunQuery } = props;
-    onRunQuery();
-  };
-
   // Add a node to the query
   const onAddNodeClick = () => {
     const { onChange, query } = props;
     if (isSimMode) {
       onChange({
         ...query,
-        simNodeList: [...simNodeList, { node_name: '', utc: 0, px: 0, py: 0, pz: 0, vx: 0, vy: 0, vz: 0 }],
+        simNodeList: [...simNodeList, { name: '', frame: 'eci' }],
       });
     } else {
       onChange({
@@ -38,7 +32,7 @@ export const QueryEditor = (props: Props) => {
         opNodeList: [
           ...opNodeList,
           {
-            node_name: '',
+            name: '',
             tag_name: opNodeList[0].tag_name,
             tag_value: opNodeList[0].tag_value,
             px: opNodeList[0].px,
@@ -87,9 +81,12 @@ export const QueryEditor = (props: Props) => {
     <div>
       {isSimMode ? SimulationMode() : OperationalMode()}
       <InlineFieldRow>
-        <Button onClick={onAddNodeClick}>Add Node +</Button>
-        <Button onClick={onRemoveNodeClick}>Remove Node -</Button>
-        {isSimMode ? <Button onClick={onSubmitClick}>Run Propagator</Button> : null}
+        <Button size={'md'} variant={'secondary'} fill={'outline'} icon={'plus-circle'} onClick={onAddNodeClick}>
+          Add Node
+        </Button>
+        <Button size={'md'} variant={'secondary'} fill={'outline'} icon={'minus-circle'} onClick={onRemoveNodeClick}>
+          Remove Node
+        </Button>
       </InlineFieldRow>
     </div>
   );

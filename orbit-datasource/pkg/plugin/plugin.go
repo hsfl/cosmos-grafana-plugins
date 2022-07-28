@@ -190,29 +190,20 @@ func (d *SampleDatasource) QueryData(ctx context.Context, req *backend.QueryData
 
 type queryModel struct {
 	// WithStreaming bool `json:"withStreaming"`
-	EnableSimMode bool               `json:"enableSimMode"`
-	SimNodeList   []propagator_args  `json:"simNodeList"`
-	OpNodeList    []operational_args `json:"opNodeList"`
+	IsSimMode   bool               `json:"isSimMode"`
+	SimNodeList []propagator_args  `json:"simNodeList"`
+	OpNodeList  []operational_args `json:"opNodeList"`
 }
 
 // Send an array of these to the propagator
 type propagator_args struct {
-	Node_name string  `json:"node_name"`
-	Utc       float64 `json:"utc"`
-	Px        float64 `json:"px"`
-	Py        float64 `json:"py"`
-	Pz        float64 `json:"pz"`
-	Vx        float64 `json:"vx"`
-	Vy        float64 `json:"vy"`
-	Vz        float64 `json:"vz"`
-	Simdt     float64 `json:"simdt,omitempty"`
-	Runcount  int32   `json:"runcount,omitempty"`
-	StartUtc  float64 `json:"startUtc"`
+	Name  string `json:"name"`
+	Frame string `json:"frame"`
 }
 
 // Use with query to Influxdb
 type operational_args struct {
-	Node_name string `json:"node_name"`
+	Name      string `json:"name"`
 	Tag_name  string `json:"tag_name"`
 	Tag_value string `json:"tag_value"`
 	Px        string `json:"px"`
@@ -291,8 +282,8 @@ func (d *SampleDatasource) query(_ context.Context, queryAPI api.QueryAPI, pCtx 
 	log.DefaultLogger.Info("queryModel", "qm", qm)
 
 	// Perform different tasks depending on run mode: simulation or non-simulation
-	if qm.EnableSimMode {
-		response = d.SimMode(qm, pCtx)
+	if qm.IsSimMode {
+		response = d.SimMode(qm, queryAPI, pCtx)
 	} else {
 		response = d.OperationalMode(qm, queryAPI, pCtx)
 	}
@@ -301,33 +292,86 @@ func (d *SampleDatasource) query(_ context.Context, queryAPI api.QueryAPI, pCtx 
 }
 
 // Simulation takes a set of initial conditions and propagates a full orbit with the orbital propagator
-func (d *SampleDatasource) SimMode(qm queryModel, pCtx backend.PluginContext) backend.DataResponse {
+func (d *SampleDatasource) SimMode(qm queryModel, queryAPI api.QueryAPI, pCtx backend.PluginContext) backend.DataResponse {
 	response := backend.DataResponse{}
 
 	// create data frame response.
 	frame := data.NewFrame("response")
 
-	for i := range qm.SimNodeList {
-		qm.SimNodeList[i].StartUtc = qm.SimNodeList[i].Utc
-		qm.SimNodeList[i].Runcount = 90
+	nameList := ""
+	for idx, elem := range qm.SimNodeList {
+		nameList += elem.Name
+		if idx < len(qm.SimNodeList)-1 {
+			nameList += "|"
+		}
 	}
 
-	// Call orbital propagator to generate full orbit
-	predicted_orbit, err := orbitalPropagatorCall(qm.SimNodeList)
+	// TODO: make smarter
+	fieldList := fmt.Sprintf(`%s|%s|%s|%s|%s|%s|%s`,
+		"utc",
+		"eci.px",
+		"eci.py",
+		"eci.pz",
+		"eci.vx",
+		"eci.vy",
+		"eci.vz",
+	)
+
+	simQuery := fmt.Sprintf(
+		`bucket = "%s"
+measurement = "%s"
+latest = from(bucket: bucket)
+	|> range(start: -3d)
+	|> filter(fn: (r) => r["_measurement"] == measurement)
+	|> keep(columns: ["_time"])
+	|> sort(columns: ["_time"], desc: false)
+	|> last(column: "_time")
+	|> findColumn(fn: (key) => true, column: "_time")
+starttime = time(v: uint(v: latest[0])-uint(v: %d))
+from(bucket: "Simulator_Data")
+	|> range(start: starttime)
+	|> filter(fn: (r) => r["_measurement"] == measurement)
+	|> filter(fn: (r) => r["%s"] =~ /(%s)/)
+	|> filter(fn: (r) => r["_field"] =~ /(%s)/)
+	|> keep(columns: ["%s", "_time", "_value", "_field"])
+	|> group(columns: ["%s", "_time"])`,
+		"Simulator_Data",
+		"simdata",
+		// Note: 1274 records (two nodes at runcount=90, simdt=60) were stored in .004 seconds
+		// So ten times that number, .04 seconds "should" be fine
+		40000000,
+		"name", // should be tagname?
+		nameList,
+		fieldList,
+		"name",
+		"name", // should be tagname?
+	)
+	// log.DefaultLogger.Error("simQuery", "simQuery", simQuery)
+
+	// Get flux query result
+	result, err := queryAPI.Query(context.Background(), simQuery)
 	if err != nil {
-		log.DefaultLogger.Error("Error in orbitalPropagatorCall", err.Error())
+		log.DefaultLogger.Error("query error", err.Error())
 		response.Error = err
 		return response
 	}
 
-	// Create fields
+	czmlresp, err := toCzml(qm, result)
+	if err != nil {
+		log.DefaultLogger.Error("Error in toCzml", err.Error())
+		response.Error = err
+		return response
+	}
+
 	frame.Fields = append(frame.Fields,
 		data.NewField("historical", nil, []string{""}),
-		data.NewField("predicted", nil, []string{predicted_orbit}),
+		// TODO: fix this
+		data.NewField("predicted", nil, []string{czmlresp.historical}),
 	)
 
 	// add the frames to the response.
 	response.Frames = append(response.Frames, frame)
+
 	return response
 }
 
@@ -355,11 +399,11 @@ func (d *SampleDatasource) OperationalMode(qm queryModel, queryAPI api.QueryAPI,
 	// 					or r["_field"] == "%s")
 	// 		|> group(columns: ["_measurement", "_time"])
 	// 		//|> last()`,
-	// 	qm.OpNodeList[0].Node_name,
-	// 	qm.OpNodeList[1].Node_name,
-	// 	qm.OpNodeList[2].Node_name,
-	// 	qm.OpNodeList[3].Node_name,
-	// 	qm.OpNodeList[4].Node_name,
+	// 	qm.OpNodeList[0].Name,
+	// 	qm.OpNodeList[1].Name,
+	// 	qm.OpNodeList[2].Name,
+	// 	qm.OpNodeList[3].Name,
+	// 	qm.OpNodeList[4].Name,
 	// 	qm.OpNodeList[0].Tag_name,
 	// 	qm.OpNodeList[0].Tag_value,
 	// 	qm.OpNodeList[0].Px,
@@ -371,7 +415,7 @@ func (d *SampleDatasource) OperationalMode(qm queryModel, queryAPI api.QueryAPI,
 
 	nameList := ""
 	for idx, elem := range qm.OpNodeList {
-		nameList += elem.Node_name
+		nameList += elem.Name
 		if idx < len(qm.OpNodeList)-1 {
 			nameList += "|"
 		}
@@ -416,10 +460,10 @@ from(bucket: "Simulator_Data")
 		"name",
 		"name", // should be tagname?
 	)
+	// log.DefaultLogger.Error("simQuery", "simQuery", simQuery)
 
 	// Get flux query result
 	result, err := queryAPI.Query(context.Background(), simQuery)
-
 	if err != nil {
 		log.DefaultLogger.Error("query error", err.Error())
 		response.Error = err
@@ -571,8 +615,7 @@ func toCzml(qm queryModel, result *api.QueryTableResult) (czml_response, error) 
 	}
 	// Complete Availability string, we need only set it once
 	if len(czmlPacket) > 1 {
-
-		czmlPacket[2].Availability = mjdToTime(earliestTime).Format(time.RFC3339) + "/" + mjdToTime(latestTime).Format(time.RFC3339)
+		czmlPacket[1].Availability = mjdToTime(earliestTime).Format(time.RFC3339) + "/" + mjdToTime(latestTime).Format(time.RFC3339)
 	}
 	czmlbytes, err := json.Marshal(czmlPacket)
 	if err != nil {
@@ -598,7 +641,7 @@ func toCzml(qm queryModel, result *api.QueryTableResult) (czml_response, error) 
 			// 40587 is day offset between unix time and MJD
 			mjdt := 40587 + (float64(unixut)/1000000)/86400
 			pargs = append(pargs, propagator_args{
-				Node_name: czmlPacket[i].Id,
+				Name: czmlPacket[i].Id,
 				Utc:       mjdt,
 				Px:        czmlPacket[i].Position.Cartesian[len(czmlPacket[i].Position.Cartesian)-3].(float64),
 				Py:        czmlPacket[i].Position.Cartesian[len(czmlPacket[i].Position.Cartesian)-2].(float64),

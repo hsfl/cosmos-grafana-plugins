@@ -48,6 +48,9 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
         // series is an array of query responses
         // fields is an array of the fields in those responses (in this case, 'historical' and 'predicted')
         // values are the rows within that field
+        if (!data.series.length) {
+          return;
+        }
         let historical: string = data.series[0].fields.find((x) => x.name === 'historical')?.values.get(0);
         if (historical !== '') {
           const czmlified: CzmlPacket[] = JSON.parse(historical);
@@ -69,7 +72,7 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
   console.log('rerender globe panel');
 
   return (
-    <div>
+    <div style={{ width: width, height: height, overflow: 'auto' }}>
       <div id="cesiumContainer"></div>
       <Viewer
         id="cesium-container-id"

@@ -2,19 +2,13 @@ import { DataQuery, DataSourceJsonData } from '@grafana/data';
 
 // For propagator setup
 export interface SimFields {
-  node_name: string;
-  utc: number;
-  px: number;
-  py: number;
-  pz: number;
-  vx: number;
-  vy: number;
-  vz: number;
+  name: string;
+  frame: string;
 }
 
 // For editing query to database
 export interface OpFields {
-  node_name: string;
+  name: string;
   tag_name: string;
   tag_value: string;
   px: string;
@@ -39,19 +33,13 @@ export const defaultQuery: Partial<MyQuery> = {
   isSimMode: false,
   simNodeList: [
     {
-      node_name: '',
-      utc: 0,
-      px: 0,
-      py: 0,
-      pz: 0,
-      vx: 0,
-      vy: 0,
-      vz: 0,
+      name: '',
+      frame: 'eci',
     },
   ],
   opNodeList: [
     {
-      node_name: '',
+      name: '',
       tag_name: 'beacon_type',
       tag_value: 'posbeacon',
       px: 'node.loc.pos.eci.s.col[0]',

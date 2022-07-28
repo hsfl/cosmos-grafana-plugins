@@ -64,7 +64,7 @@ export const simForm = (
         </InlineField>
       </InlineFieldRow>
       <InlineFieldRow>
-        <Tooltip placement="top" content={'Fields for the propagator to return.'}>
+        <Tooltip placement="top" interactive={false} content={'Fields for the propagator to return.'}>
           <div style={{ width: '100%', maxWidth: '40em', height: 'auto' }}>
             <MultiSelect
               options={generateTelemSelect(telemList)}
