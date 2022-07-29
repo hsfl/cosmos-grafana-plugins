@@ -97,7 +97,7 @@ func SendToTelegraf(msg string) error {
 	// This is the telegraf simdata port
 	// Attempt tcp connection (UDP packets have a size limit)
 	const TELEGRAF_PORT int = 10097
-	url := "telegraf:" + fmt.Sprint(TELEGRAF_PORT)
+	url := "cosmos_telegraf:" + fmt.Sprint(TELEGRAF_PORT)
 	conn, err := net.Dial("tcp", url)
 	if err != nil {
 		log.DefaultLogger.Error("TCP connect error", err.Error())
