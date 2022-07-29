@@ -540,12 +540,13 @@ func toCzml(qm queryModel, result *api.QueryTableResult) (czml_response, error) 
 	czmlPacket[0].Version = "1.0"
 
 	// Reusable arrays for positional data
-	px_name := qm.OpNodeList[0].Px
-	py_name := qm.OpNodeList[0].Py
-	pz_name := qm.OpNodeList[0].Pz
-	vx_name := qm.OpNodeList[0].Vx
-	vy_name := qm.OpNodeList[0].Vy
-	vz_name := qm.OpNodeList[0].Vz
+	// TODO: make dynamic
+	px_name := "eci.px"
+	py_name := "eci.py"
+	pz_name := "eci.pz"
+	vx_name := "eci.vx"
+	vy_name := "eci.vy"
+	vz_name := "eci.vz"
 
 	// For determining if orbital propagator needs to be called
 	//targetTime := time.Now()
