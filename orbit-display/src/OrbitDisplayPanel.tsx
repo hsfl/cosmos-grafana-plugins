@@ -32,6 +32,10 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
     },
   ];
 
+  //   useEffect(() => {
+  //     console.log('do once');
+  //   }, []);
+
   useEffect(() => {
     setDataState(data);
   }, [data]);
@@ -69,7 +73,7 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
   //     console.log('detected change');
   //     //setdat(czml1);
   //   };
-  console.log('rerender globe panel');
+  // console.log('rerender globe panel');
 
   return (
     <div style={{ width: width, height: height, overflow: 'auto' }}>

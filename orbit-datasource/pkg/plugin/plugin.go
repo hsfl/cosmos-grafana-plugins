@@ -256,6 +256,14 @@ type czmlPath struct {
 	Resolution float64      `json:"resolution,omitempty"`
 }
 
+type czmlClock struct {
+	Interval    string `json:"interval,omitempty"`
+	CurrentTime string `json:"currentTime,omitempty"`
+	Multiplier  int32  `json:"multiplier,omitempty"`
+	Range       string `json:"range,omitempty"`
+	Step        string `json:"step,omitempty"`
+}
+
 type czmlStruct struct {
 	Id           string        `json:"id"`
 	Name         string        `json:"name,omitempty"`
@@ -265,6 +273,7 @@ type czmlStruct struct {
 	Point        *czmlPoint    `json:"point,omitempty"`
 	Model        *czmlModel    `json:"model,omitempty"`
 	Path         *czmlPath     `json:"path,omitempty"`
+	Clock        *czmlClock    `json:"clock,omitempty"` // For the document packet to define clock settings for the whole dataset
 	// This is not marshalled into json, it is only for holding velocity values for the latest timestamp
 	vel [3]float64
 }
@@ -522,11 +531,13 @@ func mjdToTime(mjd float64) time.Time {
 func toCzml(qm queryModel, result *api.QueryTableResult) (czml_response, error) {
 	// Start czml response construction
 	var czmlPacket []czmlStruct
+	// Store node names here to convert to an index into czmlPacket
+	var nodeNameIdx = make(map[string]int)
 	czmlPacket = append(czmlPacket, czmlStruct{})
 	var idx int = 0
-	czmlPacket[idx].Id = "document"
-	czmlPacket[idx].Name = "OrbitDatasourceResponse-Historical"
-	czmlPacket[idx].Version = "1.0"
+	czmlPacket[0].Id = "document"
+	czmlPacket[0].Name = "OrbitDatasourceResponse-Historical"
+	czmlPacket[0].Version = "1.0"
 
 	// Reusable arrays for positional data
 	px_name := qm.OpNodeList[0].Px
@@ -557,25 +568,35 @@ func toCzml(qm queryModel, result *api.QueryTableResult) (czml_response, error) 
 			//log.DefaultLogger.Info("Table: ", result.TableMetadata().String())
 			tableNum = -1
 		}
-		// Add a new packet entry for new node
-		if result.Record().ValueByKey("name").(string) != czmlPacket[idx].Id {
-			czmlPacket = append(czmlPacket, czmlStruct{})
-			idx++
-			czmlPacket[idx].Id = result.Record().ValueByKey("name").(string)
-			czmlPacket[idx].Position = &czmlPosition{}
-			// czmlPacket[idx].Position.Interval = ...
-			// czmlPacket[idx].Position.Epoch = result.Record().Time().Format(time.RFC3339)
-			czmlPacket[idx].Position.ReferenceFrame = "INERTIAL"
-			czmlPacket[idx].Model = &czmlModel{}
-			czmlPacket[idx].Model.Gltf = "./public/plugins/hsfl-orbit-display/img/HyTI.glb"
-			czmlPacket[idx].Model.Scale = 4.0
-			czmlPacket[idx].Model.MinimumPixelSize = 50
-			czmlPacket[idx].Path = &czmlPath{}
-			czmlPacket[idx].Path.Material.PolylineOutline.Color.Rgba = [4]int32{255, 255, 255, 128}
-			czmlPacket[idx].Path.LeadTime = 5400
-			czmlPacket[idx].Path.TrailTime = 5400
-			czmlPacket[idx].Path.Width = 5
-			czmlPacket[idx].Path.Resolution = 1
+		// Check if we're still handling the same node
+		nodeName := result.Record().ValueByKey("name").(string)
+		if nodeName != czmlPacket[idx].Id {
+			// Attempt to fetch idx of node name
+			nodeIdx, exists := nodeNameIdx[nodeName]
+			if exists {
+				// Use existing entry in czmlPacket
+				idx = nodeIdx
+			} else {
+				// Create a new entry in czmlPacket for new node and a new entry in nodeNameIdx as well
+				czmlPacket = append(czmlPacket, czmlStruct{})
+				idx = len(czmlPacket) - 1
+				nodeNameIdx[nodeName] = idx
+				czmlPacket[idx].Id = nodeName
+				czmlPacket[idx].Position = &czmlPosition{}
+				// czmlPacket[idx].Position.Interval = ...
+				// czmlPacket[idx].Position.Epoch = "1858-11-17T00:00:00Z" // MJD epoch, but I probably end up losing some precision?
+				czmlPacket[idx].Position.ReferenceFrame = "INERTIAL"
+				czmlPacket[idx].Model = &czmlModel{}
+				czmlPacket[idx].Model.Gltf = "./public/plugins/hsfl-orbit-display/img/HyTI.glb"
+				czmlPacket[idx].Model.Scale = 4.0
+				czmlPacket[idx].Model.MinimumPixelSize = 50
+				czmlPacket[idx].Path = &czmlPath{}
+				czmlPacket[idx].Path.Material.PolylineOutline.Color.Rgba = [4]int32{255, 255, 255, 128}
+				czmlPacket[idx].Path.LeadTime = 5400
+				czmlPacket[idx].Path.TrailTime = 5400
+				czmlPacket[idx].Path.Width = 5
+				czmlPacket[idx].Path.Resolution = 1
+			}
 		}
 		// New point, add timestamp and append positional arrays
 		if tableNum != result.Record().Table() {
@@ -613,10 +634,16 @@ func toCzml(qm queryModel, result *api.QueryTableResult) (czml_response, error) 
 		}
 		//log.DefaultLogger.Info("Row: ", "Time", result.Record().Time(), result.Record().Field(), result.Record().Value(), "Table", result.Record().Table(), "Measurement", result.Record().Measurement())
 	}
-	// Complete Availability string, we need only set it once
-	if len(czmlPacket) > 1 {
-		czmlPacket[1].Availability = mjdToTime(earliestTime).Format(time.RFC3339) + "/" + mjdToTime(latestTime).Format(time.RFC3339)
-	}
+	// Complete Availability string, setting it on the document object means it defines the availability for the entire data set, not for the individual entities (node0, node1, etc.)
+	earliestrfc := mjdToTime(earliestTime).Format(time.RFC3339)
+	czmlPacket[0].Clock = &czmlClock{}
+	czmlPacket[0].Clock.CurrentTime = earliestrfc
+	czmlPacket[0].Clock.Interval = earliestrfc + "/" + mjdToTime(latestTime).Format(time.RFC3339)
+	czmlPacket[0].Clock.Range = "LOOP_STOP"
+	// if len(czmlPacket) > 1 {
+	// 	czmlPacket[1].Availability = czmlPacket[0].Clock.Interval
+	// }
+
 	czmlbytes, err := json.Marshal(czmlPacket)
 	if err != nil {
 		log.DefaultLogger.Error("json.Marshal error", err.Error())

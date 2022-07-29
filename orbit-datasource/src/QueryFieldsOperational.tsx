@@ -12,7 +12,7 @@ export const nodeOpParams = (idx: number, props: Props, query: Partial<MyQuery> 
   return (
     <div>
       <InlineFieldRow>
-        <InlineField labelWidth={13.8} label="Node name" tooltip="Name of this node. Must be unique">
+        <InlineField disabled={true} labelWidth={13.8} label="Node name" tooltip="Name of this node. Must be unique">
           <Input
             width={20}
             type="text"
@@ -37,6 +37,7 @@ export const nodeOpParams = (idx: number, props: Props, query: Partial<MyQuery> 
       </InlineFieldRow>
       <InlineFieldRow>
         <InlineField
+          disabled={true}
           labelWidth={14}
           label="Tag name"
           tooltip="Tag name in Influxdb for the measurement containing position and velocity values"
@@ -49,6 +50,7 @@ export const nodeOpParams = (idx: number, props: Props, query: Partial<MyQuery> 
           />
         </InlineField>
         <InlineField
+          disabled={true}
           labelWidth={14}
           label="Tag value"
           tooltip="Tag value in Influxdb for the measurement containing position and velocity values"
@@ -65,21 +67,21 @@ export const nodeOpParams = (idx: number, props: Props, query: Partial<MyQuery> 
         <InlineFormLabel width={5} tooltip="Field names of ECI-frame XYZ position component values in the database">
           Position
         </InlineFormLabel>
-        <InlineField labelWidth={3} label="X">
+        <InlineField disabled={true} labelWidth={3} label="X">
           <Input
             type="string"
             value={opNodeList[idx].px || ''}
             onChange={(e) => onOpFieldsChange(e, idx, 'px', props, opNodeList)}
           />
         </InlineField>
-        <InlineField labelWidth={3} label="Y">
+        <InlineField disabled={true} labelWidth={3} label="Y">
           <Input
             type="string"
             value={opNodeList[idx].py || ''}
             onChange={(e) => onOpFieldsChange(e, idx, 'py', props, opNodeList)}
           />
         </InlineField>
-        <InlineField labelWidth={3} label="Z">
+        <InlineField disabled={true} labelWidth={3} label="Z">
           <Input
             type="string"
             value={opNodeList[idx].pz || ''}
@@ -91,21 +93,21 @@ export const nodeOpParams = (idx: number, props: Props, query: Partial<MyQuery> 
         <InlineFormLabel width={5} tooltip="Field names of ECI-frame XYZ velocity component values in the database">
           Velocity
         </InlineFormLabel>
-        <InlineField labelWidth={3} label="X">
+        <InlineField disabled={true} labelWidth={3} label="X">
           <Input
             type="string"
             value={opNodeList[idx].vx || ''}
             onChange={(e) => onOpFieldsChange(e, idx, 'vx', props, opNodeList)}
           />
         </InlineField>
-        <InlineField labelWidth={3} label="Y">
+        <InlineField disabled={true} labelWidth={3} label="Y">
           <Input
             type="string"
             value={opNodeList[idx].vy || ''}
             onChange={(e) => onOpFieldsChange(e, idx, 'vy', props, opNodeList)}
           />
         </InlineField>
-        <InlineField labelWidth={3} label="Z">
+        <InlineField disabled={true} labelWidth={3} label="Z">
           <Input
             type="string"
             value={opNodeList[idx].vz || ''}

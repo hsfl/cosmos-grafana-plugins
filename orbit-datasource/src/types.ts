@@ -30,7 +30,7 @@ export interface MyQuery extends DataQuery {
 
 export const defaultQuery: Partial<MyQuery> = {
   constant: 6.5,
-  isSimMode: false,
+  isSimMode: true,
   simNodeList: [
     {
       name: '',
