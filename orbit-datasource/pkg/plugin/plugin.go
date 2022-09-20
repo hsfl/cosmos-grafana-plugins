@@ -361,11 +361,12 @@ from(bucket: "Simulator_Data")
 	result, err := queryAPI.Query(context.Background(), simQuery)
 	if err != nil {
 		log.DefaultLogger.Error("query error", err.Error())
+		err = fmt.Errorf("Query returned no results.")
 		response.Error = err
 		return response
 	}
 
-	czmlresp, err := toCzml(qm, result)
+	czmlresp, err := toCzml(result)
 	if err != nil {
 		log.DefaultLogger.Error("Error in toCzml", err.Error())
 		response.Error = err
@@ -475,11 +476,12 @@ from(bucket: "Simulator_Data")
 	result, err := queryAPI.Query(context.Background(), simQuery)
 	if err != nil {
 		log.DefaultLogger.Error("query error", err.Error())
+		err = fmt.Errorf("Query returned no results.")
 		response.Error = err
 		return response
 	}
 
-	czmlresp, err := toCzml(qm, result)
+	czmlresp, err := toCzml(result)
 	if err != nil {
 		log.DefaultLogger.Error("Error in toCzml", err.Error())
 		response.Error = err
@@ -528,7 +530,7 @@ func mjdToTime(mjd float64) time.Time {
 }
 
 // Take query result and convert to czml format
-func toCzml(qm queryModel, result *api.QueryTableResult) (czml_response, error) {
+func toCzml(result *api.QueryTableResult) (czml_response, error) {
 	// Start czml response construction
 	var czmlPacket []czmlStruct
 	// Store node names here to convert to an index into czmlPacket
