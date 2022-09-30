@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { PanelProps } from '@grafana/data';
+import { Button, InlineFieldRow, Input, Label, Select } from '@grafana/ui';
 import { CzmlPacket, SimpleOptions } from 'types';
 import {
   buildModuleUrl,
@@ -32,6 +33,10 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
     },
   ];
 
+  //   useEffect(() => {
+  //     console.log('do once');
+  //   }, []);
+
   useEffect(() => {
     setDataState(data);
   }, [data]);
@@ -48,6 +53,9 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
         // series is an array of query responses
         // fields is an array of the fields in those responses (in this case, 'historical' and 'predicted')
         // values are the rows within that field
+        if (!data.series.length) {
+          return;
+        }
         let historical: string = data.series[0].fields.find((x) => x.name === 'historical')?.values.get(0);
         if (historical !== '') {
           const czmlified: CzmlPacket[] = JSON.parse(historical);
@@ -66,21 +74,22 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
   //     console.log('detected change');
   //     //setdat(czml1);
   //   };
-  console.log('rerender globe panel');
+  // console.log('rerender globe panel');
 
   return (
-    <div>
+    <div style={{ width: width, height: height, overflow: 'auto' }}>
       <div id="cesiumContainer"></div>
       <Viewer
         id="cesium-container-id"
         ref={viewer}
+        style={{ height: '70%' }}
         // Don't touch these three as it enables offline Cesium use
         imageryProvider={globeTexture}
         baseLayerPicker={false}
         geocoder={false}
         // These two display the time controls
-        animation={true}
-        timeline={true}
+        animation={options.showAnimation}
+        timeline={options.showTimeline}
         // Various others to keep disabled
         fullscreenButton={false}
         homeButton={false}
@@ -91,6 +100,55 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
         <Globe enableLighting />
         <GlobeToolbar data={String(dataState.series[0]?.fields.find((x) => x.name === 'predicted')?.values.get(0))} />
       </Viewer>
+      <InlineFieldRow>
+        <Label>
+          <Select
+            value={{ label: 'Target Earth' }}
+            options={[{ label: 'Target Earth' }, { label: 'Archival' }]}
+            onChange={() => {}}
+            width={13}
+          />
+          <Select
+            value={{ label: 'View Normal' }}
+            options={[{ label: 'View Normal' }, { label: 'Archival' }]}
+            onChange={() => {}}
+            width={13}
+          />
+          <Button
+            style={{ marginInlineStart: '1em' }}
+            size={'md'}
+            variant={'secondary'}
+            fill={'outline'}
+            onClick={() => {}}
+          >
+            View Options
+          </Button>
+        </Label>
+      </InlineFieldRow>
+      <InlineFieldRow>
+        <Label>
+          {'Latitude'}
+          <Input style={{ marginInline: '1em' }} width={10} type="number" value="-49.1624" />
+          {'in Beta Angle'}
+          <Input style={{ marginInlineStart: '1em' }} width={8} type="number" value="" />
+        </Label>
+      </InlineFieldRow>
+      <InlineFieldRow>
+        <Label>
+          {'Longitude'}
+          <Input style={{ marginInline: '1em' }} width={10} type="number" value="166.1392" />
+          {'Time to Eclipse'}
+          <Input style={{ marginInlineStart: '1em' }} width={8} type="number" value="" />
+        </Label>
+      </InlineFieldRow>
+      <InlineFieldRow>
+        <Label>
+          {'Altitude'}
+          <Input style={{ marginInline: '1em' }} width={10} type="number" value="501.0841" />
+          {'Time to Sunlight'}
+          <Input style={{ marginInlineStart: '1em' }} width={8} type="number" value="" />
+        </Label>
+      </InlineFieldRow>
     </div>
   );
 };
