@@ -1,0 +1,27 @@
+{
+  "name": "interstel-adcs-display",
+  "version": "1.0.0",
+  "description": "Displays 3D Visual of a satellite using ADCS position/attitude information",
+  "scripts": {
+    "build": "grafana-toolkit plugin:build",
+    "test": "grafana-toolkit plugin:test",
+    "dev": "grafana-toolkit plugin:dev",
+    "watch": "grafana-toolkit plugin:dev --watch",
+    "sign": "grafana-toolkit plugin:sign",
+    "start": "yarn watch"
+  },
+  "author": "ginoscott",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@grafana/data": "latest",
+    "@grafana/toolkit": "latest",
+    "@grafana/ui": "latest"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "dependencies": {
+    "@types/three": "^0.144.0",
+    "three": "^0.145.0"
+  }
+}
