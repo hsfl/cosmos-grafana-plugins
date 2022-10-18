@@ -25,12 +25,11 @@ class TimeEvent extends BusEventWithPayload<number> {
 }
 
 export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, height, eventBus }) => {
-  // References
-  // Cesium Viewer ref
   // Cesium object
   const [cesiumViewer, setCesiumViewer] = useState<CesiumViewer>();
   // The index into the data array
   const refIdx = useRef<number>(0);
+  // DOM text references for animation
   const refLatitude = useRef<HTMLInputElement>(null);
 
   // Subscribe to time panel's time events
@@ -88,6 +87,8 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
     if (cesiumViewer === undefined || !data.series.length) {
       return;
     }
+    // No Cesium Ion services are being used, hide watermark
+    cesiumViewer.cesiumWidget.creditContainer.parentNode?.removeChild(cesiumViewer.cesiumWidget.creditContainer);
     if (cesiumViewer.dataSources.length) {
       // Get the czml document we started at the top of this file
       let myczml = cesiumViewer.dataSources.getByName('CosmosOrbitalDisplay') as CesiumCzmlDataSource[];
@@ -129,6 +130,7 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
         imageryProvider={globeTexture}
         baseLayerPicker={false}
         geocoder={false}
+        creditContainer={undefined}
         // These two display the time controls
         animation={options.showAnimation}
         timeline={options.showTimeline}

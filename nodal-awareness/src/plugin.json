@@ -1,12 +1,12 @@
 {
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "panel",
-  "name": "my-plugin",
-  "id": "interstel-my-plugin",
+  "name": "nodal-awareness",
+  "id": "hsfl-nodal-awareness",
   "info": {
-    "description": "first plugin",
+    "description": "",
     "author": {
-      "name": "LH",
+      "name": "ginoscott",
       "url": ""
     },
     "keywords": [],
