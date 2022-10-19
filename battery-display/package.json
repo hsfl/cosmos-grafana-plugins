@@ -19,5 +19,8 @@
   },
   "engines": {
     "node": ">=14"
+  },
+  "dependencies": {
+    "@visx/visx": "^2.16.0"
   }
 }
