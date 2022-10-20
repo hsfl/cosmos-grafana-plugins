@@ -1,10 +1,10 @@
 {
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "panel",
-  "name": "my-plugin",
-  "id": "interstel-my-plugin",
+  "name": "command-panel",
+  "id": "interstel-command-panel",
   "info": {
-    "description": "first plugin",
+    "description": "This is the command panel",
     "author": {
       "name": "LH",
       "url": ""
