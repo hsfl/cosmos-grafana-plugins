@@ -62,7 +62,7 @@ const useCommand = () => {
     <div style={{ display: 'flex', flexDirection: 'row', width: "100%"}}>
       <InlineFieldRow>
         <InlineLabel width={40}>
-          CMD  
+          CMD {'>'} 
         {useBasicSelectAsync()}
         </InlineLabel>
       </InlineFieldRow>
@@ -71,7 +71,7 @@ const useCommand = () => {
           Send Command
         </Button>
         <Button size = "xs">
-          Macros
+          Macro{"'"}s
         </Button>
       </HorizontalGroup>
     </div>
