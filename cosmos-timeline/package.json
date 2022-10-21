@@ -1,0 +1,27 @@
+{
+  "name": "interstel-timeline",
+  "version": "1.0.0",
+  "description": "Provides a dashboard-level timeline event emitter, with features like start and stop",
+  "scripts": {
+    "build": "grafana-toolkit plugin:build",
+    "test": "grafana-toolkit plugin:test",
+    "dev": "grafana-toolkit plugin:dev",
+    "watch": "grafana-toolkit plugin:dev --watch",
+    "sign": "grafana-toolkit plugin:sign",
+    "start": "yarn watch"
+  },
+  "author": "ginoscott",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@grafana/toolkit": "latest"
+  },
+  "dependencies": {
+    "@grafana/data": "latest",
+    "@grafana/ui": "latest",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}
