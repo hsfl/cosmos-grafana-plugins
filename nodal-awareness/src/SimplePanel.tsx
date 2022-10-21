@@ -38,9 +38,9 @@ const yScale = scaleLinear({
   domain: [0,1],
   range: [1, 10],
 });
-for (let point of points) {
-    console.log(xScale(point.x));
-}
+// for (let point of points) {
+//     console.log(xScale(point.x));
+// }
 
 const angle = (d: Point) => xScale(xpt(d)) ?? 0;
 const radius = (d: Point) => yScale(xpt(d)) ?? 0;

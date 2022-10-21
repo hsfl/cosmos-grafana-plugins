@@ -12,7 +12,7 @@ interface TimeEventPayload {
   rate?: number,
 }
 
-class TimeEvent extends BusEventWithPayload<TimeEventPayload> {
+class TimeEvent extends BusEventWithPayload<Partial<TimeEventPayload>> {
   static type = 'COSMOS-TimeEvent';
 }
 
@@ -60,9 +60,16 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     }
     // If we are playing, create a new interval with proper refresh speed
     const interval = setInterval(() => {
-      refCurrentTime.current += 1000 * refTimeRate.current;
-      if (refCurrentTime.current > endTime) {
+      // Just publish new time every second for now
+      publishNewTime({time: refCurrentTime.current});
+
+      // timeRange is in unix second timestamps
+      refCurrentTime.current += 1 * refTimeRate.current;
+      const newTime = refCurrentTime.current += 1 * refTimeRate.current;
+      if (newTime > endTime) {
         setPaused(true);
+      } else {
+        refCurrentTime.current = newTime;
       }
     }, 1000, [endTime]);
 
@@ -70,10 +77,10 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       // Clear interval reference
       clearInterval(interval);
     }
-  }, [paused, endTime]);
+  }, [paused, endTime, publishNewTime]);
 
   return (
-    <div>
+    <div className='mytestclass'>
       <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start' }}>
         <Button
           size={'md'}

@@ -1,10 +1,21 @@
-import React, {useState} from 'react';
-import { PanelProps, SelectableValue } from '@grafana/data';
+import React, {useEffect, useRef, useState} from 'react';
+import { BusEventWithPayload, PanelProps, SelectableValue } from '@grafana/data';
 import { InlineField, InlineFieldRow, Input, AsyncSelect, InlineLabel, RadioButtonGroup, Button, HorizontalGroup} from '@grafana/ui';
 import { SimpleOptions, /*currentMJD*/ } from 'types';
 //import { currentMJD } from 'utils/utilFunctions';
 
 interface Props extends PanelProps<SimpleOptions> {}
+
+interface TimeEventPayload {
+  // The starting time, positive unix timestamp
+  time?: number,
+  // Time progression rate, in seconds. Event fires sparsely
+  rate?: number,
+}
+
+class TimeEvent extends BusEventWithPayload<Partial<TimeEventPayload>> {
+  static type = 'COSMOS-TimeEvent';
+}
 
 //const defaultTime = currentMJD(-300 / 86400);
 
@@ -81,7 +92,7 @@ const useBasicSelectAsync = () => {
 
 
 
-const useTimeMode = () => {
+const useTimeMode = (refTimeDiv: React.Ref<HTMLInputElement>) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'row', width: "100%"}}>
       <InlineFieldRow>
@@ -92,6 +103,7 @@ const useTimeMode = () => {
           shrink
         >
           <Input
+            ref={refTimeDiv}
             name = "start"
             type="number"
             value = {Date.now()}
@@ -206,7 +218,7 @@ const useCautionAndWarning = () => {
   );
 }
 
-export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) => {
+export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eventBus }) => {
   // const displayText = () => {
   //   if (options.on_off)
   //   {
@@ -215,14 +227,33 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
   //     );
   //   }
   //   return(null);
-  // }; 
+  // };
+
+  const refTimeDiv = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const subscriber = eventBus.getStream(TimeEvent).subscribe(event => {
+      if (refTimeDiv.current === null) {
+        return;
+      }
+      if (event.payload.time !== undefined) {
+        // Unix timestamp to mjd
+        const newTime = (event.payload.time / 86400.0) + 2440587.5 - 2400000.5;
+        refTimeDiv.current.value = newTime.toString();
+      }
+    });
+
+    return () => {
+      subscriber.unsubscribe();
+    }
+  }, [eventBus]);
 
   return (
     <div>
       {/* {options.on_off ? <div>Text option value: {options.text}</div> : null}
       {displayText()}
       {displayText2(options)} */}
-      {useTimeMode()}
+      {useTimeMode(refTimeDiv)}
       {useCautionAndWarning()}
       {/* {useRadioButtonGroup()} */}
     </div>
