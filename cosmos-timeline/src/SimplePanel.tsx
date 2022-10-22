@@ -56,6 +56,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   useEffect(() => {
     // No interval if paused
     if (paused) {
+      publishNewTime({time: refCurrentTime.current});
       return;
     }
     // If we are playing, create a new interval with proper refresh speed
@@ -64,7 +65,6 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       publishNewTime({time: refCurrentTime.current});
 
       // timeRange is in unix second timestamps
-      refCurrentTime.current += 1 * refTimeRate.current;
       const newTime = refCurrentTime.current += 1 * refTimeRate.current;
       if (newTime > endTime) {
         setPaused(true);

@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import { BusEventWithPayload, PanelProps, SelectableValue } from '@grafana/data';
 import { InlineField, InlineFieldRow, Input, AsyncSelect, InlineLabel, RadioButtonGroup, Button, HorizontalGroup} from '@grafana/ui';
 import { SimpleOptions, /*currentMJD*/ } from 'types';
+import moment from 'moment-timezone';
 //import { currentMJD } from 'utils/utilFunctions';
 
 interface Props extends PanelProps<SimpleOptions> {}
@@ -92,7 +93,7 @@ const useBasicSelectAsync = () => {
 
 
 
-const useTimeMode = (refTimeDiv: React.Ref<HTMLInputElement>) => {
+const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: React.Ref<HTMLInputElement>) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'row', width: "100%"}}>
       <InlineFieldRow>
@@ -103,10 +104,10 @@ const useTimeMode = (refTimeDiv: React.Ref<HTMLInputElement>) => {
           shrink
         >
           <Input
-            ref={refTimeDiv}
+            ref={refUTCTimeDiv}
             name = "start"
-            type="number"
-            value = {Date.now()}
+            type="text"
+            value = {""}
           />
         </InlineField>
       </InlineFieldRow>
@@ -160,6 +161,7 @@ const useTimeMode = (refTimeDiv: React.Ref<HTMLInputElement>) => {
             shrink
           >
             <Input
+              ref={refMJDTimeDiv}
               name="start"
               type="number"
               value = {123456}
@@ -229,17 +231,23 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   //   return(null);
   // };
 
-  const refTimeDiv = useRef<HTMLInputElement>(null);
+  const refUTCTimeDiv = useRef<HTMLInputElement>(null);
+  const refMJDTimeDiv = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const subscriber = eventBus.getStream(TimeEvent).subscribe(event => {
-      if (refTimeDiv.current === null) {
-        return;
-      }
       if (event.payload.time !== undefined) {
-        // Unix timestamp to mjd
-        const newTime = (event.payload.time / 86400.0) + 2440587.5 - 2400000.5;
-        refTimeDiv.current.value = newTime.toString();
+        if (refMJDTimeDiv.current !== null) {
+          // Unix timestamp to mjd
+          const newMJDTime = (event.payload.time / 86400.0) + 2440587.5 - 2400000.5;
+          refMJDTimeDiv.current.value = newMJDTime.toString();
+        }
+        if (refUTCTimeDiv.current !== null) {
+          // Unix timestamp to mjd
+          const newUTCTime = moment.unix(event.payload.time).tz('UTC').format('HH:mm:ss');
+          refUTCTimeDiv.current.value = newUTCTime;
+        }
+        
       }
     });
 
@@ -253,7 +261,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       {/* {options.on_off ? <div>Text option value: {options.text}</div> : null}
       {displayText()}
       {displayText2(options)} */}
-      {useTimeMode(refTimeDiv)}
+      {useTimeMode(refUTCTimeDiv, refMJDTimeDiv)}
       {useCautionAndWarning()}
       {/* {useRadioButtonGroup()} */}
     </div>
