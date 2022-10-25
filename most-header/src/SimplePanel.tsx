@@ -8,7 +8,7 @@ import moment from 'moment-timezone';
 interface Props extends PanelProps<SimpleOptions> {}
 
 interface TimeEventPayload {
-  // The starting time, positive unix timestamp
+  // The starting time, positive unix milliseconds timestamp
   time?: number,
   // Time progression rate, in seconds. Event fires sparsely
   rate?: number,
@@ -238,13 +238,14 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     const subscriber = eventBus.getStream(TimeEvent).subscribe(event => {
       if (event.payload.time !== undefined) {
         if (refMJDTimeDiv.current !== null) {
-          // Unix timestamp to mjd
-          const newMJDTime = (event.payload.time / 86400.0) + 2440587.5 - 2400000.5;
+          // Unix millisecond timestamp to mjd
+          const newMJDTime = (event.payload.time / (86400.0*1000)) + 2440587.5 - 2400000.5;
           refMJDTimeDiv.current.value = newMJDTime.toString();
         }
         if (refUTCTimeDiv.current !== null) {
           // Unix timestamp to mjd
-          const newUTCTime = moment.unix(event.payload.time).tz('UTC').format('HH:mm:ss');
+          // .unix takes unix seconds argument, so convert milliseconds to seconds
+          const newUTCTime = moment.unix(event.payload.time/1000).tz('UTC').format('HH:mm:ss');
           refUTCTimeDiv.current.value = newUTCTime;
         }
         
