@@ -57,6 +57,7 @@ export const defaultQuery: Partial<MyQuery> = {
  */
 export interface MyDataSourceOptions extends DataSourceJsonData {
   org?: string;
+  url?: string;
 }
 
 /**

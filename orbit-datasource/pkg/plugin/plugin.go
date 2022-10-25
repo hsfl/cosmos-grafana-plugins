@@ -184,7 +184,7 @@ func (d *SampleDatasource) QueryData(ctx context.Context, req *backend.QueryData
 
 	// Create new influxdb client
 	//var client influxdb2.Options
-	client := influxdb2.NewClient("http://influxdb:8086", authKey)
+	client := influxdb2.NewClient(jsonData["url"], authKey)
 	queryAPI := client.QueryAPI(jsonData["org"])
 
 	// loop over queries and execute them individually.
@@ -770,7 +770,7 @@ func (d *SampleDatasource) CheckHealth(_ context.Context, req *backend.CheckHeal
 
 	// Create new influxdb client
 	//var client influxdb2.Options
-	client := influxdb2.NewClient("http://influxdb:8086", authKey)
+	client := influxdb2.NewClient(jsonData["url"], authKey)
 	queryAPI := client.QueryAPI(jsonData["org"])
 	_, err = queryAPI.Query(context.Background(), `from(bucket:"Simulator_Data")|> range(start: -1s)`)
 	if err != nil {

@@ -10,6 +10,14 @@ interface Props extends DataSourcePluginOptionsEditorProps<MyDataSourceOptions> 
 interface State {}
 
 export class ConfigEditor extends PureComponent<Props, State> {
+  onURLChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { onOptionsChange, options } = this.props;
+    const jsonData = {
+      ...options.jsonData,
+      url: event.target.value,
+    };
+    onOptionsChange({ ...options, jsonData });
+  };
   onOrgChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { onOptionsChange, options } = this.props;
     const jsonData = {
@@ -52,6 +60,16 @@ export class ConfigEditor extends PureComponent<Props, State> {
 
     return (
       <div className="gf-form-group">
+        <div className="gf-form">
+          <FormField
+            label="URL"
+            labelWidth={6}
+            inputWidth={20}
+            onChange={this.onURLChange}
+            value={jsonData.url || ''}
+            placeholder="http://influxdb:8086"
+          />
+        </div>
         <div className="gf-form">
           <FormField
             label="Organization"
