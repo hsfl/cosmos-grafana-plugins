@@ -1,132 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { PanelData, PanelProps } from '@grafana/data';
-import { SimpleOptions } from 'types';
-//import letterFrequency, { LetterFrequency } from '@visx/mock-data/lib/mocks/letterFrequency';
-import { scaleBand, scaleLinear } from '@visx/scale';
-import { Bar } from '@visx/shape';
-import { Group } from '@visx/group';
+import React, { useEffect, useRef, useState } from 'react';
+import { PanelProps } from '@grafana/data';
+import { BarOrientation, SimpleOptions, Labels } from 'types';
+import { BarGaugeRow } from 'components/BarGaugeRow';
 
 interface Props extends PanelProps<SimpleOptions> {}
 
-//const dataLetter = letterFrequency.slice(5);
-
-// accessors
-// const getLetter = (d: LetterFrequency) => d.letter;
-// const getLetterFrequency = (d: LetterFrequency) => Number(d.frequency) * 100;
-// console.log('thing:',dataLetter.map(getLetter));
-
-enum BarOrientation {
-  vertical,
-  horizontal
-}
-
-interface SolarPanelRowProps {
-  time?: any,
-  solars?: any,
-  /** Array of field indices into data for desired label */
-  filteredLabels: number[],
-  /** Reference to query data */
-  data: PanelData,
-  /** Width of one little bar gauge */
-  width: number,
-  /** Height of one little bar gauge */
-  height: number,
-  /** Horizontal or Vertical */
-  orientation: BarOrientation,
-  /** Index for the query series in data to refer to. BCREG and BATT in separate series at the moment. See assumptions at the bottom of the file */
-  bidx: number | undefined,
-}
-
-// Row of solar panel values
-const SolarPanelRow = (props: SolarPanelRowProps) => {
-  const {width, height, filteredLabels, data, orientation, bidx} = props;
-  const numGraphs = filteredLabels.length;
-  const verticalMargin = 0;//height * .4;
-  // Bounds
-  const xMax = width*numGraphs;
-  const yMax = height + verticalMargin;
-  // TODO: adjust maxBarSize horizontal width?
-  const maxBarSize = orientation === BarOrientation.horizontal ? width : yMax;
-  // TODO: fix max value, current using 5
-  const maxValue = 5;
-  // scales, memoize for performance
-  const xScale = useMemo(
-    () =>
-      scaleBand<number>({
-        range: [0, xMax],
-        round: true,
-        domain: filteredLabels,
-        paddingInner: 0.1,
-      }),
-    [xMax, filteredLabels],
-  );
-  // Scale between 0 and end of bar's maximum value, in the direction of the orientation (i.e., barSize)
-  const barScale = useMemo(
-    () =>
-      scaleLinear<number>({
-        range: [0, maxBarSize],
-        round: true,
-        domain: [0, maxValue],
-        clamp: true,
-      }),
-    [maxBarSize],
-  );
-  //console.log(filteredLabels, numGraphs, filteredLabels.map(i=>`thing${i}`), xScale(`thing7`));
-  if (numGraphs === 0 || bidx === undefined) {
-    return null;
-  }
-  return (
-    <svg width={xMax} height={yMax}>
-      <Group>
-        {filteredLabels.map((i: any) => {
-          const idxOfValue = data.series[bidx].fields[i].values.length - 1;
-          // The scaled 'extent' for the value of the bar (e.g., for a vertical orientation, the height of the bar)
-          const barSize = barScale(data.series[bidx].fields[i].values.get(idxOfValue) ?? 0);
-          // Note: x increases positive to the right, y increases positive downward, hence barY's vertical calculation
-          // The starting X point
-          const barX = xScale(i);
-          // The starting Y point. Graph grows positive down
-          const barY = orientation === BarOrientation.horizontal ? 0 : yMax - barSize;
-          // The width of the graph (i.e., not of the containing bar)
-          const graphWidth = xScale.bandwidth();
-          // The height of the graph (i.e., not of the containing bar)
-          const graphHeight = yMax;
-          // The width of the scaled bar in the graph
-          const barWidth = orientation === BarOrientation.horizontal ? barSize : graphWidth;
-          // The height of the scaled bar in the graph 
-          const barHeight = orientation === BarOrientation.horizontal ? yMax : barSize;
-
-          return (
-            <Group key={`bar-${i}`}>
-              <rect
-                x={barX}
-                y={0}
-                width={graphWidth}
-                height={graphHeight}
-                fill="rgba(200, 200, 200, 0.9)"
-              />
-              <Bar
-                x={barX}
-                y={barY}
-                width={barWidth}
-                height={barHeight}
-                fill="rgba(255, 255, 0, 0.9)"
-              />
-            </Group>
-          );
-        })}
-      </Group>
-    </svg>
-  );
-};
-
-// Interface for a dict of arrays
-// Key will be the label name, which points to an array of indices into the data.series[].fields array which share the same label
-interface Labels {
-  [key: string]: number[]
-}
-
-export const SimplePanel: React.FC<Props> = ({ options, data, width, height, fieldConfig }) => {
+export const SimplePanel: React.FC<Props> = ({ options, data, width, height, fieldConfig, eventBus }) => {
   const [bcregLabels, setBcregLabels] = useState<Labels>({});
   const [battLabels, setBattLabels] = useState<Labels>({});
   const refBcregSeriesIdx = useRef<number | undefined>(undefined);
@@ -217,7 +96,6 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, fie
       setBattLabels(newLabels);
     }
 
-
   }, [data]);
   // Batt row needs: time col, n cols of battery values
 
@@ -228,7 +106,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, fie
           return (
             <div key={`row-${key}`} style={{ display: 'flex', flexDirection: 'column' }}>
               {key}
-              <SolarPanelRow width={20} height={20} bidx={refBcregSeriesIdx.current} orientation={BarOrientation.vertical} filteredLabels={bcregLabels[key] !== undefined ? bcregLabels[key] : []} data={data} />
+              <BarGaugeRow width={20} height={20} bidx={refBcregSeriesIdx.current} orientation={BarOrientation.vertical} filteredLabels={bcregLabels[key] !== undefined ? bcregLabels[key] : []} data={data} eventBus={eventBus} />
             </div>
           );
         })
@@ -238,7 +116,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, fie
           return (
             <div key={`row-${key}`} style={{ display: 'flex', flexDirection: 'column' }}>
               {key}
-              <SolarPanelRow width={80} height={40} bidx={refBattSeriesIdx.current} orientation={BarOrientation.horizontal} filteredLabels={battLabels[key] !== undefined ? battLabels[key] : []} data={data} />
+              <BarGaugeRow width={80} height={40} bidx={refBattSeriesIdx.current} orientation={BarOrientation.horizontal} filteredLabels={battLabels[key] !== undefined ? battLabels[key] : []} data={data} eventBus={eventBus} />
             </div>
           );
         })
