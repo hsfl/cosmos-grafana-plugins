@@ -164,15 +164,28 @@ func (d *SampleDatasource) Dispose() {
 // The QueryDataResponse contains a map of RefID to the response for each query, and each response
 // contains Frames ([]*Frame).
 func (d *SampleDatasource) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
-	log.DefaultLogger.Info("QueryData called", "request", req)
-
 	// create response struct
 	response := backend.NewQueryDataResponse()
 
+	var authKey string
+	// Get the authentication stuff
+	instanceSettings := req.PluginContext.DataSourceInstanceSettings
+	if _authKey, exists := instanceSettings.DecryptedSecureJSONData["authKey"]; exists {
+		// Use the decrypted authentication key.
+		authKey = _authKey
+	}
+	var jsonData map[string]string
+	err := json.Unmarshal(instanceSettings.JSONData, &jsonData)
+	if err != nil {
+		// panic(err)
+		log.DefaultLogger.Error("Error in unmarshal", "error", err)
+	}
+	// log.DefaultLogger.Info("QueryData called", "request", req)
+
 	// Create new influxdb client
 	//var client influxdb2.Options
-	client := influxdb2.NewClient("http://influxdb:8086", "INFLUXDBINITADMINTOKEN")
-	queryAPI := client.QueryAPI("hsfl")
+	client := influxdb2.NewClient("http://influxdb:8086", authKey)
+	queryAPI := client.QueryAPI(jsonData["org"])
 
 	// loop over queries and execute them individually.
 	for _, q := range req.Queries {
@@ -360,7 +373,7 @@ from(bucket: "Simulator_Data")
 	// Get flux query result
 	result, err := queryAPI.Query(context.Background(), simQuery)
 	if err != nil {
-		log.DefaultLogger.Error("query error", err.Error())
+		log.DefaultLogger.Error("query error1", err.Error())
 		err = fmt.Errorf("Query returned no results.")
 		response.Error = err
 		return response
@@ -475,7 +488,7 @@ from(bucket: "Simulator_Data")
 	// Get flux query result
 	result, err := queryAPI.Query(context.Background(), simQuery)
 	if err != nil {
-		log.DefaultLogger.Error("query error", err.Error())
+		log.DefaultLogger.Error("query error2", err.Error())
 		err = fmt.Errorf("Query returned no results.")
 		response.Error = err
 		return response
@@ -560,7 +573,7 @@ func toCzml(result *api.QueryTableResult) (czml_response, error) {
 	// Iterate over query result lines
 	for result.Next() {
 		if result.Err() != nil {
-			log.DefaultLogger.Error("Query error:", result.Err().Error())
+			log.DefaultLogger.Error("Query error3:", result.Err().Error())
 			break
 		}
 		// Observe when there is new grouping key producing new table
@@ -738,13 +751,32 @@ func orbitalPropagatorCall(pargs []propagator_args) (string, error) {
 // a datasource is working as expected.
 func (d *SampleDatasource) CheckHealth(_ context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
 	log.DefaultLogger.Info("CheckHealth called", "request", req)
-
 	var status = backend.HealthStatusOk
 	var message = "Data source is working"
 
-	if rand.Int()%2 == 0 {
+	var authKey string
+	// Get the authentication stuff
+	instanceSettings := req.PluginContext.DataSourceInstanceSettings
+	if _authKey, exists := instanceSettings.DecryptedSecureJSONData["authKey"]; exists {
+		// Use the decrypted authentication key.
+		authKey = _authKey
+	}
+	var jsonData map[string]string
+	err := json.Unmarshal(instanceSettings.JSONData, &jsonData)
+	if err != nil {
+		// panic(err)
+		log.DefaultLogger.Error("Error in unmarshal", "error", err)
+	}
+
+	// Create new influxdb client
+	//var client influxdb2.Options
+	client := influxdb2.NewClient("http://influxdb:8086", authKey)
+	queryAPI := client.QueryAPI(jsonData["org"])
+	_, err = queryAPI.Query(context.Background(), `from(bucket:"Simulator_Data")|> range(start: -1s)`)
+	if err != nil {
 		status = backend.HealthStatusError
-		message = "randomized error"
+		message = "Data source configuration was incorrect: " + err.Error()
+		// log.DefaultLogger.Error("CheckHealth test query failed", "error", err)
 	}
 
 	return &backend.CheckHealthResult{
