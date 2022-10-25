@@ -1,20 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { PanelProps, BusEventWithPayload } from '@grafana/data';
+import { PanelProps } from '@grafana/data';
 import { Button } from '@grafana/ui';
-import { SimpleOptions } from 'types';
+import { SimpleOptions, TimeEvent, TimeEventPayload } from 'types';
 
 interface Props extends PanelProps<SimpleOptions> {}
-
-interface TimeEventPayload {
-  // The starting time, positive unix timestamp
-  time?: number,
-  // Time progression rate, in seconds. Event fires sparsely
-  rate?: number,
-}
-
-class TimeEvent extends BusEventWithPayload<Partial<TimeEventPayload>> {
-  static type = 'COSMOS-TimeEvent';
-}
 
 export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eventBus, timeRange }) => {
   // Playback state, if it is paused or not
@@ -26,7 +15,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   const [endTime, setEndTime] = useState<number>(0);
   // For animating timeline
   const refCurrentTime = useRef<number>(0);
-  const refTimeRate = useRef<number>(1);
+  const refTimeRate = useRef<number>(60);
 
   // Time event publisher
   const publishNewTime = useCallback((payload: TimeEventPayload)=>{
@@ -38,8 +27,9 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
 
   useEffect(() => {
     // Keep boundedTime within bounds of time range
-    const rangeStart = timeRange.from.unix()
-    const rangeEnd = timeRange.to.unix()
+    // .unix() returns unix seconds, convert to unix milliseconds
+    const rangeStart = timeRange.from.unix() * 1000;
+    const rangeEnd = timeRange.to.unix() * 1000;
     setBoundedTime((boundedTime)=> boundedTime > rangeStart ? boundedTime : rangeStart);
     setBoundedTime((boundedTime)=> boundedTime < rangeEnd ? boundedTime : rangeEnd);
     setStartTime(rangeStart);
@@ -64,8 +54,8 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       // Just publish new time every second for now
       publishNewTime({time: refCurrentTime.current});
 
-      // timeRange is in unix second timestamps
-      const newTime = refCurrentTime.current += 1 * refTimeRate.current;
+      // Use unix millisecond timestamps
+      const newTime = refCurrentTime.current + 1000 * refTimeRate.current;
       if (newTime > endTime) {
         setPaused(true);
       } else {
