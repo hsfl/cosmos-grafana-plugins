@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import { BusEventWithPayload, PanelProps, SelectableValue } from '@grafana/data';
-import { InlineField, InlineFieldRow, Input, AsyncSelect, InlineLabel, RadioButtonGroup, Button, HorizontalGroup} from '@grafana/ui';
+import { InlineField, InlineFieldRow, Input, AsyncSelect, InlineLabel, RadioButtonGroup} from '@grafana/ui';
 import { SimpleOptions, /*currentMJD*/ } from 'types';
 import moment from 'moment-timezone';
 //import { currentMJD } from 'utils/utilFunctions';
@@ -33,6 +33,7 @@ class TimeEvent extends BusEventWithPayload<Partial<TimeEventPayload>> {
 //   return(null);
 // }; 
 
+//Selection bar
 const useRadioButtonGroup = () => {
   const [selected, setSelected] = useState('log review');
     const options = [
@@ -57,6 +58,7 @@ const useRadioButtonGroup = () => {
     );
   }
 
+//options for drop down menu
 const options = [
   { label: 'Design' },
   { label: 'Near Realtime' },
@@ -67,7 +69,7 @@ const options = [
 ];
 
 
-
+//Dropdown menu
 const loadAsyncOptions = () => {
   return new Promise<Array<SelectableValue<string>>>((resolve) => {
     setTimeout(() => {
@@ -181,45 +183,6 @@ const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: 
   );
 };
 
-const useCautionAndWarning = () => {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'row', width: "100%"}}>
-      <HorizontalGroup spacing="xs">
-        <Button size="xs" variant = "destructive">
-          Flight Dynamics
-        </Button>
-        <Button size = "xs" variant = "success">
-          GS
-        </Button>
-        <Button size="xs" variant = "success">
-          FSW
-        </Button>
-        <Button size="xs" variant = "success">
-          Payloads
-        </Button>
-        <Button size="xs" variant = "destructive">
-          TCS
-        </Button>
-        <Button size="xs" variant = "destructive">
-          ADCS
-        </Button>
-        <Button size="xs" variant = "destructive">
-          Telecom
-        </Button>
-        <Button size="xs" variant = "destructive">
-          EPS
-        </Button>
-        <Button size="xs" variant = "destructive">
-          Propulsion
-        </Button>
-        <Button size="xs" variant = "destructive">
-          OBCS
-        </Button>
-      </HorizontalGroup>
-    </div>
-  );
-}
-
 export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eventBus }) => {
   // const displayText = () => {
   //   if (options.on_off)
@@ -263,7 +226,6 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       {displayText()}
       {displayText2(options)} */}
       {useTimeMode(refUTCTimeDiv, refMJDTimeDiv)}
-      {useCautionAndWarning()}
       {/* {useRadioButtonGroup()} */}
     </div>
   );

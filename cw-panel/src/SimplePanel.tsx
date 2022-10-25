@@ -12,13 +12,13 @@ const useCautionAndWarning = () => {
         <Button size="xs" variant = "destructive">
           Flight Dynamics
         </Button>
-        <Button size = "xs" variant = "primary">
+        <Button size = "xs" variant = "success">
           GS
         </Button>
-        <Button size="xs" variant = "primary">
+        <Button size="xs" variant = "success">
           FSW
         </Button>
-        <Button size="xs" variant = "primary">
+        <Button size="xs" variant = "success">
           Payloads
         </Button>
         <Button size="xs" variant = "destructive">
