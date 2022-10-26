@@ -93,28 +93,24 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, fie
 
   return (
     <div style={{ width: width, height: height, display: 'block' }}>
-      {/* <svg>
-        <Group> */}
-          {
-          refRects.current.map((rectRef, i) => {
-            let temp = 0;
-            if (data.series.length && i+1 < data.series[0].fields.length) {
-              const idx = data.series[0].fields[i+1].values.length-1;
-              temp = data.series[0].fields[i+1].values.get(idx);
-            }
-            return (
-                <RectWithText
-                  ref={(el) => refRects.current[i] = el}
-                  width={50}
-                  height={30}
-                  key={`temp-${i}`}
-                  temperature={temp}
-                />
-            );
-          })
-        }
-        {/* </Group>
-      </svg> */}
+      {
+        refRects.current.map((rectRef, i) => {
+          let temp = 0;
+          if (data.series.length && i+1 < data.series[0].fields.length) {
+            const idx = data.series[0].fields[i+1].values.length-1;
+            temp = data.series[0].fields[i+1].values.get(idx);
+          }
+          return (
+              <RectWithText
+                ref={(el) => refRects.current[i] = el}
+                width={50}
+                height={30}
+                key={`temp-${i}`}
+                temperature={temp}
+              />
+          );
+        })
+      }
     </div>
   );
 };
