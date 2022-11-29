@@ -57,7 +57,10 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
   useEffect(() => {
     // Array of references
     // Number of columns is the total -1 to exclude the time column
-    const numColumns = data.series[0].fields.length-1;
+    let numColumns = 0;
+    for (let i = 0; i < data.series.length; i++) {
+        numColumns += data.series[i].fields.length - 1;
+    }
     // Array of indices
     if (refIdxs.current.length < numColumns) {
       for (let i = refIdxs.current.length; i < numColumns; i++) {
@@ -90,12 +93,30 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         if (!data.series.length) {
           return;
         }
+        // 0th, 1st, and 2nd derivatives have been separated into separate series
+        let seriesIdx = 0;
+        switch(key) {
+            case 'VYAW':
+            case 'VPITCH':
+            case 'VROLL':
+                seriesIdx = 1;
+                break;
+            case 'AYAW':
+            case 'APITCH':
+            case 'AROLL':
+                seriesIdx = 2;
+                break;
+            default:
+                break;
+        }
         // setState takes one rerender cycle to be reset to the correct value
-        if (i+1 >= data.series[0].fields.length) {
+        // TODO: make this a better check?
+        const boundCheck = (i%3)+1;
+        if (boundCheck >= data.series[seriesIdx].fields.length) {
           return;
         }
         // Query must have returned some values
-        const timeValues = data.series[0].fields[0].values;
+        const timeValues = data.series[seriesIdx].fields[0].values;
         if (timeValues.length === 0) {
           return;
         }
@@ -120,10 +141,15 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             break;
           }
         }
-        const currentValue: number = (data.series[0].fields[i+1].values.get(refIdxs.current[i]) ?? 0);
+        // Grab appropriate column
+        const field = data.series[seriesIdx].fields.find((field)=>field.name === key);
+        if (field === undefined) {
+            return;
+        }
+        // Finally, update display with most up-to-date values
+        const currentValue: number = (field.values.get(refIdxs.current[i]) ?? 0);
         ref.value = currentValue.toString();
-        switch(key)
-        {
+        switch(key) {
           case 'YAW':
             yaw = currentValue;
             break;
