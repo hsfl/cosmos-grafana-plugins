@@ -152,8 +152,9 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 		response.Error = err
 		return response
 	}
-	var avec jsonResponse
-	err = json.Unmarshal(bytes, &avec)
+	var j jsonResponse
+	err = json.Unmarshal(bytes, &j)
+	//err = json.Unmarshal(bytes, &j)
 	if err != nil {
 		log.DefaultLogger.Error("Error in query JSON unmarshal", err.Error())
 		response.Error = err
@@ -161,20 +162,47 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 	}
 
 	// Convert sql json to timeseries dataframe
-	frame := ConvertToFrame(&avec)
+	frame1 := ConvertToFrame(&j.Payload.Avectors)
+	frame2 := ConvertToFrame(&j.Payload.Qvatts)
+	frame3 := ConvertToFrame(&j.Payload.Qaatts)
 
 	// add the frames to the response.
-	response.Frames = append(response.Frames, frame)
+	response.Frames = append(response.Frames, frame1, frame2, frame3)
 
 	return response
 }
 
-func ConvertToFrame(j *jsonResponse) *data.Frame {
-	log.DefaultLogger.Info("In ConvertToFrame", "j", j.Payload[0])
+// Convert a json of mysql col/rows into a grafana timeseries data frame
+// Heavily references (and abbreviates) executeQuery in grafana/pkg/tsdb/sqleng/sql_engine.go
+func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
+	// reflection setup, get field names
+	if len(*jarg) < 1 {
+		return nil
+	}
+
+	var names []string
+
+	// jtype := reflect.TypeOf((*j)[0])
+	// for i := 0; i < jtype.NumField(); i++ {
+	// 	names = append(names, jtype.Field(i).Name)
+	// }
+
+	// Create column names
+	switch any((*jarg)[0]).(type) {
+	case avector:
+		names = []string{"Time", "YAW", "PITCH", "ROLL"}
+	case qvatt:
+		names = []string{"Time", "VYAW", "VPITCH", "VROLL"}
+	case qaatt:
+		names = []string{"Time", "AYAW", "APITCH", "AROLL"}
+	default:
+		return nil
+	}
+
 	// ---- FrameFromRows
 	// Create response frame
 	// Based on sqlutil NewFrame
-	names := []string{"Time", "b", "e", "h"}
+	//names := []string{"Time", "b", "e", "h"}
 	fields := make(data.Fields, len(names))
 	for i, v := range names {
 		if v == "Time" {
@@ -186,28 +214,61 @@ func ConvertToFrame(j *jsonResponse) *data.Frame {
 	}
 	frame := data.NewFrame("", fields...)
 
-	for _, v := range j.Payload {
-		timestamp, err := time.Parse(time.RFC3339, v.Time)
-		if err != nil {
-			log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
-			return nil
+	for _, v := range *jarg {
+		// vtype := reflect.ValueOf((*j)[0])
+		// row := make([]interface{}, len(names))
+		// for i := 0; i < vtype.NumField(); i++ {
+		// 	field := vtype.Field(i).Name
+		// 	switch field {
+		// 	case "Time":
+		// 		row[0] = v.Time
+		// 	default:
+		// 		row[i] = vtype.Field(i).Interface
+		// 	}
+		// }
+		switch j := any(v).(type) {
+		case avector:
+			// Time must be in unix milliseconds
+			timestamp, err := time.Parse(time.RFC3339, j.Time)
+			if err != nil {
+				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
+				return nil
+			}
+			row := make([]interface{}, 4)
+			row[0] = &timestamp
+			row[1] = j.B
+			row[2] = j.E
+			row[3] = j.H
+			frame.AppendRow(row...)
+		case qvatt:
+			timestamp, err := time.Parse(time.RFC3339, j.Time)
+			if err != nil {
+				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
+				return nil
+			}
+			row := make([]interface{}, 4)
+			row[0] = &timestamp
+			row[1] = j.Qvx
+			row[2] = j.Qvy
+			row[3] = j.Qvz
+			frame.AppendRow(row...)
+		case qaatt:
+			timestamp, err := time.Parse(time.RFC3339, j.Time)
+			if err != nil {
+				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
+				return nil
+			}
+			row := make([]interface{}, 4)
+			row[0] = &timestamp
+			row[1] = j.Qax
+			row[2] = j.Qay
+			row[3] = j.Qaz
+			frame.AppendRow(row...)
 		}
-		row := make([]interface{}, 4)
-		row[0] = &timestamp
-		row[1] = v.B
-		row[2] = v.E
-		row[3] = v.H
-		frame.AppendRow(row...)
 	}
-	// ---- end FrameFromRows
-	log.DefaultLogger.Info("In ConvertToFrame after frame", "frame", frame)
-	// ---- convertSQLTimeColumnsToEpochMS
-	newField := data.NewFieldFromFieldType(data.FieldTypeNullableTime, 0)
-	newField.Name = frame.Fields[0].Name
-	newField.Labels = frame.Fields[0].Labels
 
-	// ---- end convertSQLTimeColumnsToEpochMS
-	// ---- format to timeseries
+	// ---- end FrameFromRows
+	// ---- Format to timeseries
 	tsSchema := frame.TimeSeriesSchema()
 	if tsSchema.Type == data.TimeSeriesTypeLong {
 		var err error
