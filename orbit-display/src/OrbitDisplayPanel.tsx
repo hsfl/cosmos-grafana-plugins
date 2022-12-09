@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { BusEventWithPayload, PanelProps } from '@grafana/data';
+import { BusEventWithPayload, PanelData, PanelProps } from '@grafana/data';
 import { Button, InlineFieldRow, Input, Label, Select } from '@grafana/ui';
 import { CzmlPacket, SimpleOptions } from 'types';
 import {
@@ -7,12 +7,17 @@ import {
   TileMapServiceImageryProvider,
   Viewer as CesiumViewer,
   CzmlDataSource as CesiumCzmlDataSource,
+  SampledPositionProperty as CesiumSampledPositionProperty,
+  JulianDate,
 } from 'cesium';
 import { CesiumComponentRef, CzmlDataSource, Globe, Viewer } from 'resium';
 import { GlobeToolbar } from './GlobeToolbar';
-import './globe.css';
+import './css/globe.css';
+import './css/widgets.css';
+//import { CosmosCesiumDatasource } from './helpers/CosmosCesiumDatasource';
 
-require('../node_modules/cesium/Source/Widgets/widgets.css');
+//require('../node_modules/cesium/Source/Widgets/widgets.css');
+//import 'Cesium/Widgets/widgets.css';
 
 const globeTexture = new TileMapServiceImageryProvider({
   url: buildModuleUrl('Assets/Textures/NaturalEarthII'),
@@ -23,6 +28,9 @@ interface Props extends PanelProps<SimpleOptions> {}
 class TimeEvent extends BusEventWithPayload<number> {
   static type = 'COSMOS-TimeEvent';
 }
+
+const offset = 59270.9494213 * 86400; //59483.25*86400;
+const lat0 = 20;
 
 export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, height, eventBus }) => {
   // Cesium object
@@ -49,9 +57,101 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
       name: 'CosmosOrbitalDisplay',
       version: '1.0',
     },
+    {
+      id: 'TEST',
+      name: 'Model',
+      //availability: "2021-09-26T06:00:00Z/2021-09-26T08:30:00Z",
+      availability: '2021-02-25T22:47:10Z/2021-02-26T01:17:10Z',
+      position: {
+        cartographicDegrees: [
+          // time(s) lon lat alt
+          offset + 0,
+          lat0 - 0,
+          22,
+          600000,
+          offset + 600,
+          lat0 - 20,
+          22,
+          600000,
+          offset + 1200,
+          lat0 - 40,
+          22,
+          600000,
+          offset + 1800,
+          lat0 - 60,
+          22,
+          600000,
+          offset + 2400,
+          lat0 - 80,
+          22,
+          600000,
+          offset + 3000,
+          lat0 - 100,
+          22,
+          600000,
+          offset + 3600,
+          lat0 - 120,
+          22,
+          600000,
+          offset + 4200,
+          lat0 - 140,
+          22,
+          600000,
+          offset + 4800,
+          lat0 - 160,
+          22,
+          600000,
+          offset + 5400,
+          lat0 - 180,
+          22,
+          600000,
+          offset + 6000,
+          lat0 - 200,
+          22,
+          600000,
+          offset + 6600,
+          lat0 - 220,
+          22,
+          600000,
+          offset + 7200,
+          lat0 - 240,
+          22,
+          600000,
+          offset + 7800,
+          lat0 - 260,
+          22,
+          600000,
+          offset + 8400,
+          lat0 - 280,
+          22,
+          600000,
+          offset + 9000,
+          lat0 - 300,
+          22,
+          600000,
+          offset + 9600,
+          lat0 - 320,
+          22,
+          600000,
+          //offset+9600, lat0 -  0, 22,  600000,
+        ],
+        epoch: '1858-11-17T00:00:00Z',
+        interpolationAlgorithm: 'LAGRANGE',
+        interpolationDegree: 3,
+        referenceFrame: 'FIXED',
+      },
+      model: {
+        gltf: './public/plugins/hsfl-orbit-display/img/GenericSatellite.glb',
+        scale: 1.0,
+        minimumPixelSize: 64,
+      },
+      path: {
+        show: true,
+      },
+    },
   ];
 
-  const updateDOMRefs = useCallback((data, refIdx) => {
+  const updateDOMRefs = useCallback((data: PanelData, refIdx: React.MutableRefObject<number>) => {
     if (
       !data.series.length || // Check if there is valid query result
       data.series[0].fields.length < 2 || // Check if there are time and value columns in query
@@ -84,6 +184,25 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
 
   // Update Cesium viewer with latest data
   useEffect(() => {
+    let myczml = cesiumViewer?.dataSources.getByName('CosmosOrbitalDisplay') as CesiumCzmlDataSource[];
+    if (cesiumViewer !== undefined && myczml.length) {
+      if (myczml[0].entities.getById('mytestentity') === undefined) {
+        const pos: CesiumSampledPositionProperty = new CesiumSampledPositionProperty(0);
+        pos.addSamplesPackedArray([0, 10000000, 0, 0, 953550008, 10000000, 0, 0], JulianDate.fromIso8601('2021-02-26'));
+        myczml[0].entities.add({
+          position: pos,
+          model: {
+            uri: './public/plugins/hsfl-orbit-display/img/GenericSatellite.glb',
+            scale: 1.0,
+            minimumPixelSize: 64,
+          },
+        });
+      }
+      if (!cesiumViewer.dataSources.getByName('mytestdatasource').length) {
+        //cesiumViewer.dataSources.add(new CosmosCesiumDatasource('mytestdatasource'));
+        console.log(cesiumViewer.dataSources);
+      }
+    }
     if (cesiumViewer === undefined || !data.series.length) {
       return;
     }
@@ -134,6 +253,9 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
         // These two display the time controls
         animation={options.showAnimation}
         timeline={options.showTimeline}
+        // Enables explicit render mode
+        requestRenderMode={true}
+        maximumRenderTimeChange={0.5}
         // Various others to keep disabled
         fullscreenButton={false}
         homeButton={false}
@@ -141,7 +263,7 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
         navigationHelpButton={false}
       >
         <CzmlDataSource data={czml0} /*onChange={handlechange}*/></CzmlDataSource>
-        <Globe enableLighting />
+        <Globe enableLighting dynamicAtmosphereLighting={false} showGroundAtmosphere={false} />
         <GlobeToolbar data={String(data.series[0]?.fields.find((x) => x.name === 'predicted')?.values.get(0))} />
       </Viewer>
       <InlineFieldRow>
