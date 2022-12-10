@@ -1,3 +1,5 @@
+import { BusEventWithPayload, PanelData } from '@grafana/data';
+
 export interface SimpleOptions {
   showTimeline: boolean;
   showAnimation: boolean;
@@ -61,3 +63,21 @@ export interface HashStr {
 export interface HashNum {
   [key: string]: number;
 }
+
+export type RefDict = { [key in input_field]?: HTMLInputElement | null };
+export type IdxDict = { [key in input_field]?: number };
+
+export type input_field = 'sx' | 'sy' | 'sz' | 'beta' | 'eclipse' | 'sunlight';
+
+export interface TimeEventPayload {
+  // The starting time, positive unix timestamp
+  time?: number;
+  // Time progression rate, in seconds. Event fires sparsely
+  rate?: number;
+}
+
+export class TimeEvent extends BusEventWithPayload<Partial<TimeEventPayload>> {
+  static type = 'COSMOS-TimeEvent';
+}
+
+export type TimeEventCallback = (data: PanelData, event: TimeEvent) => void;

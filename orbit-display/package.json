@@ -8,7 +8,8 @@
     "dev": "webpack -w -c ./webpack.config.ts --env development",
     "watch": "grafana-toolkit plugin:dev --watch",
     "sign": "grafana-toolkit plugin:sign",
-    "start": "yarn watch"
+    "start": "yarn watch",
+    "lint":  "eslint --fix --ext .ts,.tsx ./src"
   },
   "author": "ginoscott",
   "license": "Apache-2.0",

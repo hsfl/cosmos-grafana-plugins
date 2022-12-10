@@ -1,4 +1,17 @@
-//import Cesium /*, { DataSourceClock, EntityCluster, EntityCollection, Event }*/ from 'cesium';
+import {
+  defined,
+  Cartesian3,
+  ClockRange,
+  DataSourceClock,
+  DeveloperError,
+  EntityCluster,
+  EntityCollection,
+  Event as CesiumEvent,
+  JulianDate,
+  ReferenceFrame,
+  SampledPositionProperty,
+  TimeIntervalCollection,
+} from 'cesium';
 
 /**
  * This class is an example of a custom DataSource.  It loads JSON data as
@@ -29,20 +42,168 @@
 //   this._entityCluster = new Cesium.EntityCluster();
 // }
 
-export class CosmosCesiumDatasource{// extends Cesium.DataSource {
+export class CosmosCesiumDatasource {
+  name: string;
+  clock: DataSourceClock;
+  changedEvent: CesiumEvent;
+  errorEvent: CesiumEvent;
+  isLoading: boolean;
+  loadingEvent: CesiumEvent;
+  entities: EntityCollection;
+  clustering: EntityCluster;
+  show: boolean;
+  update(time: JulianDate): boolean {
+    return true;
+  }
   constructor(name: string) {
-    // super();
-    // this.name = name;
+    this.name = name;
+    //this.clock = undefined as any; // Per Cesium-documentation, clock will be undefined for static data
+    this.clock = new DataSourceClock();
+    const timeRange = TimeIntervalCollection.fromIso8601({ iso8601: '2022-10-22T20:00:00Z/2022-10-22T21:00:00Z' });
+    this.clock.clockRange = ClockRange.UNBOUNDED;
+    this.clock.currentTime = timeRange.start;
+    this.clock.startTime = timeRange.start;
+    this.clock.stopTime = timeRange.stop;
+    this.changedEvent = new CesiumEvent();
+    //this.changedEvent.addEventListener(()=> {return this.changedEvent});
+    this.errorEvent = new CesiumEvent();
+    this.isLoading = false;
+    this.loadingEvent = new CesiumEvent();
+    this.entities = new EntityCollection(this);
+    this.clustering = new EntityCluster();
+    this.show = true;
+  }
+
+  setLoading(isLoading: boolean): void {
+    if (this.isLoading !== isLoading) {
+      if (isLoading) {
+        this.entities.suspendEvents();
+      } else {
+        this.entities.resumeEvents();
+      }
+      this.isLoading = isLoading;
+      this.loadingEvent.raiseEvent([isLoading]);
+    }
+  }
+  // TODO: fix any type
+  load(Time: any, sx: any, sy: any, sz: any): void {
+    console.log('ccd0');
+    if (!defined(sx) || !defined(sy) || !defined(sz)) {
+      throw new DeveloperError('data is required.');
+    }
+    console.log('ccd1');
+
+    //It's a good idea to suspend events when making changes to a
+    //large amount of entities.  This will cause events to be batched up
+    //into the minimal amount of function calls and all take place at the
+    //end of processing (when resumeEvents is called).
+    // entities.suspendEvents();
+    //Clear out any data that might already exist.
+    const entities = this.entities;
+    entities.removeAll();
+    this.setLoading(true);
+
+    // Data will be
+    const maxLen = Math.max(Time.length, sx.length, sy.length, sz.length);
+    console.log('maxLen:', maxLen, Time, sx, sy, sz);
+    const pos: SampledPositionProperty = new SampledPositionProperty(ReferenceFrame.INERTIAL);
+    for (let i = 0; i < maxLen; i++) {
+      // if (sx[i] == null || sy[i] == null || sz)
+      const julianDate = new Date(Time.get(i));
+      // console.log(julianDate, sx.get(i), sy.get(i), sz.get(i));
+      pos.addSample(JulianDate.fromDate(julianDate), Cartesian3.fromElements(sx.get(i), sy.get(i), sz.get(i)));
+    }
+    console.log('ccd2');
+    //pos.addSamplesPackedArray([0, 5000000, 8500000, 0, 953550008, 8000000, 2500000, 0], JulianDate.fromIso8601('2021-02-25T23:30:00Z'));
+    const timeRange = TimeIntervalCollection.fromIso8601({ iso8601: '2022-10-22T20:00:00Z/2022-10-22T21:00:00Z' });
+    entities.add({
+      id: 'Sat2Id',
+      name: 'Sat2',
+      path: {
+        width: 2,
+      },
+      position: pos,
+      model: {
+        uri: './public/plugins/hsfl-orbit-display/img/GenericSatellite.glb',
+        scale: 1.0,
+        minimumPixelSize: 64,
+      },
+      availability: timeRange,
+    });
+    let clock = new DataSourceClock();
+    if (this.clock === undefined) {
+      console.log('clock created');
+      this.clock = new DataSourceClock();
+    }
+    clock.clockRange = ClockRange.CLAMPED;
+    clock.currentTime = timeRange.start;
+    clock.startTime = timeRange.start;
+    clock.stopTime = timeRange.stop;
+    if (!clock.equals(this.clock)) {
+      this.clock = clock.clone(this.clock);
+      console.log('clock updated');
+    }
+    this.clock = clock.clone(this.clock);
+
+    console.log('ccd3');
+
+    // Loop over each series
+    // for (let x = 0; x < data.length; x++) {
+    //     const series = data[x];
+    //     const seriesName = series[0];
+    //     const coordinates = series[1];
+
+    //     //Add the name of the series to our list of possible values.
+    //     this._seriesNames.push(seriesName);
+
+    //     //Make the first series the visible one by default
+    //     const show = x === 0;
+    //     if (show) {
+    //     this._seriesToDisplay = seriesName;
+    //     }
+
+    //     //Now loop over each coordinate in the series and create
+    //     // our entities from the data.
+    //     for (let i = 0; i < coordinates.length; i += 3) {
+    //     const latitude = coordinates[i];
+    //     const longitude = coordinates[i + 1];
+    //     const height = coordinates[i + 2];
+
+    //     //Ignore lines of zero height.
+    //     if (height === 0) {
+    //         continue;
+    //     }
+
+    //     const color = Cesium.Color.fromHsl(0.6 - height * 0.5, 1.0, 0.5);
+    //     const surfacePosition = Cesium.Cartesian3.fromDegrees(longitude, latitude, 0);
+    //     const heightPosition = Cesium.Cartesian3.fromDegrees(longitude, latitude, height * heightScale);
+
+    //     //WebGL Globe only contains lines, so that's the only graphics we create.
+    //     const polyline = new Cesium.PolylineGraphics();
+    //     polyline.material = new Cesium.ColorMaterialProperty(color);
+    //     polyline.width = new Cesium.ConstantProperty(2);
+    //     polyline.arcType = new Cesium.ConstantProperty(Cesium.ArcType.NONE);
+    //     polyline.positions = new Cesium.ConstantProperty([surfacePosition, heightPosition]);
+
+    //     //The polyline instance itself needs to be on an entity.
+    //     const entity = new Cesium.Entity({
+    //         id: `${seriesName} index ${i.toString()}`,
+    //         show: show,
+    //         polyline: polyline,
+    //         //seriesName: seriesName, //Custom property to indicate series name
+    //     });
+
+    //     //Add the entity to the collection.
+    //     entities.add(entity);
+    //     }
+    // }
+
+    //Once all data is processed, call resumeEvents and raise the changed event.
+    //entities.resumeEvents();
+    this.changedEvent.raiseEvent([this]);
+    this.setLoading(false);
   }
 }
-
-// export const CosmosCesiumDatasource = (name: string) => {
-//   const ds = new Cesium.CustomDataSource(name);
-
-//   return ds;
-// };
-
-// Object.setPrototypeOf(CosmosCesiumDatasource.prototype, CustomDataSource.prototype);
 
 // export function CosmosCesiumDatasource(this: Cesium.CustomDataSource, name: string) {
 //   //All public configuration is defined as ES5 properties
@@ -350,11 +511,4 @@ export class CosmosCesiumDatasource{// extends Cesium.DataSource {
 //   entities.resumeEvents();
 //   this._changed.raiseEvent(this);
 //   this._setLoading(false);
-// };
-
-// CosmosCesiumDatasource.prototype._setLoading = function (isLoading) {
-//   if (this._isLoading !== isLoading) {
-//     this._isLoading = isLoading;
-//     this._loading.raiseEvent(this, isLoading);
-//   }
 // };
