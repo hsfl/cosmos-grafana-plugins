@@ -82,4 +82,3 @@ export const currentMJD = (offset: number) => {
   //             as year              unix-mjd offset
   return unixsec / 86400 + offset + 40587;
 };
-
