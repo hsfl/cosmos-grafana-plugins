@@ -42,14 +42,14 @@ import { SelectableValue } from '@grafana/data';
 //   'RadioCommunicate',
 // ];
 
-const commandList = [{value: 'Reset'}, {value: 'Reboot'}, {value: 'EpsSwitchName'}];
+const commandList = [{ value: 'Reset' }, { value: 'Reboot' }, { value: 'EpsSwitchName' }];
 
-const groundNodeList = [{value: 'ground'}, {value: 'ground2'}];
-const groundAgentList = [{value: 'comm'}];
-const agentRequestList = [{value: 'command'}, {value: 'command_adcs'}];
-const destNodeList = [{value: 'iobc'}, {value: 'unibap'}];
-const radioUpList = [{value: 'UHFUP'}, {value: 'RXSNET'}];
-const radioDownList = [{value: 'UHFDOWN'}, {value: 'TXSI2C'}];
+const groundNodeList = [{ value: 'ground' }, { value: 'ground2' }];
+const groundAgentList = [{ value: 'comm' }];
+const agentRequestList = [{ value: 'command' }, { value: 'command_adcs' }];
+const destNodeList = [{ value: 'iobc' }, { value: 'unibap' }];
+const radioUpList = [{ value: 'UHFUP' }, { value: 'RXSNET' }];
+const radioDownList = [{ value: 'UHFDOWN' }, { value: 'TXSI2C' }];
 
 const commandFormat = [
   'agent',
@@ -81,7 +81,7 @@ const optionsList: Array<SelectableValue<string>> = [
 
 export const useInputSuggest = () => {
   // const [value, setValue] = useState<SelectableValue<string>>();
-  const [options, setOptions] = useState<SelectableValue<string>[]>(groundNodeList);
+  const [options, setOptions] = useState<Array<SelectableValue<string>>>(groundNodeList);
   // Reference to current input search string
   const searchQueryTermRef = useRef<string>('');
   const searchQueryIdxRef = useRef<number>(0);
@@ -116,14 +116,14 @@ export const useInputSuggest = () => {
       const newTerm = splitInput[termIdx];
       searchQueryTermRef.current = newTerm;
       searchQueryIdxRef.current = termIdx;
-      console.log('input-change', searchQueryIdxRef.current, searchQueryTermRef.current)
+      console.log('input-change', searchQueryIdxRef.current, searchQueryTermRef.current);
       updateOptions();
       setInputValue(value);
     } else if (actionMeta.action === 'set-value') {
       // Called if tab-completing based on suggestion
-    //   const splitInput = actionMeta.prevInputValue.split(/\s+/);
-    //   const termIdx = Math.min(splitInput.length, commandFormat.length - 1);
-    //   const newTerm = ''
+      //   const splitInput = actionMeta.prevInputValue.split(/\s+/);
+      //   const termIdx = Math.min(splitInput.length, commandFormat.length - 1);
+      //   const newTerm = ''
       // searchQueryTermRef.current = newTerm;
       // searchQueryIdxRef.current = termIdx;
       // console.log('set-value', searchQueryIdxRef.current, '\''+searchQueryTermRef.current+'\'')
@@ -169,11 +169,10 @@ export const useInputSuggest = () => {
     if (event.key !== 'Tab') {
       return;
     }
-
-  }
+  };
 
   //const onSelectChange = (option: SelectableValue<string>) => {
-  const onChange = (option: SingleValue<SelectableValue<string>>, action:ActionMeta<SelectableValue<string>>) => {
+  const onChange = (option: SingleValue<SelectableValue<string>>, action: ActionMeta<SelectableValue<string>>) => {
     console.log('onChange value:', option, action);
     if (action.action !== 'select-option' || option?.value === undefined) {
       return;
@@ -183,7 +182,7 @@ export const useInputSuggest = () => {
       // Remove unformed last word, if it exists, and replace with selected value
       const lastChar = inputValue.slice(-1);
       if (lastChar === ' ') {
-          return inputValue + option.value + ' ';
+        return inputValue + option.value + ' ';
       }
       const prevStr = inputValue.split(/\s+/);
       prevStr[prevStr.length - 1] = option.value!;
@@ -197,9 +196,8 @@ export const useInputSuggest = () => {
 
   // Filters available options based on current searchQuery string
   const filterOption = (option: SelectableValue<string>, searchQuery: string): boolean => {
-    
     let ret = false;
-    
+
     if (option.value === undefined) {
       return false;
     }
@@ -255,7 +253,7 @@ export const useInputSuggest = () => {
   };
 
   return (
-    <div style={{width:'35em', paddingLeft:'1em'}}>
+    <div style={{ width: '35em', paddingLeft: '1em', overflow: 'visible' }}>
       <Select
         ref={selectRef}
         inputValue={inputValue}
@@ -268,6 +266,9 @@ export const useInputSuggest = () => {
         filterOption={filterOption}
         getOptionLabel={formatOptionLabel}
         closeMenuOnSelect={false}
+        // With these two props, menulist always renders on top 
+        menuPortalTarget={document.body}
+        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
         //components={{Input: CustomInput}}
       />
     </div>

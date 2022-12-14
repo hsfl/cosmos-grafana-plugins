@@ -24,7 +24,7 @@ interface Props extends PanelProps<SimpleOptions> {}
 
 const useCommand = () => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'row', width: '100%', overflow: 'visible' }}>
       <InlineFieldRow>
         <InlineLabel width={'auto'}>
           CMD {'>'}
@@ -33,7 +33,7 @@ const useCommand = () => {
       </InlineFieldRow>
       <HorizontalGroup spacing="xs">
         <Button size="xs">Send Command</Button>
-        <Button size="xs">Macro{"'"}s</Button>
+        <Button size="xs">Macros</Button>
       </HorizontalGroup>
     </div>
   );
