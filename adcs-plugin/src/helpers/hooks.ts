@@ -8,18 +8,16 @@ export const useCosmosTimeline = (data: PanelData, eventBus: EventBus, callback:
   // Imperative animation controller
   // Unix seconds timestamp that denotes current time, obtained from cosmos-timeline event publisher
   useEffect(() => {
-    const subscriber = eventBus.getStream(TimeEvent).subscribe(event => {
+    const subscriber = eventBus.getStream(TimeEvent).subscribe((event) => {
       if (event.payload.time !== undefined) {
         callback(data, event);
       }
     });
     return () => {
       subscriber.unsubscribe();
-    }
+    };
   }, [eventBus, data, callback]);
-
 };
-
 
 // ---------------------------------------------------
 type DomUpdateReturn = [
@@ -50,7 +48,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         refRenderer.current.dispose();
         refRenderer.current = undefined;
       }
-    }
+    };
   }, []);
 
   // Update refIdxs
@@ -59,7 +57,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     // Number of columns is the total -1 to exclude the time column
     let numColumns = 0;
     for (let i = 0; i < data.series.length; i++) {
-        numColumns += data.series[i].fields.length - 1;
+      numColumns += data.series[i].fields.length - 1;
     }
     // Array of indices
     if (refIdxs.current.length < numColumns) {
@@ -76,7 +74,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
   const updateDOMRefs = useCallback((data: PanelData, event: TimeEvent) => {
     if (
       !data.series.length || // Check if there is valid query result
-      data.series[0].fields.length < 2// || // Check if there are time and value columns in query
+      data.series[0].fields.length < 2 // || // Check if there are time and value columns in query
       //refIdx.current >= data.series[0].fields[0].values.length // Check if there are values in those columns
     ) {
       //refIdx.current = 0;
@@ -95,23 +93,23 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         }
         // 0th, 1st, and 2nd derivatives have been separated into separate series
         let seriesIdx = 0;
-        switch(key) {
-            case 'VYAW':
-            case 'VPITCH':
-            case 'VROLL':
-                seriesIdx = 1;
-                break;
-            case 'AYAW':
-            case 'APITCH':
-            case 'AROLL':
-                seriesIdx = 2;
-                break;
-            default:
-                break;
+        switch (key) {
+          case 'VYAW':
+          case 'VPITCH':
+          case 'VROLL':
+            seriesIdx = 1;
+            break;
+          case 'AYAW':
+          case 'APITCH':
+          case 'AROLL':
+            seriesIdx = 2;
+            break;
+          default:
+            break;
         }
         // setState takes one rerender cycle to be reset to the correct value
         // TODO: make this a better check?
-        const boundCheck = (i%3)+1;
+        const boundCheck = (i % 3) + 1;
         if (boundCheck >= data.series[seriesIdx].fields.length) {
           return;
         }
@@ -121,7 +119,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           return;
         }
         // If index is out of bounds, set it back to the start
-        if (refIdxs.current[i] >= timeValues.length-1) {
+        if (refIdxs.current[i] >= timeValues.length - 1) {
           refIdxs.current[i] = 0;
         }
         // If new timestamp is less than our current timestamp, then search from start
@@ -131,7 +129,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           refIdxs.current[i] = 0;
         }
         // Search through timestamps, and get the timestamp that is one before we go over the event timestamp
-        for (; refIdxs.current[i] < timeValues.length-1; refIdxs.current[i]++) {
+        for (; refIdxs.current[i] < timeValues.length - 1; refIdxs.current[i]++) {
           time = timeValues.get(refIdxs.current[i]);
           if (time === event.payload.time!) {
             break;
@@ -142,14 +140,14 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           }
         }
         // Grab appropriate column
-        const field = data.series[seriesIdx].fields.find((field)=>field.name === key);
+        const field = data.series[seriesIdx].fields.find((field) => field.name === key);
         if (field === undefined) {
-            return;
+          return;
         }
         // Finally, update display with most up-to-date values
-        const currentValue: number = (field.values.get(refIdxs.current[i]) ?? 0);
+        const currentValue: number = field.values.get(refIdxs.current[i]) ?? 0;
         ref.value = currentValue.toString();
-        switch(key) {
+        switch (key) {
           case 'YAW':
             yaw = currentValue;
             break;
@@ -165,8 +163,12 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
 
     // Update threejs model rotation
     requestAnimationFrame(() => {
-      if (refModel.current !== undefined && refRenderer.current !== undefined && refScene.current !== undefined && refCamera.current !== undefined)
-      {
+      if (
+        refModel.current !== undefined &&
+        refRenderer.current !== undefined &&
+        refScene.current !== undefined &&
+        refCamera.current !== undefined
+      ) {
         refModel.current.rotation.set(yaw, pitch, roll);
         refRenderer.current.render(refScene.current, refCamera.current);
       }
