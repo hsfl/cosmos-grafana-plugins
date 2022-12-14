@@ -66,6 +66,8 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
         const cosmosDS = new CosmosCesiumDatasource(datasourceName);
         cesiumViewer.dataSources.add(cosmosDS);
       }
+      // Disable fancy transition animations
+      cesiumViewer.sceneModePicker.viewModel.duration = 0;
     }
   }, [cesiumViewer]);
 
