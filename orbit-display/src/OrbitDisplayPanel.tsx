@@ -77,7 +77,7 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
   }, []);
 
   return (
-    <div style={{ width: width, height: height, overflow: 'auto' }}>
+    <div style={{ width: width, height: height, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
       <div id="cesiumContainer"></div>
       <Viewer
         id="cesium-container-id"
@@ -130,65 +130,39 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
           </Button>
         </Label>
       </InlineFieldRow>
-      <InlineFieldRow>
-        <Label>
-          {'Latitude'}
-          <Input
-            ref={(ref) => (refInputs.current['sx'] = ref)}
-            style={{ marginInline: '1em' }}
-            width={10}
-            type="number" /*value="-49.1624"*/
-          />
-          {'in Beta Angle'}
-          <Input
-            ref={(ref) => (refInputs.current['beta'] = ref)}
-            style={{ marginInlineStart: '1em' }}
-            width={8}
-            type="number"
-            value=""
-          />
-        </Label>
-      </InlineFieldRow>
-      <InlineFieldRow>
-        <Label>
-          {'Longitude'}
-          <Input
-            ref={(ref) => (refInputs.current['sy'] = ref)}
-            style={{ marginInline: '1em' }}
-            width={10}
-            type="number"
-            value="166.1392"
-          />
-          {'Time to Eclipse'}
-          <Input
-            ref={(ref) => (refInputs.current['eclipse'] = ref)}
-            style={{ marginInlineStart: '1em' }}
-            width={8}
-            type="number"
-            value=""
-          />
-        </Label>
-      </InlineFieldRow>
-      <InlineFieldRow>
-        <Label>
-          {'Altitude'}
-          <Input
-            ref={(ref) => (refInputs.current['sz'] = ref)}
-            style={{ marginInline: '1em' }}
-            width={10}
-            type="number"
-            value="501.0841"
-          />
-          {'Time to Sunlight'}
-          <Input
-            ref={(ref) => (refInputs.current['sunlight'] = ref)}
-            style={{ marginInlineStart: '1em' }}
-            width={8}
-            type="number"
-            value=""
-          />
-        </Label>
-      </InlineFieldRow>
+      <div
+        style={{
+          display: 'grid',
+          columnGap: '2em',
+          gridTemplateRows: 'auto auto auto',
+          gridTemplateColumns: 'auto 0.5fr 5em auto 0.5fr',
+        }}
+      >
+        <div style={{ gridRow: 1, gridColumn: 1 }}>Latitude</div>
+        <div style={{ gridRow: 2, gridColumn: 1 }}>Longitude</div>
+        <div style={{ gridRow: 3, gridColumn: 1 }}>Altitude</div>
+        <div style={{ gridRow: 1, gridColumn: 2 }}>
+          <Input ref={(ref) => (refInputs.current['sx'] = ref)} type="number" /*value="-49.1624"*/ />
+        </div>
+        <div style={{ gridRow: 2, gridColumn: 2 }}>
+          <Input ref={(ref) => (refInputs.current['sy'] = ref)} type="number" value="166.1392" />
+        </div>
+        <div style={{ gridRow: 3, gridColumn: 2 }}>
+          <Input ref={(ref) => (refInputs.current['sz'] = ref)} type="number" value="501.0841" />
+        </div>
+        <div style={{ gridRow: 1, gridColumn: 4 }}>in Beta Angle</div>
+        <div style={{ gridRow: 2, gridColumn: 4 }}>Time to Eclipse</div>
+        <div style={{ gridRow: 3, gridColumn: 4 }}>Time to Sunlight</div>
+        <div style={{ gridRow: 1, gridColumn: 5 }}>
+          <Input ref={(ref) => (refInputs.current['beta'] = ref)} type="number" value="" />
+        </div>
+        <div style={{ gridRow: 2, gridColumn: 5 }}>
+          <Input ref={(ref) => (refInputs.current['eclipse'] = ref)} type="number" value="" />
+        </div>
+        <div style={{ gridRow: 3, gridColumn: 5 }}>
+          <Input ref={(ref) => (refInputs.current['sunlight'] = ref)} type="number" value="" />
+        </div>
+      </div>
     </div>
   );
 };

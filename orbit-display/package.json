@@ -9,7 +9,8 @@
     "watch": "grafana-toolkit plugin:dev --watch",
     "sign": "grafana-toolkit plugin:sign",
     "start": "yarn watch",
-    "lint":  "eslint --fix --ext .ts,.tsx ./src"
+    "lint": "eslint --cache --ignore-path ./.gitignore --ext .js,.jsx,.ts,.tsx .",
+    "lint:fix": "yarn lint --fix"
   },
   "author": "ginoscott",
   "license": "Apache-2.0",
