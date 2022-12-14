@@ -120,58 +120,53 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
           width={13}
         />
       </InlineFieldRow>
-      <table>
-        <tr>
-          <td></td>
-          <td style={{ fontSize: '0.8em', textAlign: 'center' }}>Attitude</td>
-          <td style={{ fontSize: '0.8em', textAlign: 'center' }}>Angular Velocity (rad/s)</td>
-          <td style={{ fontSize: '0.8em', textAlign: 'center' }}>Angular Accel (rad/s<sup>2</sup>)</td>
-        </tr>
-        <tr>
-          <td>Yaw</td>
-          <td>
-            <Input ref={(ref) => (refInputs.current['YAW'] = ref)} style={{ marginInlineStart: '1em' }} type="text" />
-          </td>
-          <td>
-            <Input ref={(ref) => (refInputs.current['VYAW'] = ref)} style={{ marginInlineStart: '1em' }} type="text" />
-          </td>
-          <td>
-            <Input ref={(ref) => (refInputs.current['AYAW'] = ref)} style={{ marginInlineStart: '1em' }} type="text" />
-          </td>
-        </tr>
-        <tr>
-          <td>Pitch</td>
-          <td>
-            <Input ref={(ref) => (refInputs.current['PITCH'] = ref)} style={{ marginInlineStart: '1em' }} type="text" />
-          </td>
-          <td>
-            <Input
-              ref={(ref) => (refInputs.current['VPITCH'] = ref)}
-              style={{ marginInlineStart: '1em' }}
-              type="text"
-            />
-          </td>
-          <td>
-            <Input
-              ref={(ref) => (refInputs.current['APITCH'] = ref)}
-              style={{ marginInlineStart: '1em' }}
-              type="text"
-            />
-          </td>
-        </tr>
-        <tr>
-          <td>Roll</td>
-          <td>
-            <Input ref={(ref) => (refInputs.current['ROLL'] = ref)} style={{ marginInlineStart: '1em' }} type="text" />
-          </td>
-          <td>
-            <Input ref={(ref) => (refInputs.current['VROLL'] = ref)} style={{ marginInlineStart: '1em' }} type="text" />
-          </td>
-          <td>
-            <Input ref={(ref) => (refInputs.current['AROLL'] = ref)} style={{ marginInlineStart: '1em' }} type="text" />
-          </td>
-        </tr>
-      </table>
+      <div
+        style={{
+          alignItems: 'center',
+          justifyItems: 'center',
+          textAlign: 'center',
+          display: 'grid',
+          //columnGap: '1em',
+          gridTemplateRows: 'auto auto auto auto',
+          gridTemplateColumns: 'auto auto auto auto',
+        }}
+      >
+        <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 2 }}>Attitude</div>
+        <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 3 }}>Angular Vel (rad/s)</div>
+        <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 4 }}>Angular Accel (rad/s<sup>2</sup>)</div>
+
+        <div style={{ gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' }}>Yaw</div>
+        <div style={{ gridRow: 3, gridColumn: 1, marginInlineEnd: '1em' }}>Pitch</div>
+        <div style={{ gridRow: 4, gridColumn: 1, marginInlineEnd: '1em' }}>Roll</div>
+
+        <div style={{ gridRow: 2, gridColumn: 2 }}>
+          <Input ref={(ref) => (refInputs.current['YAW'] = ref)} type="text" />
+        </div>
+        <div style={{ gridRow: 2, gridColumn: 3 }}>
+          <Input ref={(ref) => (refInputs.current['VYAW'] = ref)} type="text" />
+        </div>
+        <div style={{ gridRow: 2, gridColumn: 4 }}>
+          <Input ref={(ref) => (refInputs.current['AYAW'] = ref)} type="text" />
+        </div>
+        <div style={{ gridRow: 3, gridColumn: 2 }}>
+          <Input ref={(ref) => (refInputs.current['PITCH'] = ref)} type="text" />
+        </div>
+        <div style={{ gridRow: 3, gridColumn: 3 }}>
+          <Input ref={(ref) => (refInputs.current['VPITCH'] = ref)} type="text" />
+        </div>
+        <div style={{ gridRow: 3, gridColumn: 4 }}>
+          <Input ref={(ref) => (refInputs.current['APITCH'] = ref)} type="text" />
+        </div>
+        <div style={{ gridRow: 4, gridColumn: 2 }}>
+          <Input ref={(ref) => (refInputs.current['ROLL'] = ref)} type="text" />
+        </div>
+        <div style={{ gridRow: 4, gridColumn: 3 }}>
+          <Input ref={(ref) => (refInputs.current['VROLL'] = ref)} type="text" />
+        </div>
+        <div style={{ gridRow: 4, gridColumn: 4 }}>
+          <Input ref={(ref) => (refInputs.current['AROLL'] = ref)} type="text" />
+        </div>
+      </div>
     </div>
   );
 };
