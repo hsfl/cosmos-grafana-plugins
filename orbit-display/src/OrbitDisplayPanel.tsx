@@ -132,10 +132,11 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
       </InlineFieldRow>
       <div
         style={{
+          alignItems: 'center',
           display: 'grid',
-          columnGap: '2em',
+          columnGap: '1em',
           gridTemplateRows: 'auto auto auto',
-          gridTemplateColumns: 'auto 0.5fr 5em auto 0.5fr',
+          gridTemplateColumns: 'auto 0.5fr 0px auto 0.5fr',
         }}
       >
         <div style={{ gridRow: 1, gridColumn: 1 }}>Latitude</div>
