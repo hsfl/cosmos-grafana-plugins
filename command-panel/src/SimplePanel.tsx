@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { PanelProps, SelectableValue } from '@grafana/data';
-import { InlineFieldRow, AsyncSelect, InlineLabel, Button, HorizontalGroup } from '@grafana/ui';
+import React from 'react';
+import { PanelProps } from '@grafana/data';
+import { InlineFieldRow, InlineLabel, Button, HorizontalGroup } from '@grafana/ui';
 import { SimpleOptions /*currentMJD*/ } from './types';
 //import { currentMJD } from 'utils/utilFunctions';
+import { useInputSuggest } from './helpers/InputWithSuggest';
 
 interface Props extends PanelProps<SimpleOptions> {}
 
@@ -21,45 +22,13 @@ interface Props extends PanelProps<SimpleOptions> {}
 //   return(null);
 // };
 
-const options = [
-  { label: 'Option 1' },
-  { label: 'Option 2' },
-  { label: 'Option 3' },
-  { label: 'Option 4' },
-  { label: 'Option 5' },
-  { label: 'Option 6' },
-];
-
-const loadAsyncOptions = () => {
-  return new Promise<Array<SelectableValue<string>>>((resolve) => {
-    setTimeout(() => {
-      resolve(options);
-    }, 2000);
-  });
-};
-const useBasicSelectAsync = () => {
-  const [value, setValue] = useState<SelectableValue<string>>();
-
-  return (
-    <AsyncSelect
-      loadOptions={loadAsyncOptions}
-      defaultOptions
-      value={value}
-      width={30}
-      onChange={(v) => {
-        setValue(v);
-      }}
-    />
-  );
-};
-
 const useCommand = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
       <InlineFieldRow>
-        <InlineLabel width={40}>
+        <InlineLabel width={'auto'}>
           CMD {'>'}
-          {useBasicSelectAsync()}
+          {useInputSuggest()}
         </InlineLabel>
       </InlineFieldRow>
       <HorizontalGroup spacing="xs">
