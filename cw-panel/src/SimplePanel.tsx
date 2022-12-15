@@ -5,38 +5,41 @@ import { SimpleOptions, /*currentMJD*/ } from 'types';
 
 interface Props extends PanelProps<SimpleOptions> {}
 
+const green = '#0b0';
+const yellow = '#ea3';
+
 const useCautionAndWarning = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'row', width: "100%"}}>
       <HorizontalGroup spacing="xs">
-        <Button size="xs" variant = "destructive">
+        <Button size="xs" style={{ background:green }}>
           Flight Dynamics
         </Button>
-        <Button size = "xs" variant = "success">
+        <Button size="xs" style={{ background:green }}>
           GS
         </Button>
-        <Button size="xs" variant = "success">
+        <Button size="xs" style={{ background:green }}>
           FSW
         </Button>
-        <Button size="xs" variant = "success">
+        <Button size="xs" style={{ background:green }}>
           Payloads
         </Button>
-        <Button size="xs" variant = "destructive">
+        <Button size="xs" style={{ background:green }}>
           TCS
         </Button>
-        <Button size="xs" variant = "destructive">
+        <Button size="xs" style={{ background:green }}>
           ADCS
         </Button>
-        <Button size="xs" variant = "destructive">
+        <Button size="xs" style={{ background:green }}>
           Telecom
         </Button>
-        <Button size="xs" variant = "destructive">
+        <Button size="xs" style={{ background:green }}>
           EPS
         </Button>
-        <Button size="xs" variant = "destructive">
+        <Button size="xs" style={{ background:yellow }}>
           Propulsion
         </Button>
-        <Button size="xs" variant = "destructive">
+        <Button size="xs" style={{ background:green }}>
           OBCS
         </Button>
       </HorizontalGroup>
