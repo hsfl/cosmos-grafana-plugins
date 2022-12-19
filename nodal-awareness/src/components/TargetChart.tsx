@@ -1,7 +1,5 @@
 import React from 'react';
 
-import './table.css';
-
 export const TargetChart = () => {
 
   return (

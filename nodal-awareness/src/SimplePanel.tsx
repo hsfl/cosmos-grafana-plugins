@@ -1,8 +1,8 @@
 import React from 'react';
 import { PanelProps } from '@grafana/data';
 import { SimpleOptions } from 'types';
-import { NodalAwarenessPlot } from 'components/NodalAwarenessPlot';
-import { TargetChart } from 'components/TargetChart';
+import { NodalAwarenessPlot } from './components/NodalAwarenessPlot';
+import { TargetChart } from './components/TargetChart';
 
 interface Props extends PanelProps<SimpleOptions> {}
 
