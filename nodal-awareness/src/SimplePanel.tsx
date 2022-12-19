@@ -7,12 +7,12 @@ import { TargetChart } from './components/TargetChart';
 interface Props extends PanelProps<SimpleOptions> {}
 
 export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) => {
-
+  const plotWidth = Math.min(width*2/3, height*1.5);
   return (
-    <div style={{ width, height, display: 'flex', flexDirection: 'row' }}>
-      <NodalAwarenessPlot width={width*2/3} height={height} />
-      <TargetChart />
-      
+    // TODO: fix plot/table relative spacing
+    <div style={{ width, height, display: 'grid', gridTemplateColumns: 'auto auto' }}>
+      <NodalAwarenessPlot width={plotWidth} height={height} />
+      <TargetChart width={width/3} height={height} />
     </div>
   );
 };
