@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
-import { BusEventWithPayload, PanelProps, SelectableValue } from '@grafana/data';
-import { InlineField, InlineFieldRow, Input, AsyncSelect, InlineLabel, RadioButtonGroup} from '@grafana/ui';
+import { BusEventWithPayload, PanelProps } from '@grafana/data';
+import { InlineField, InlineFieldRow, Input, Select, RadioButtonGroup} from '@grafana/ui';
 import { SimpleOptions, /*currentMJD*/ } from 'types';
 import moment from 'moment-timezone';
 //import { currentMJD } from 'utils/utilFunctions';
@@ -70,24 +70,15 @@ const options = [
 
 
 //Dropdown menu
-const loadAsyncOptions = () => {
-  return new Promise<Array<SelectableValue<string>>>((resolve) => {
-    setTimeout(() => {
-      resolve(options);
-    }, 2000);
-  });
-};
 const useBasicSelectAsync = () => {
-  const [value, setValue] = useState<SelectableValue<string>>();
 
   return (
-    <AsyncSelect
-      loadOptions={loadAsyncOptions}
-      defaultOptions
-      value={value}
-      width = {10}
+    <Select
+      options={options}
+      //value={value}
+      width={17}
       onChange={v => {
-        setValue(v);
+        //setValue(v);
       }}
     />
   );
@@ -95,7 +86,7 @@ const useBasicSelectAsync = () => {
 
 
 
-const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: React.Ref<HTMLInputElement>) => {
+const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: React.Ref<HTMLInputElement>, refMETTimeDiv: React.Ref<HTMLInputElement>) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'row', width: "100%"}}>
       <InlineFieldRow>
@@ -110,6 +101,7 @@ const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: 
             name = "start"
             type="text"
             value = {""}
+            width={10}
           />
         </InlineField>
       </InlineFieldRow>
@@ -123,7 +115,8 @@ const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: 
             <Input
               name="start"
               type="number"
-              value = {123456}
+              value = {0}
+              width={8}
             />
           </InlineField>
       </InlineFieldRow>
@@ -135,9 +128,11 @@ const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: 
             shrink
           >
             <Input
+                ref={refMETTimeDiv}
               name="start"
-              type="number"
-              value = {123456}
+              type="text"
+              value = {0}
+              width={10}
             />
           </InlineField>
       </InlineFieldRow>
@@ -151,7 +146,8 @@ const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: 
             <Input
               name="start"
               type="number"
-              value = {123456}
+              value = {0}
+              width={8}
             />
           </InlineField>
       </InlineFieldRow>
@@ -166,15 +162,15 @@ const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: 
               ref={refMJDTimeDiv}
               name="start"
               type="number"
-              value = {123456}
+              value = {0}
+              width={16}
             />
           </InlineField>
       </InlineFieldRow>
       <InlineFieldRow>
-        <InlineLabel width={17}>
-          Mode  
+        <InlineField label="Mode" labelWidth = {8}>
         {useBasicSelectAsync()}
-        </InlineLabel>
+        </InlineField>
       </InlineFieldRow>
       <InlineFieldRow>
         {useRadioButtonGroup()}
@@ -196,6 +192,8 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
 
   const refUTCTimeDiv = useRef<HTMLInputElement>(null);
   const refMJDTimeDiv = useRef<HTMLInputElement>(null);
+  const refMETTimeDiv = useRef<HTMLInputElement>(null);
+  const missionStartTime = useRef<number>(0);
 
   useEffect(() => {
     const subscriber = eventBus.getStream(TimeEvent).subscribe(event => {
@@ -211,6 +209,17 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
           const newUTCTime = moment.unix(event.payload.time/1000).tz('UTC').format('HH:mm:ss');
           refUTCTimeDiv.current.value = newUTCTime;
         }
+        if (refMETTimeDiv.current !== null) {
+            if (missionStartTime.current === 0 || event.payload.time < missionStartTime.current) {
+                missionStartTime.current = event.payload.time;
+            }
+            const diffTime = event.payload.time - missionStartTime.current;
+            const duration = moment.duration(diffTime);
+            const hours = Math.floor(duration.asHours());
+            const hoursString = String(hours).padStart(2, '0');
+            const metString = hoursString + moment.utc(diffTime).format(":mm:ss");
+            refMETTimeDiv.current.value = metString;
+        }
         
       }
     });
@@ -225,7 +234,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       {/* {options.on_off ? <div>Text option value: {options.text}</div> : null}
       {displayText()}
       {displayText2(options)} */}
-      {useTimeMode(refUTCTimeDiv, refMJDTimeDiv)}
+      {useTimeMode(refUTCTimeDiv, refMJDTimeDiv, refMETTimeDiv)}
       {/* {useRadioButtonGroup()} */}
     </div>
   );

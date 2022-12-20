@@ -8,17 +8,16 @@ export interface SimpleOptions {
   seriesCountSize: SeriesSize;
 }
 
-// 
-export type RefDict = {[key in adcs_field]?: HTMLInputElement | null};
-
+//
+export type RefDict = { [key in adcs_field]?: HTMLInputElement | null };
 
 export type adcs_field = 'YAW' | 'VYAW' | 'AYAW' | 'PITCH' | 'VPITCH' | 'APITCH' | 'ROLL' | 'VROLL' | 'AROLL';
 
 export interface TimeEventPayload {
   // The starting time, positive unix timestamp
-  time?: number,
+  time?: number;
   // Time progression rate, in seconds. Event fires sparsely
-  rate?: number,
+  rate?: number;
 }
 
 export class TimeEvent extends BusEventWithPayload<Partial<TimeEventPayload>> {
