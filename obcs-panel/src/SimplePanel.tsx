@@ -6,6 +6,11 @@ import { BarOrientation, SimpleOptions /*currentMJD*/ } from './types';
 
 interface Props extends PanelProps<SimpleOptions> {}
 
+
+{/* <Button size="xs" style={{ background:green }}>
+Flight Dynamics
+</Button> */}
+
 export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eventBus }) => {
   const useTimeMode = () => {
     return (
