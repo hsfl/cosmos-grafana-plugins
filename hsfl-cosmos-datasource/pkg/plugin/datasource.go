@@ -59,8 +59,12 @@ func NewDatasource(instanceSettings backend.DataSourceInstanceSettings) (instanc
 
 // COSMOS Web backend api endpoint call
 // msg: json encoded string
-func (d *Datasource) GetEndpoint(timeRange backend.TimeRange) (string, error) {
-	base := d.url + "/db/attitude/"
+func (d *Datasource) GetEndpoint(queryText string, timeRange backend.TimeRange) (string, error) {
+	if queryText == "" {
+		err := fmt.Errorf("queryText wrong")
+		return "", err
+	}
+	base := d.url + "/db/" + queryText + "/"
 	req, err := http.NewRequest("GET", base, nil)
 	if err != nil {
 		log.DefaultLogger.Error("Error in http.NewRequest", err.Error())
@@ -76,8 +80,8 @@ func (d *Datasource) GetEndpoint(timeRange backend.TimeRange) (string, error) {
 
 // msg: json encoded string
 // url: URL or Hostname of API endpoint
-func (d *Datasource) CosmosBackendCall(timeRange backend.TimeRange) ([]byte, error) {
-	endpoint, err := d.GetEndpoint(timeRange)
+func (d *Datasource) CosmosBackendCall(queryText string, timeRange backend.TimeRange) ([]byte, error) {
+	endpoint, err := d.GetEndpoint(queryText, timeRange)
 	if err != nil {
 		return nil, err
 	}
@@ -130,9 +134,6 @@ func (d *Datasource) QueryData(ctx context.Context, req *backend.QueryDataReques
 	return response, nil
 }
 
-type queryModel struct {
-}
-
 func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query backend.DataQuery) backend.DataResponse {
 	response := backend.DataResponse{}
 
@@ -145,29 +146,70 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 	}
 
 	// frame := data.NewFrame("response")
+	qm.QueryText = strings.TrimSpace(qm.QueryText)
+	qm.QueryText = strings.ReplaceAll(qm.QueryText, " ", "")
+	queryTexts := strings.Split(qm.QueryText, ",")
 
-	bytes, err := d.CosmosBackendCall(query.TimeRange)
-	if err != nil {
-		log.DefaultLogger.Error("Error in Cosmos Backend call", err.Error())
-		response.Error = err
-		return response
+	for _, v := range queryTexts {
+		bytes, err := d.CosmosBackendCall(v, query.TimeRange)
+		if err != nil {
+			log.DefaultLogger.Error("Error in Cosmos Backend call", err.Error())
+			response.Error = err
+			return response
+		}
+		var j jsonResponse
+		err = json.Unmarshal(bytes, &j)
+		//err = json.Unmarshal(bytes, &j)
+		if err != nil {
+			log.DefaultLogger.Error("Error in query JSON unmarshal", err.Error())
+			response.Error = err
+			return response
+		}
+
+		// Convert sql json to timeseries dataframe
+		frame1 := ConvertToFrame(&j.Payload.Avectors)
+		frame2 := ConvertToFrame(&j.Payload.Qvatts)
+		frame3 := ConvertToFrame(&j.Payload.Qaatts)
+		frame4 := ConvertToFrame(&j.Payload.Ecis)
+		frame5 := ConvertToFrame(&j.Payload.Batts)
+		frame6 := ConvertToFrame(&j.Payload.Bcregs)
+		frame7 := ConvertToFrame(&j.Payload.Tsens)
+		frame8 := ConvertToFrame(&j.Payload.Cpus)
+
+		// add the frames to the response.
+		if frame1 != nil {
+			frame1.RefID = "avector"
+			response.Frames = append(response.Frames, frame1)
+		}
+		if frame2 != nil {
+			frame2.RefID = "qvatt"
+			response.Frames = append(response.Frames, frame2)
+		}
+		if frame3 != nil {
+			frame3.RefID = "qaatt"
+			response.Frames = append(response.Frames, frame3)
+		}
+		if frame4 != nil {
+			frame4.RefID = "eci"
+			response.Frames = append(response.Frames, frame4)
+		}
+		if frame5 != nil {
+			frame5.RefID = "batt"
+			response.Frames = append(response.Frames, frame5)
+		}
+		if frame6 != nil {
+			frame6.RefID = "bcreg"
+			response.Frames = append(response.Frames, frame6)
+		}
+		if frame7 != nil {
+			frame7.RefID = "tsen"
+			response.Frames = append(response.Frames, frame7)
+		}
+		if frame8 != nil {
+			frame8.RefID = "cpu"
+			response.Frames = append(response.Frames, frame8)
+		}
 	}
-	var j jsonResponse
-	err = json.Unmarshal(bytes, &j)
-	//err = json.Unmarshal(bytes, &j)
-	if err != nil {
-		log.DefaultLogger.Error("Error in query JSON unmarshal", err.Error())
-		response.Error = err
-		return response
-	}
-
-	// Convert sql json to timeseries dataframe
-	frame1 := ConvertToFrame(&j.Payload.Avectors)
-	frame2 := ConvertToFrame(&j.Payload.Qvatts)
-	frame3 := ConvertToFrame(&j.Payload.Qaatts)
-
-	// add the frames to the response.
-	response.Frames = append(response.Frames, frame1, frame2, frame3)
 
 	return response
 }
@@ -195,9 +237,21 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 		names = []string{"Time", "VYAW", "VPITCH", "VROLL"}
 	case qaatt:
 		names = []string{"Time", "AYAW", "APITCH", "AROLL"}
+	case eci:
+		names = []string{"Time", "sx", "sy", "sz"}
+	case batt:
+		names = []string{"Time", "node", "amp", "power"}
+	case bcreg:
+		names = []string{"Time", "node", "amp", "power"}
+	case tsen:
+		names = []string{"Time", "node", "temp"}
+	case cpu:
+		names = []string{"Time", "node", "load", "gib", "storage"}
 	default:
 		return nil
 	}
+
+	log.DefaultLogger.Error("Checking backend return", "return", (*jarg)[0])
 
 	// ---- FrameFromRows
 	// Create response frame
@@ -205,9 +259,12 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 	//names := []string{"Time", "b", "e", "h"}
 	fields := make(data.Fields, len(names))
 	for i, v := range names {
-		if v == "Time" {
+		switch v {
+		case "Time":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableTime, 0)
-		} else {
+		case "node":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
+		default:
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeFloat64, 0)
 		}
 		fields[i].Name = names[i]
@@ -234,7 +291,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
 				return nil
 			}
-			row := make([]interface{}, 4)
+			row := make([]interface{}, len(names))
 			row[0] = &timestamp
 			row[1] = j.B
 			row[2] = j.E
@@ -246,7 +303,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
 				return nil
 			}
-			row := make([]interface{}, 4)
+			row := make([]interface{}, len(names))
 			row[0] = &timestamp
 			row[1] = j.Qvx
 			row[2] = j.Qvy
@@ -258,11 +315,71 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
 				return nil
 			}
-			row := make([]interface{}, 4)
+			row := make([]interface{}, len(names))
 			row[0] = &timestamp
 			row[1] = j.Qax
 			row[2] = j.Qay
 			row[3] = j.Qaz
+			frame.AppendRow(row...)
+		case eci:
+			timestamp, err := time.Parse(time.RFC3339, j.Time)
+			if err != nil {
+				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
+				return nil
+			}
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = j.Sx
+			row[2] = j.Sy
+			row[3] = j.Sz
+			frame.AppendRow(row...)
+		case batt:
+			timestamp, err := time.Parse(time.RFC3339, j.Time)
+			if err != nil {
+				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
+				return nil
+			}
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = &j.Node
+			row[2] = j.Amp
+			row[3] = j.Power
+			frame.AppendRow(row...)
+		case bcreg:
+			timestamp, err := time.Parse(time.RFC3339, j.Time)
+			if err != nil {
+				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
+				return nil
+			}
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = &j.Node
+			row[2] = j.Amp
+			row[3] = j.Power
+			frame.AppendRow(row...)
+		case tsen:
+			timestamp, err := time.Parse(time.RFC3339, j.Time)
+			if err != nil {
+				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
+				return nil
+			}
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = &j.Node
+			row[2] = j.Temp
+			frame.AppendRow(row...)
+		case cpu:
+			timestamp, err := time.Parse(time.RFC3339, j.Time)
+			if err != nil {
+				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
+				return nil
+			}
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = &j.Node
+			row[2] = j.Load
+			row[3] = j.Gib
+			row[4] = j.Storage
 			frame.AppendRow(row...)
 		}
 	}
@@ -311,7 +428,7 @@ func (d *Datasource) CheckHealth(_ context.Context, req *backend.CheckHealthRequ
 
 	timeRange := backend.TimeRange{From: time.Now(), To: time.Now()}
 
-	_, err := d.CosmosBackendCall(timeRange)
+	_, err := d.CosmosBackendCall("Attitude", timeRange)
 	if err != nil {
 		status = backend.HealthStatusError
 		message = err.Error()

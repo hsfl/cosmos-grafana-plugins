@@ -114,10 +114,10 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       <div ref={refWebGLContainer} />
       <InlineFieldRow>
         <Select
-          value={{ label: 'View Normal' }}
-          options={[{ label: 'View Normal' }, { label: 'Archival' }]}
+          value={{ label: 'LVLH' }}
+          options={[{ label: 'LVLH' }, { label: 'ICRF' }]}
           onChange={() => {}}
-          width={13}
+          width="auto"
         />
       </InlineFieldRow>
       <div
@@ -133,7 +133,9 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       >
         <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 2 }}>Attitude</div>
         <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 3 }}>Angular Vel (rad/s)</div>
-        <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 4 }}>Angular Accel (rad/s<sup>2</sup>)</div>
+        <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 4 }}>
+          Angular Accel (rad/s<sup>2</sup>)
+        </div>
 
         <div style={{ gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' }}>Yaw</div>
         <div style={{ gridRow: 3, gridColumn: 1, marginInlineEnd: '1em' }}>Pitch</div>

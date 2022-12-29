@@ -111,15 +111,15 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
         <Label>
           <Select
             value={{ label: 'Target Earth' }}
-            options={[{ label: 'Target Earth' }, { label: 'Archival' }]}
+            options={[{ label: 'Target Earth' }, { label: 'Target Sat' }]}
             onChange={() => {}}
-            width={13}
+            width="auto"
           />
           <Select
             value={{ label: 'View Normal' }}
-            options={[{ label: 'View Normal' }, { label: 'Archival' }]}
+            options={[{ label: 'View Normal' }, { label: 'View Nadir' }]}
             onChange={() => {}}
-            width={13}
+            width="auto"
           />
           <Button
             style={{ marginInlineStart: '1em' }}

@@ -25,16 +25,16 @@ const RectWithText = React.forwardRef<RectWithTextHandle, RectWithTextProps>((pr
         <Group>
           <rect
             ref={refRect}
-            x={padding}
-            y={padding}
+            x={padding/2}
+            y={padding/2}
             width={width}
             height={height}
             fill="rgba(0, 225, 0, 1)"
           />
           <Text
             innerTextRef={refText}
-            dx={padding+width/2}
-            dy={padding+height/2}
+            dx={padding/2+width/2}
+            dy={padding/2+height/2}
             textAnchor='middle'
             verticalAnchor='middle'
             fontFamily="Helvetica"

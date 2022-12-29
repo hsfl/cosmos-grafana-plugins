@@ -76,8 +76,8 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, fie
               break;
             }
           }
-          const thing = (data.series[0].fields[i+1].values.get(refIdxs.current[i]) ?? 0);
-          val.text!.textContent = thing;
+          const currentTemp: number = (data.series[0].fields[i+1].values.get(refIdxs.current[i]) ?? 0);
+          val.text!.textContent = currentTemp.toFixed(2);
         });
       }
     });
@@ -103,7 +103,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, fie
           return (
               <RectWithText
                 ref={(el) => refRects.current[i] = el}
-                width={50}
+                width={60}
                 height={30}
                 key={`temp-${i}`}
                 temperature={temp}

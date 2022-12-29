@@ -1,12 +1,13 @@
 import { DataQuery, DataSourceJsonData } from '@grafana/data';
 
+export type queryValues = 'attitude' | 'position' | 'battery' | 'bcreg' | 'cpu';
+
 export interface MyQuery extends DataQuery {
-  queryText?: string;
-  constant: number;
+  queryText?: queryValues;
 }
 
 export const defaultQuery: Partial<MyQuery> = {
-  constant: 6.5,
+  queryText: 'position',
 };
 
 /**

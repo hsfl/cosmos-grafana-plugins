@@ -10,11 +10,19 @@ interface Props extends DataSourcePluginOptionsEditorProps<MyDataSourceOptions> 
 interface State {}
 
 export class ConfigEditor extends PureComponent<Props, State> {
-  onURLChange = (event: ChangeEvent<HTMLInputElement>) => {
+  onBackendUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { onOptionsChange, options } = this.props;
     const jsonData = {
       ...options.jsonData,
-      url: event.target.value,
+      backendurl: event.target.value,
+    };
+    onOptionsChange({ ...options, jsonData });
+  };
+  onDBUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { onOptionsChange, options } = this.props;
+    const jsonData = {
+      ...options.jsonData,
+      dburl: event.target.value,
     };
     onOptionsChange({ ...options, jsonData });
   };
@@ -62,11 +70,23 @@ export class ConfigEditor extends PureComponent<Props, State> {
       <div className="gf-form-group">
         <div className="gf-form">
           <FormField
-            label="URL"
+            label="Cosmos Backend URL"
             labelWidth={6}
             inputWidth={20}
-            onChange={this.onURLChange}
-            value={jsonData.url || ''}
+            onChange={this.onBackendUrlChange}
+            value={jsonData.backendurl || ''}
+            placeholder={'cosmos_backend or 172.17.0.0'}
+            tooltip={'Hostname or URL to cosmos_backend container'}
+          />
+        </div>
+
+        <div className="gf-form">
+          <FormField
+            label="Database URL"
+            labelWidth={6}
+            inputWidth={20}
+            onChange={this.onDBUrlChange}
+            value={jsonData.dburl || ''}
             placeholder="http://influxdb:8086"
           />
         </div>

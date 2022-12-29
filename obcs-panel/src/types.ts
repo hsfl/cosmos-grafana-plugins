@@ -8,6 +8,11 @@ export interface SimpleOptions {
   seriesCountSize: SeriesSize;
 }
 
+export type RefDict = { [key in input_field]?: HTMLInputElement | null };
+export type IdxDict = { [key in input_field]?: number };
+
+export type input_field = 'load' | 'gib' | 'storage';
+
 export interface TimeEventPayload {
   // The starting time, positive unix timestamp
   time?: number;
@@ -18,6 +23,8 @@ export interface TimeEventPayload {
 export class TimeEvent extends BusEventWithPayload<Partial<TimeEventPayload>> {
   static type = 'COSMOS-TimeEvent';
 }
+
+export type TimeEventCallback = (data: PanelData, event: TimeEvent) => void;
 
 export enum BarOrientation {
   vertical,

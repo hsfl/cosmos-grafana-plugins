@@ -1,5 +1,9 @@
 package plugin
 
+type queryModel struct {
+	QueryText string `json:"queryText"`
+}
+
 // JSON model of Grafana Backend Datasource config
 type datasourceConfig struct {
 	UsingHostname bool   `json:"usingHostname"`
@@ -16,6 +20,11 @@ type Cosmosresponse struct {
 	Avectors []avector `json:"avectors,omitempty"`
 	Qvatts   []qvatt   `json:"qvatts,omitempty"`
 	Qaatts   []qaatt   `json:"qaatts,omitempty"`
+	Ecis     []eci     `json:"ecis,omitempty"`
+	Batts    []batt    `json:"batts,omitempty"`
+	Bcregs   []bcreg   `json:"bcregs,omitempty"`
+	Tsens    []tsen    `json:"tsens,omitempty"`
+	Cpus     []cpu     `json:"cpus,omitempty"`
 }
 
 type avector struct {
@@ -39,8 +48,43 @@ type qaatt struct {
 	Qaz  float64 `json:"qaz"`
 }
 
+type eci struct {
+	Time string
+	Sx   float64 `json:"sx"`
+	Sy   float64 `json:"sy"`
+	Sz   float64 `json:"sz"`
+}
+
+type batt struct {
+	Time  string
+	Node  string  `json:"node"`
+	Amp   float64 `json:"amp"`
+	Power float64 `json:"power"`
+}
+
+type bcreg struct {
+	Time  string
+	Node  string  `json:"node"`
+	Amp   float64 `json:"amp"`
+	Power float64 `json:"power"`
+}
+
+type tsen struct {
+	Time string
+	Node string  `json:"node"`
+	Temp float64 `json:"temp"`
+}
+
+type cpu struct {
+	Time    string
+	Node    string  `json:"node"`
+	Load    float64 `json:"load"`
+	Gib     float64 `json:"gib"`
+	Storage float64 `json:"storage"`
+}
+
 type cosmostype interface {
-	avector | qvatt | qaatt
+	avector | qvatt | qaatt | eci | batt | bcreg | tsen | cpu
 }
 
 // Datasource is an example datasource which can respond to data queries, reports

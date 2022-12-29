@@ -5,10 +5,10 @@ import { MissionEventsDisplay } from './components/MED';
 
 interface Props extends PanelProps<SimpleOptions> {}
 
-export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) => {
+export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eventBus }) => {
   return (
     <div style={{ width, height, display: 'flex', flexDirection: 'row' }}>
-      <MissionEventsDisplay width={width} height={height} />
+      <MissionEventsDisplay width={width} height={height} eventBus={eventBus} />
     </div>
   );
 };

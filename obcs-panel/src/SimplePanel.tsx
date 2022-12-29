@@ -1,8 +1,9 @@
-import React from 'react'; //{ useState}
+import React from 'react';
 import { PanelProps } from '@grafana/data';
-import { Input, InlineField, InlineFieldRow } from '@grafana/ui'; //Card, RadioButtonGroup
+import { Input, InlineField, InlineFieldRow } from '@grafana/ui';
 import { BarGauge } from './components/BarGauge';
-import { BarOrientation, SimpleOptions /*currentMJD*/ } from './types';
+import { BarOrientation, SimpleOptions } from './types';
+import { useCosmosTimeline, useDomUpdate } from './helpers/hooks';
 
 interface Props extends PanelProps<SimpleOptions> {}
 
@@ -12,23 +13,26 @@ Flight Dynamics
 </Button> */}
 
 export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eventBus }) => {
+  const [refInputs, updateDOMRefs] = useDomUpdate();
+  useCosmosTimeline(data, eventBus, updateDOMRefs);
+
   const useTimeMode = () => {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
         <div>Free SSDR</div>
         <InlineFieldRow>
           <InlineField shrink>
-            <Input name="start" type="text" value={46.2 + '%'} />
+            <Input ref={(ref) => (refInputs.current['load'] = ref)} type="text" value={0 + '%'} />
           </InlineField>
         </InlineFieldRow>
         <InlineFieldRow>
           <InlineField shrink>
-            <Input name="start" type="text" value={153.044 + ' MB'} />
+            <Input ref={(ref) => (refInputs.current['gib'] = ref)} type="text" value={0 + ' MB'} />
           </InlineField>
         </InlineFieldRow>
         <InlineFieldRow>
           <InlineField shrink>
-            <Input name="start" type="number" value={148} />
+            <Input ref={(ref) => (refInputs.current['storage'] = ref)} type="text" value={0} />
           </InlineField>
         </InlineFieldRow>
       </div>
