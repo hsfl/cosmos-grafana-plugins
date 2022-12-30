@@ -8,7 +8,7 @@ interface Props extends PanelProps<SimpleOptions> {}
 export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eventBus }) => {
   return (
     <div style={{ width, height, display: 'flex', flexDirection: 'row' }}>
-      <MissionEventsDisplay width={width} height={height} eventBus={eventBus} />
+      <MissionEventsDisplay data={data} width={width} height={height} eventBus={eventBus} />
     </div>
   );
 };

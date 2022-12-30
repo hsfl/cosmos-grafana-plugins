@@ -32,15 +32,12 @@ export const useDomUpdate = (): DomUpdateReturn => {
 
   useEffect(() => {
     // Clean up renderer on unmount
-    return () => {
-
-    };
+    return () => {};
   }, []);
 
   // ---------------------------------------------------
   // Imperative animation update call
   const updateDOMRefs = useCallback((event: TimeEvent) => {
-
     // Update threejs model rotation
     requestAnimationFrame(() => {
       if (refTimeTickGroup.current !== undefined) {
