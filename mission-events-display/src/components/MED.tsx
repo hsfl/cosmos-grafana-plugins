@@ -139,7 +139,3 @@ export const MissionEventsDisplay = (props: { data: PanelData; width: number; he
     </div>
   );
 };
-
-// TODO: implement lazy loading with:
-// https://www.framer.com/docs/guide-reduce-bundle-size/
-// https://stackoverflow.com/questions/66324426/react-lazy-loading-components-that-use-framer-motion-page-transitions
