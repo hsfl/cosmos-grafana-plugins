@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Displays 3D Visual of a satellite using ADCS position/attitude information",
   "scripts": {
-    "build": "grafana-toolkit plugin:build",
+    "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
     "test": "grafana-toolkit plugin:test",
     "dev": "webpack -w -c ./.config/webpack/webpack.config.ts --env development",
     "watch": "grafana-toolkit plugin:dev --watch",

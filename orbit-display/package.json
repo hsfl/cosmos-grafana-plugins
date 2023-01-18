@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Display satellite orbits",
   "scripts": {
-    "build": "grafana-toolkit plugin:build",
+    "build": "webpack -c ./webpack.config.ts --env production",
     "test": "grafana-toolkit plugin:test",
     "dev": "webpack -w -c ./webpack.config.ts --env development",
     "watch": "grafana-toolkit plugin:dev --watch",
