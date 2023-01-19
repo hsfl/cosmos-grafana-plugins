@@ -5,11 +5,11 @@ import { Text } from '@visx/text';
 import { useCosmosTimeline, useDomUpdate } from '../helpers/hooks';
 import { EventBus, PanelData } from '@grafana/data';
 
-interface DummyEvent {
-  name: string;
-  start: number;
-  duration: number;
-}
+// interface DummyEvent {
+//   name: string;
+//   start: number;
+//   duration: number;
+// }
 
 // Some dummy events for time between UTC 2022-10-22 20:00:00 to 2022-10-22 21:00:00 (1666468859000 to 1666472399000)
 const eventTimes = [
@@ -21,16 +21,16 @@ const eventTimes = [
   1666471859000, // 50
   1666472159000, // 55
 ];
-const eventDurations = [15, 10, 5, 20, 10, 20, 20].map((v) => v * 60 * 1000);
-const dummyEvents: DummyEvent[] = eventTimes.map((v, i) => ({
-  name: 'event' + i,
-  start: eventTimes[i],
-  duration: eventDurations[i],
-}));
+// const eventDurations = [15, 10, 5, 20, 10, 20, 20].map((v) => v * 60 * 1000);
+// const dummyEvents: DummyEvent[] = eventTimes.map((v, i) => ({
+//   name: 'event' + i,
+//   start: eventTimes[i],
+//   duration: eventDurations[i],
+// }));
 const tickHeight = 30;
 
 export const MissionEventsDisplay = (props: { data: PanelData; width: number; height: number; eventBus: EventBus }) => {
-  const { data, width, height, eventBus } = props;
+  const { /*data,*/ width, height, eventBus } = props;
   const columns = ['Umbra', 'kauaic', 'surrey', 'cube1', 'cube2'];
   const colOffset = width / 4;
   const colOffsetEnd = colOffset + 15 * columns.length;
@@ -38,7 +38,7 @@ export const MissionEventsDisplay = (props: { data: PanelData; width: number; he
   const [refTimeTickGroup, updateDomRefs] = useDomUpdate();
   useCosmosTimeline(eventBus, updateDomRefs);
   // let's assume a scale of 1 means that each tick represents 1 minute
-  const [scale, setScale] = useState<number>(1);
+  const [scale /*, setScale */] = useState<number>(1);
   const [graphHeight, setGraphHeight] = useState<number>(height);
   const [divElement, setDivElement] = useState<HTMLDivElement>();
   const scrollPercentage = useRef<number>(0);

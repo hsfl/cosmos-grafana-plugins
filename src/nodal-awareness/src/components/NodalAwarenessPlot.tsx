@@ -1,47 +1,42 @@
 import React, { useMemo } from 'react';
-import { AxisLeft } from '@visx/axis';
-import { curveNatural } from '@visx/curve';
-import { GridAngle, GridRadial } from '@visx/grid';
-import { Group } from '@visx/group';
-import { scaleLinear, NumberLike } from '@visx/scale';
-import { Circle, LineRadial } from '@visx/shape';
+import { scaleLinear } from '@visx/scale';
 import { motion } from 'framer-motion';
 
-interface Point {
-  theta: number;
-  r: number;
-}
+// interface Point {
+//   theta: number;
+//   r: number;
+// }
 // Axis markers
-const points: Point[] = [
-  { theta: 0, r: 45 },
-  { theta: 22.5, r: 45 },
-  { theta: 45.0, r: 45 },
-  { theta: 67.5, r: 45 },
-];
-const angleTicks: number[] = [0, 1, 2, 3, 4, 5, 6, 7].map((v) => v * 45);
+// const points: Point[] = [
+//   { theta: 0, r: 45 },
+//   { theta: 22.5, r: 45 },
+//   { theta: 45.0, r: 45 },
+//   { theta: 67.5, r: 45 },
+// ];
+// const angleTicks: number[] = [0, 1, 2, 3, 4, 5, 6, 7].map((v) => v * 45);
 const radialTicks: number[] = [0, 22.5, 45.0, 67.5];
 // accessors
-const getTheta = (d: Point) => d.theta;
-const getRadius = (d: Point) => d.r;
-const formatTicks = (val: NumberLike) => String(val);
+// const getTheta = (d: Point) => d.theta;
+// const getRadius = (d: Point) => d.r;
+// const formatTicks = (val: NumberLike) => String(val);
 
-const padding = 20;
+// const padding = 20;
 
-const blue = '#aeeef8';
+// const blue = '#aeeef8';
 
 export const NodalAwarenessPlot = (props: { width: number; height: number }) => {
   const { width, height } = props;
   const dimMax = Math.min(width, height);
   const padding = Math.min(dimMax / 2 / (radialTicks.length + 1), 100000);
   const yMax = height / 2;
-  const xScale = useMemo(
-    () =>
-      scaleLinear({
-        domain: [0, 360],
-        range: [0, Math.PI * 2],
-      }),
-    []
-  );
+  // const xScale = useMemo(
+  //   () =>
+  //     scaleLinear({
+  //       domain: [0, 360],
+  //       range: [0, Math.PI * 2],
+  //     }),
+  //   []
+  // );
   const yScale = useMemo(
     () =>
       scaleLinear({
@@ -50,8 +45,8 @@ export const NodalAwarenessPlot = (props: { width: number; height: number }) => 
       }),
     [yMax]
   );
-  const angle = (d: Point) => xScale(getTheta(d)) ?? 0;
-  const radius = (d: Point) => yScale(getRadius(d)) ?? 0;
+  // const angle = (d: Point) => xScale(getTheta(d)) ?? 0;
+  // const radius = (d: Point) => yScale(getRadius(d)) ?? 0;
 
   if (width < 10) {
     return null;
