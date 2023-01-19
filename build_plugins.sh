@@ -3,11 +3,11 @@
 # Builds each plugin folder in the src directory. The created dist folder will be moved to
 # a new subdirectory with the same plugin folder name in the build directory.
 
-# Usage: build_plugins.sh [true|false]
+# Usage: build_plugins.sh [--cleanup]
 # Positional arg 1: Cleanup node_modules and clear yarn cache. True or false. To be used when building the docker image to reduce image size.
 
 CLEANUP=false
-if [[ $# -eq 1 && $1 == "true" ]]; then
+if [[ $# -eq 1 && $1 == "--cleanup" ]]; then
     CLEANUP=true
 fi
 
@@ -20,8 +20,6 @@ for f in *; do
     if [ -d "$f" ]; then
         echo "Found plugin folder $f"
         cd $f
-        yarn install
-        yarn build
 
         # Backend datasources must also be built with mage
         if [[ -f "./Magefile.go" ]]; then
@@ -29,10 +27,15 @@ for f in *; do
             mage -v
         fi
 
+        # Build frontend part of plugin
+        yarn install
+        yarn build
+
         # Cleanup node_modules folder to reduce size
         if [[ $CLEANUP == true ]]; then
             rm -rf ./node_modules
         fi
+
         # Move dist folder to build/<PLUGIN_NAME>/dist
         mkdir ../../build/cosmos-grafana-plugins/$f
         mv ./dist ../../build/cosmos-grafana-plugins/$f/
