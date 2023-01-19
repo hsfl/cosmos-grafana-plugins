@@ -4,6 +4,7 @@
   "description": "Provides a dashboard-level timeline event emitter, with features like start and stop",
   "scripts": {
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
+    "build:quiet": "webpack -c ./.config/webpack/webpack.config.ts --env production --progress=false",
     "test": "grafana-toolkit plugin:test",
     "dev": "webpack -w -c ./.config/webpack/webpack.config.ts --env development",
     "watch": "grafana-toolkit plugin:dev --watch",
