@@ -45,7 +45,9 @@ for f in *; do
     fi
 done
 
-# Clean up yarn cache, which is probably several GiBs by now
+# Clean up yarn cache, which is probably several GiBs by now. And other cache while we're at it.
 if [[ $CLEANUP == true ]]; then
     yarn cache clean
+    rm -rf /usr/local/.cache/*
+    rm -rf /root/.cache/*
 fi
