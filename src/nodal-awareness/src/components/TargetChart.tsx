@@ -14,7 +14,7 @@ export const TargetChart = (props: { width: number; height: number }) => {
         gridTemplateColumns: '1fr 3em 3em 3em 3em 3em 3em',
         // width: props.width,
         // height: props.height,
-        overflow: 'scroll'
+        overflow: 'scroll',
       }}
     >
       {/** Column labels */}

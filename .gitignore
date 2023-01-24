@@ -1,8 +1,4 @@
 note_from_cosmos_web
-*.zip
-zipscript
 
-datasource-basic/
-upload-json-telegraf/
-
-testplugin/
+src/testplugins/
+build/*

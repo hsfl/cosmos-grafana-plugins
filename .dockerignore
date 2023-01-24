@@ -1,0 +1,10 @@
+# Ignore any of our stuff
+**/node_modules
+**/dist
+# User test plugins
+src/testplugins
+# The output of the build_plugins.sh script
+build
+
+# Other ignores
+Dockerfile

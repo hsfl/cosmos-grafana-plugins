@@ -7,10 +7,11 @@ import { useCosmosTimeline, useDomUpdate } from './helpers/hooks';
 
 interface Props extends PanelProps<SimpleOptions> {}
 
-
-{/* <Button size="xs" style={{ background:green }}>
+{
+  /* <Button size="xs" style={{ background:green }}>
 Flight Dynamics
-</Button> */}
+</Button> */
+}
 
 export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eventBus }) => {
   const [refInputs, updateDOMRefs] = useDomUpdate();

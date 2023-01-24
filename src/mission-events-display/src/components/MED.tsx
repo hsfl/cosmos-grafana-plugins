@@ -8,11 +8,11 @@ import { EventBus, PanelData, TimeRange } from '@grafana/data';
 import { animate, motion, useMotionValue } from "framer-motion";
 //import "./styles.css";
 
-interface DummyEvent {
-  name: string;
-  start: number;
-  duration: number;
-}
+// interface DummyEvent {
+//   name: string;
+//   start: number;
+//   duration: number;
+// }
 
 const orbitalEventTimes = [
   1666468859000, // 0
@@ -50,7 +50,7 @@ export const MissionEventsDisplay = (props: { data: PanelData; width: number; he
   const topPartOffset = height / 6;
   const [refTimeTickGroup, updateDomRefs] = useDomUpdate();
   // let's assume a scale of 1 means that each tick represents 1 minute
-  const [scale, setScale] = useState<number>(1);
+  const [scale /*, setScale */] = useState<number>(1);
   const [graphHeight, setGraphHeight] = useState<number>(height);
   const [divElement, setDivElement] = useState<HTMLDivElement>();
   const scrollPercentage = useRef<number>(0);

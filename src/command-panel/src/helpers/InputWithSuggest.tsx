@@ -1,5 +1,5 @@
-import React, { forwardRef, useRef, useState } from 'react';
-import Select, { components, ActionMeta, InputActionMeta, InputProps, SingleValue } from 'react-select';
+import React, { useRef, useState } from 'react';
+import Select, { ActionMeta, InputActionMeta, SingleValue } from 'react-select';
 import { SelectableValue } from '@grafana/data';
 //import { InputActionMeta } from '@grafana/ui';
 
@@ -49,7 +49,7 @@ const groundAgentList = [{ value: 'comm' }];
 const agentRequestList = [{ value: 'command' }, { value: 'command_adcs' }];
 const destNodeList = [{ value: 'iobc' }, { value: 'unibap' }];
 const radioUpList = [{ value: 'UHFUP' }, { value: 'RXSNET' }];
-const radioDownList = [{ value: 'UHFDOWN' }, { value: 'TXSI2C' }];
+// const radioDownList = [{ value: 'UHFDOWN' }, { value: 'TXSI2C' }];
 
 const commandFormat = [
   'agent',
@@ -61,23 +61,23 @@ const commandFormat = [
   'COMMAND',
   'ARGS',
 ];
-const optionsList: Array<SelectableValue<string>> = [
-  {
-    label: 'Reset',
-    value: 'agent GROUND_NODE GROUND_AGENT AGENT_REQUEST DEST_NODE RADIOUP:RADIODOWN Reset ARGS',
-    description: 'Resets the given node',
-  },
-  {
-    label: 'Reboot',
-    value: 'agent GROUND_NODE GROUND_AGENT AGENT_REQUEST DEST_NODE RADIOUP:RADIODOWN Reboot ARGS',
-    description: 'Reboot the given node',
-  },
-  {
-    label: 'EpsSwitchName',
-    value: 'agent GROUND_NODE GROUND_AGENT AGENT_REQUEST DEST_NODE RADIOUP:RADIODOWN EpsSwitchName ARGS',
-    description: 'Turn EPS switch on/off',
-  },
-];
+// const optionsList: Array<SelectableValue<string>> = [
+//   {
+//     label: 'Reset',
+//     value: 'agent GROUND_NODE GROUND_AGENT AGENT_REQUEST DEST_NODE RADIOUP:RADIODOWN Reset ARGS',
+//     description: 'Resets the given node',
+//   },
+//   {
+//     label: 'Reboot',
+//     value: 'agent GROUND_NODE GROUND_AGENT AGENT_REQUEST DEST_NODE RADIOUP:RADIODOWN Reboot ARGS',
+//     description: 'Reboot the given node',
+//   },
+//   {
+//     label: 'EpsSwitchName',
+//     value: 'agent GROUND_NODE GROUND_AGENT AGENT_REQUEST DEST_NODE RADIOUP:RADIODOWN EpsSwitchName ARGS',
+//     description: 'Turn EPS switch on/off',
+//   },
+// ];
 
 export const useInputSuggest = () => {
   // const [value, setValue] = useState<SelectableValue<string>>();
@@ -244,7 +244,7 @@ export const useInputSuggest = () => {
       return '';
     }
     // Split full
-    const splitStr = option.value.split(' ');
+    // const splitStr = option.value.split(' ');
     switch (searchQueryIdxRef.current) {
       case 0:
     }
@@ -266,9 +266,9 @@ export const useInputSuggest = () => {
         filterOption={filterOption}
         getOptionLabel={formatOptionLabel}
         closeMenuOnSelect={false}
-        // With these two props, menulist always renders on top 
+        // With these two props, menulist always renders on top
         menuPortalTarget={document.body}
-        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+        styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
         //components={{Input: CustomInput}}
       />
     </div>
