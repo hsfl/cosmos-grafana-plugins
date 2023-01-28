@@ -71,8 +71,8 @@ func (d *Datasource) GetEndpoint(queryText string, timeRange backend.TimeRange) 
 		return "", err
 	}
 	q := req.URL.Query()
-	q.Add("from", timeRange.From.Format("2006-01-02 15:04:05.9"))
-	q.Add("to", timeRange.To.Format("2006-01-02 15:04:05.9"))
+	q.Add("from", timeRange.From.Format(59874.83333333))
+	q.Add("to", timeRange.To.Format(59874.87500000))
 	req.URL.RawQuery = q.Encode()
 
 	return req.URL.String(), nil
@@ -175,6 +175,7 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 		frame6 := ConvertToFrame(&j.Payload.Bcregs)
 		frame7 := ConvertToFrame(&j.Payload.Tsens)
 		frame8 := ConvertToFrame(&j.Payload.Cpus)
+		frame9 := ConvertToFrame(&j.Payload.Events)
 
 		// add the frames to the response.
 		if frame1 != nil {
@@ -208,6 +209,10 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 		if frame8 != nil {
 			frame8.RefID = "cpu"
 			response.Frames = append(response.Frames, frame8)
+		}
+		if frame9 != nil {
+			frame9.RefID = "event"
+			response.Frames = append(response.Frames, frame9)
 		}
 	}
 
@@ -247,6 +252,8 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 		names = []string{"Time", "node", "temp"}
 	case cpu:
 		names = []string{"Time", "node", "load", "gib", "storage"}
+	case event:
+		names = []string{"Time", "node_name", "duration", "event_id", "event_name"}
 	default:
 		return nil
 	}
@@ -264,6 +271,12 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableTime, 0)
 		case "node":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
+		case "event_name":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
+		case "event_id":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeUint8, 0)
+		case "duration":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeUint32, 0)
 		default:
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeFloat64, 0)
 		}
@@ -380,6 +393,19 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[2] = j.Load
 			row[3] = j.Gib
 			row[4] = j.Storage
+			frame.AppendRow(row...)
+		case event:
+			timestamp, err := time.Parse(time.RFC3339, j.Time)
+			if err != nil {
+				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
+				return nil
+			}
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = &j.Node_name
+			row[2] = j.Duration
+			row[3] = j.Event_id
+			row[4] = &j.Event_name
 			frame.AppendRow(row...)
 		}
 	}

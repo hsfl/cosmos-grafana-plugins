@@ -25,6 +25,15 @@ type Cosmosresponse struct {
 	Bcregs   []bcreg   `json:"bcregs,omitempty"`
 	Tsens    []tsen    `json:"tsens,omitempty"`
 	Cpus     []cpu     `json:"cpus,omitempty"`
+	Events   []event   `json:"events,omitempty"`
+}
+
+type event struct {
+	Time string
+	Node_name string  `json:"node_name,omitempty"`
+	Duration uint `json:"duration,omitempty"`
+	Event_id uint8 `json:"event_id,omitempty"`
+	Event_name string `json:"event_name,omitempty"`
 }
 
 type avector struct {
@@ -84,7 +93,7 @@ type cpu struct {
 }
 
 type cosmostype interface {
-	avector | qvatt | qaatt | eci | batt | bcreg | tsen | cpu
+	avector | qvatt | qaatt | eci | batt | bcreg | tsen | cpu | event
 }
 
 // Datasource is an example datasource which can respond to data queries, reports
