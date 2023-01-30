@@ -1,6 +1,6 @@
 import { DataQuery, DataSourceJsonData } from '@grafana/data';
 
-export type queryValues = 'attitude' | 'position' | 'battery' | 'bcreg' | 'cpu';
+export type queryValues = 'attitude' | 'position' | 'battery' | 'bcreg' | 'cpu' | 'event';
 
 export interface MyQuery extends DataQuery {
   queryText?: queryValues;

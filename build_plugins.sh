@@ -1,18 +1,23 @@
 #!/bin/bash
 
-# Builds each plugin folder in the src directory. The created dist folder will be moved to
+# Builds each plugin folder in the src directory.
+# For the distribution version, the created dist folder will be moved to
 # a new subdirectory with the same plugin folder name in the build directory.
 
-# Usage: build_plugins.sh [--cleanup]
-# Positional arg 1: Cleanup node_modules and clear yarn cache. True or false. To be used when building the docker image to reduce image size.
+# Usage: build_plugins.sh [--dist]
+# Positional arg 1: Cleans up everything except the dist folders. True or false. To be used when building the docker image for release to reduce image size.
 
-CLEANUP=false
-if [[ $# -eq 1 && $1 == "--cleanup" ]]; then
-    CLEANUP=true
+DIST_BUILD=false
+if [[ $# -eq 1 && $1 == "--dist" ]]; then
+    DIST_BUILD=true
 fi
 
-mkdir -p build/cosmos-grafana-plugins
-rm -rf ./build/cosmos-grafana-plugins/*
+if [[ $DIST_BUILD == true ]]; then
+    # Move all dist folders to the build folder for release
+    mkdir -p build/cosmos-grafana-plugins
+    rm -rf ./build/cosmos-grafana-plugins/*
+fi
+
 # Iterate over every folder in src
 cd src
 for f in *; do
@@ -31,14 +36,11 @@ for f in *; do
         yarn install
         yarn build
 
-        # Cleanup node_modules folder to reduce size
-        if [[ $CLEANUP == true ]]; then
-            rm -rf ./node_modules
+        if [[ $DIST_BUILD == true ]]; then
+            # Move dist folder to build/<PLUGIN_NAME>/dist
+            mkdir ../../build/cosmos-grafana-plugins/$f
+            mv ./dist ../../build/cosmos-grafana-plugins/$f/
         fi
-
-        # Move dist folder to build/<PLUGIN_NAME>/dist
-        mkdir ../../build/cosmos-grafana-plugins/$f
-        mv ./dist ../../build/cosmos-grafana-plugins/$f/
 
         # Repeat for other plugins
         cd ..
@@ -46,7 +48,10 @@ for f in *; do
 done
 
 # Clean up yarn cache, which is probably several GiBs by now. And other cache while we're at it.
-if [[ $CLEANUP == true ]]; then
+if [[ $DIST_BUILD == true ]]; then
+    # Cleanup src folder to reduce image size
+    cd ..
+    rm -rf src/
     yarn cache clean
     rm -rf /usr/local/.cache/*
     rm -rf /root/.cache/*

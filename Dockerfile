@@ -1,5 +1,7 @@
 FROM node:16-bullseye as base
 
+ARG build_arg=""
+
 RUN apt-get update && apt upgrade -y
 # Download mage
 WORKDIR /usr/local
@@ -14,4 +16,4 @@ RUN go run bootstrap.go
 WORKDIR /home/cosmos-grafana-plugins
 COPY . .
 RUN chmod +x ./build_plugins.sh
-RUN ./build_plugins.sh --cleanup
+RUN ./build_plugins.sh build_arg
