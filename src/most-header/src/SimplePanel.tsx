@@ -86,13 +86,13 @@ const useBasicSelectAsync = () => {
 
 
 
-const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: React.Ref<HTMLInputElement>, refMETTimeDiv: React.Ref<HTMLInputElement>) => {
+const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: React.Ref<HTMLInputElement>, refMETTimeDiv: React.Ref<HTMLInputElement>, refMOCTimeDiv: React.Ref<HTMLInputElement>) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'row', width: "100%"}}>
       <InlineFieldRow>
         <InlineField
           label="UTC"
-          labelWidth = {6}
+          labelWidth = {5}
           //tooltip="Displays Current UTC Time"
           shrink
         >
@@ -101,29 +101,30 @@ const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: 
             name = "start"
             type="text"
             value = {""}
-            width={10}
+            width={9}
           />
         </InlineField>
       </InlineFieldRow>
       <InlineFieldRow>
         <InlineField
             label="MOC"
-            labelWidth = {6}
+            labelWidth = {5}
             //tooltip="Displays MOC"
             shrink
           >
             <Input
+              ref={refMOCTimeDiv}
               name="start"
-              type="number"
-              value = {0}
-              width={8}
+              type="text"
+              value = {""}
+              width={9}
             />
           </InlineField>
       </InlineFieldRow>
       <InlineFieldRow>
         <InlineField
             label="MET"
-            labelWidth = {6}
+            labelWidth = {5}
             //tooltip="Displays MET"
             shrink
           >
@@ -132,14 +133,14 @@ const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: 
               name="start"
               type="text"
               value = {0}
-              width={10}
+              width={9}
             />
           </InlineField>
       </InlineFieldRow>
       <InlineFieldRow>
         <InlineField
             label="SLT"
-            labelWidth = {6}
+            labelWidth = {5}
             //tooltip="Displays SLT"
             shrink
           >
@@ -147,14 +148,14 @@ const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: 
               name="start"
               type="number"
               value = {0}
-              width={8}
+              width={6}
             />
           </InlineField>
       </InlineFieldRow>
       <InlineFieldRow>
         <InlineField
             label="MJD"
-            labelWidth = {8}
+            labelWidth = {5}
             //tooltip="Displays Current UTC Time in MJD"
             shrink
           >
@@ -163,12 +164,12 @@ const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: 
               name="start"
               type="number"
               value = {0}
-              width={16}
+              width={12.5}
             />
           </InlineField>
       </InlineFieldRow>
       <InlineFieldRow>
-        <InlineField label="Mode" labelWidth = {8}>
+        <InlineField label="Mode" labelWidth = {6}>
         {useBasicSelectAsync()}
         </InlineField>
       </InlineFieldRow>
@@ -193,6 +194,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   const refUTCTimeDiv = useRef<HTMLInputElement>(null);
   const refMJDTimeDiv = useRef<HTMLInputElement>(null);
   const refMETTimeDiv = useRef<HTMLInputElement>(null);
+  const refMOCTimeDiv = useRef<HTMLInputElement>(null);
   const missionStartTime = useRef<number>(0);
 
   useEffect(() => {
@@ -208,6 +210,12 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
           // .unix takes unix seconds argument, so convert milliseconds to seconds
           const newUTCTime = moment.unix(event.payload.time/1000).tz('UTC').format('HH:mm:ss');
           refUTCTimeDiv.current.value = newUTCTime;
+        }
+        if (refMOCTimeDiv.current !== null) {
+          // Unix timestamp to mjd
+          // .unix takes unix seconds argument, so convert milliseconds to seconds
+          const newMOCTime = moment.unix(event.payload.time/1000).tz('America/Honolulu').format('HH:mm:ss');
+          refMOCTimeDiv.current.value = newMOCTime;
         }
         if (refMETTimeDiv.current !== null) {
             if (missionStartTime.current === 0 || event.payload.time < missionStartTime.current) {
@@ -234,7 +242,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       {/* {options.on_off ? <div>Text option value: {options.text}</div> : null}
       {displayText()}
       {displayText2(options)} */}
-      {useTimeMode(refUTCTimeDiv, refMJDTimeDiv, refMETTimeDiv)}
+      {useTimeMode(refUTCTimeDiv, refMJDTimeDiv, refMETTimeDiv, refMOCTimeDiv)}
       {/* {useRadioButtonGroup()} */}
     </div>
   );

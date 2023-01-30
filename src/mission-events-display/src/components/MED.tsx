@@ -14,6 +14,8 @@ import { animate, motion, useMotionValue } from "framer-motion";
 //   duration: number;
 // }
 
+const startTime = 1666468859000;
+
 const orbitalEventTimes = [
   1666468859000, // 0
   1666469459000, // 10
@@ -23,6 +25,7 @@ const orbitalEventDurations = [15, 10, 5].map((v) => v * 60 * 1000);
 const orbitalDummyEvents: DummyEvent[] = orbitalEventTimes.map((v, i) => ({
   name: 'O event' + i,
   start: orbitalEventTimes[i],
+  utcStart: new Date(orbitalEventTimes[i]).toUTCString().slice(-11, -4),
   duration: orbitalEventDurations[i],
 }));
 
@@ -37,8 +40,13 @@ const spacecraftEventDurations = [20, 10, 20, 20].map((v) => v * 60 * 1000);
 const spacecraftDummyEvents: DummyEvent[] = spacecraftEventTimes.map((v, i) => ({
   name: 'SC event' + i,
   start: spacecraftEventTimes[i],
+  utcStart: new Date(spacecraftEventTimes[i]).toUTCString().slice(-11, -4),
   duration: spacecraftEventDurations[i],
 }));
+
+//const utcStart = new Date(startTime * 1000).toUTCString().slice(-11, -4)
+// const utcString = dateObj.toUTCString();
+// const time = utcString.slice(-11, -4);
 
 const tickHeight = 30;
 
@@ -57,10 +65,10 @@ export const MissionEventsDisplay = (props: { data: PanelData; width: number; he
   const [tickVals, setTickVals] = useState<number[]>([]);
   //const [lineHeight, setLineHeight] = useState<number>()
 
+  const timeSpan = timeRange.to.unix()*1000 - timeRange.from.unix() * 1000;
+  const newGraphHeight = tickHeight * (timeSpan / (60000 * scale)); //1 tick represents [scale] minutes
   // Update various parameters of the graph: height, ticks, etc.
   useEffect(() => {
-    const timeSpan = timeRange.to.unix()*1000 - timeRange.from.unix() * 1000;
-    const newGraphHeight = tickHeight * (timeSpan / (60000 * scale)); //1 tick represents [scale] minutes
     setGraphHeight(newGraphHeight);
     setTickVals(() => {
       const ret: number[] = [];
@@ -71,25 +79,27 @@ export const MissionEventsDisplay = (props: { data: PanelData; width: number; he
     });
   }, [height, scale]);
 
-  console.log(data);
+  const pixPerMin = tickHeight/scale;
+
 
 //Updates scrollbar and display position
   const barPosition = useMotionValue(0);
   const updateScrollBar = useCallback((event: TimeEvent) => {
     requestAnimationFrame(() => {
-      if (divElement) {
-        animate(barPosition, barPosition.get() + 10);
-        if (barPosition.get() > height) {
-          animate(barPosition, barPosition.get());
-        }
+      if (divElement && event.payload.time != undefined) {
+        animate(barPosition, topPartOffset+((event.payload.time/1000-timeRange.from.unix())/60)*pixPerMin, "tween");
+        // if (barPosition.get() >= newGraphHeight-topPartOffset) {
+        //   animate(barPosition, barPosition.get());
+        // }
         if (barPosition.get() > height/2) {
-        divElement.scrollTo({ top: scrollPercentage.current, behavior: 'smooth' });
-        scrollPercentage.current += 10;
+        divElement.scrollTo({ top: topPartOffset+((event.payload.time/1000-timeRange.from.unix())/60)*pixPerMin-5*pixPerMin, behavior: 'smooth' });
+        //scrollPercentage.current += (topPartOffset+((event.payload.time/1000-timeRange.from.unix())/60)*pixPerMin);
         }
       }
     });
   }, [divElement]);
   useCosmosTimeline(eventBus, updateScrollBar);
+
 
   // Callback for div reference acquisition
   const refDiv = useCallback((ref: HTMLDivElement | null) => {
@@ -99,26 +109,9 @@ export const MissionEventsDisplay = (props: { data: PanelData; width: number; he
   }, []);
 
   // Don't attempt to display anything if view is too small
-  if (width < 10) {
+  if (width < 80) {
     return null;
   }
-
-//Sets height of timeline bar
-  // const barPosition = useMotionValue(0);
-  // const val = useRef(0);
-  // const updateTimelineBar = useCallback((event: TimeEvent) => {
-  //   const interval = setInterval(() => {
-  //     animate(barPosition, barPosition.get() + 1);
-  //     if (barPosition.get() > height) {
-  //       animate(barPosition, barPosition.get());
-  //     }
-  //   }, 40);
-  //   return () => {
-  //     clearInterval(interval);
-  //   };
-  // }, [barPosition]);
-
-  // useCosmosTimeline(eventBus, updateTimelineBar);
 
   return (
     <div ref={refDiv} style={{ width: width, height: height, overflow: 'scroll' }}>
@@ -133,7 +126,7 @@ export const MissionEventsDisplay = (props: { data: PanelData; width: number; he
             <Text x={colOffsetEnd + 5} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#fff'}>
               UTC
             </Text>
-            <Text x={colOffsetEnd + 50} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
+            <Text x={colOffsetEnd + 100} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
               Spacecraft Events
             </Text>
             {/* <Text x={colOffsetEnd + 120} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
@@ -175,12 +168,12 @@ export const MissionEventsDisplay = (props: { data: PanelData; width: number; he
             {/* Event Rectangle*/}
             {orbitalDummyEvents.map((v, i) => (
                 <Group>
-                  <rect x={colOffset+45} y={topPartOffset + ((orbitalDummyEvents[i].start-orbitalDummyEvents[0].start)/10000)} width = {15} height = {orbitalDummyEvents[i].duration/60000} fill = {"#f00"} />
-                  <Text x={0} y={topPartOffset+10+(orbitalDummyEvents[i].start-orbitalDummyEvents[0].start)/10000} fontSize={12} verticalAnchor="end" fill={'#f0f'}>
+                  <rect x={colOffset+45} y={topPartOffset + ((orbitalDummyEvents[i].start-startTime)/10000)} width = {15} height = {orbitalDummyEvents[i].duration/60000} fill = {"#f00"} />
+                  <Text x={0} y={topPartOffset+10+(orbitalDummyEvents[i].start-startTime)/10000} fontSize={12} verticalAnchor="end" fill={'#f0f'}>
                     {orbitalDummyEvents[i].name}
                   </Text>
-                  <Text x={colOffsetEnd + 5} y={topPartOffset+12+(orbitalDummyEvents[i].start-orbitalDummyEvents[0].start)/10000} fontSize={12} verticalAnchor="end" fill={'#fff'}>
-                    {(orbitalDummyEvents[i].start-orbitalDummyEvents[0].start)/60000}
+                  <Text x={colOffsetEnd + 5} y={topPartOffset+12+(orbitalDummyEvents[i].start-startTime)/10000} fontSize={12} verticalAnchor="end" fill={'#fff'}>
+                    {orbitalDummyEvents[i].utcStart}
                   </Text>
                   {/* <Text x={colOffsetEnd + 120} y={topPartOffset+12} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
                   {dummyEvents[i].start-dummyEvents[0].start}
@@ -194,11 +187,11 @@ export const MissionEventsDisplay = (props: { data: PanelData; width: number; he
             {/* Event Rectangle*/}
             {spacecraftDummyEvents.map((v, i) => (
                 <Group>
-                  <rect x={colOffset+45} y={topPartOffset + ((spacecraftDummyEvents[i].start-spacecraftDummyEvents[0].start)/10000)} width = {15} height = {spacecraftDummyEvents[i].duration/60000} fill = {"#f00"} />
-                  <Text x={colOffsetEnd + 5} y={topPartOffset+12+(spacecraftDummyEvents[i].start-spacecraftDummyEvents[0].start)/10000} fontSize={12} verticalAnchor="end" fill={'#fff'}>
-                    {(spacecraftDummyEvents[i].start-spacecraftDummyEvents[0].start)/60000}
+                  <rect x={colOffset+45} y={topPartOffset + ((spacecraftDummyEvents[i].start-startTime)/10000)} width = {15} height = {spacecraftDummyEvents[i].duration/60000} fill = {"#f00"} />
+                  <Text x={colOffsetEnd + 5} y={topPartOffset+12+(spacecraftDummyEvents[i].start-startTime)/10000} fontSize={12} verticalAnchor="end" fill={'#fff'}>
+                    {spacecraftDummyEvents[i].utcStart}
                   </Text>
-                  <Text x={colOffsetEnd + 50} y={topPartOffset+12+(spacecraftDummyEvents[i].start-spacecraftDummyEvents[0].start)/10000} fontSize={12} verticalAnchor="end" fill={'#0f0'}>
+                  <Text x={colOffsetEnd + 100} y={topPartOffset+12+(spacecraftDummyEvents[i].start-startTime)/10000} fontSize={12} verticalAnchor="end" fill={'#0f0'}>
                   {spacecraftDummyEvents[i].name}
                   </Text>
                   {/* <Text x={colOffsetEnd + 120} y={topPartOffset+12} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
