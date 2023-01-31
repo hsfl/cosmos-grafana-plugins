@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"strings"
@@ -71,8 +70,13 @@ func (d *Datasource) GetEndpoint(queryText string, timeRange backend.TimeRange) 
 		return "", err
 	}
 	q := req.URL.Query()
-	q.Add("from", timeRange.From.Format(59874.83333333))
-	q.Add("to", timeRange.To.Format(59874.87500000))
+	// q.Add("from", timeRange.From.Format(59874.83333333))
+	// q.Add("to", timeRange.To.Format(59874.87500000))
+	from_str := fmt.Sprintf("%f", time_to_mjd(timeRange.From))
+	to_str := fmt.Sprintf("%f", time_to_mjd(timeRange.To))
+	q.Add("from", from_str)
+	q.Add("to", to_str)
+
 	req.URL.RawQuery = q.Encode()
 
 	return req.URL.String(), nil
@@ -80,10 +84,10 @@ func (d *Datasource) GetEndpoint(queryText string, timeRange backend.TimeRange) 
 
 // msg: json encoded string
 // url: URL or Hostname of API endpoint
-func (d *Datasource) CosmosBackendCall(queryText string, timeRange backend.TimeRange) ([]byte, error) {
+func (d *Datasource) CosmosBackendCall(queryText string, timeRange backend.TimeRange, j *jsonResponse) error {
 	endpoint, err := d.GetEndpoint(queryText, timeRange)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Attempt tcp connection (UDP packets have a size limit)
@@ -93,16 +97,16 @@ func (d *Datasource) CosmosBackendCall(queryText string, timeRange backend.TimeR
 	// POST
 	if err != nil {
 		log.DefaultLogger.Error("Error in POST", err.Error())
-		return nil, err
+		return err
 	}
 	defer resp.Body.Close()
 	// Read response body
-	body, err := ioutil.ReadAll(resp.Body)
+	err = json.NewDecoder(resp.Body).Decode(&j)
 	if err != nil {
 		log.DefaultLogger.Error("Error reading body of POST response", err.Error())
 	}
 
-	return body, nil
+	return nil
 }
 
 // Dispose here tells plugin SDK that plugin wants to clean up resources when a new instance
@@ -151,17 +155,10 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 	queryTexts := strings.Split(qm.QueryText, ",")
 
 	for _, v := range queryTexts {
-		bytes, err := d.CosmosBackendCall(v, query.TimeRange)
+		var j jsonResponse
+		err := d.CosmosBackendCall(v, query.TimeRange, &j)
 		if err != nil {
 			log.DefaultLogger.Error("Error in Cosmos Backend call", err.Error())
-			response.Error = err
-			return response
-		}
-		var j jsonResponse
-		err = json.Unmarshal(bytes, &j)
-		//err = json.Unmarshal(bytes, &j)
-		if err != nil {
-			log.DefaultLogger.Error("Error in query JSON unmarshal", err.Error())
 			response.Error = err
 			return response
 		}
@@ -454,7 +451,8 @@ func (d *Datasource) CheckHealth(_ context.Context, req *backend.CheckHealthRequ
 
 	timeRange := backend.TimeRange{From: time.Now(), To: time.Now()}
 
-	_, err := d.CosmosBackendCall("Attitude", timeRange)
+	var j jsonResponse
+	err := d.CosmosBackendCall("Attitude", timeRange, &j)
 	if err != nil {
 		status = backend.HealthStatusError
 		message = err.Error()
