@@ -1,18 +1,18 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Group } from '@visx/group';
 import { Line } from '@visx/shape';
 import { Text } from '@visx/text';
 import { useCosmosTimeline, useDomUpdate } from '../helpers/hooks';
 import { TimeEvent } from '../types';
 import { EventBus, PanelData, TimeRange } from '@grafana/data';
-import { animate, motion, useMotionValue } from "framer-motion";
-//import "./styles.css";
+import { animate, motion, useMotionValue } from 'framer-motion';
 
-// interface DummyEvent {
-//   name: string;
-//   start: number;
-//   duration: number;
-// }
+interface DummyEvent {
+  name: string;
+  start: number;
+  utcStart: string;
+  duration: number;
+}
 
 const startTime = 1666468859000;
 
@@ -50,25 +50,31 @@ const spacecraftDummyEvents: DummyEvent[] = spacecraftEventTimes.map((v, i) => (
 
 const tickHeight = 30;
 
-export const MissionEventsDisplay = (props: { data: PanelData; width: number; height: number; eventBus: EventBus; timeRange: TimeRange }) => {
-  const { data, width, height, eventBus, timeRange } = props;
+export const MissionEventsDisplay = (props: {
+  data: PanelData;
+  width: number;
+  height: number;
+  eventBus: EventBus;
+  timeRange: TimeRange;
+}) => {
+  const { width, height, eventBus, timeRange } = props;
   const columns = ['Umbra', 'kauai', 'surrey', 'payload1', 'payload2'];
   const colOffset = width / 4;
   const colOffsetEnd = colOffset + 15 * columns.length;
   const topPartOffset = height / 6;
-  const [refTimeTickGroup, updateDomRefs] = useDomUpdate();
+  const [refTimeTickGroup] = useDomUpdate();
   // let's assume a scale of 1 means that each tick represents 1 minute
   const [scale /*, setScale */] = useState<number>(1);
   const [graphHeight, setGraphHeight] = useState<number>(height);
   const [divElement, setDivElement] = useState<HTMLDivElement>();
-  const scrollPercentage = useRef<number>(0);
+  //const scrollPercentage = useRef<number>(0);
   const [tickVals, setTickVals] = useState<number[]>([]);
   //const [lineHeight, setLineHeight] = useState<number>()
 
-  const timeSpan = timeRange.to.unix()*1000 - timeRange.from.unix() * 1000;
-  const newGraphHeight = tickHeight * (timeSpan / (60000 * scale)); //1 tick represents [scale] minutes
+  const timeSpan = timeRange.to.unix() * 1000 - timeRange.from.unix() * 1000;
   // Update various parameters of the graph: height, ticks, etc.
   useEffect(() => {
+    const newGraphHeight = tickHeight * (timeSpan / (60000 * scale));
     setGraphHeight(newGraphHeight);
     setTickVals(() => {
       const ret: number[] = [];
@@ -77,29 +83,33 @@ export const MissionEventsDisplay = (props: { data: PanelData; width: number; he
       }
       return ret;
     });
-  }, [height, scale]);
+  }, [timeSpan, height, scale]);
 
-  const pixPerMin = tickHeight/scale;
+  const pixPerMin = tickHeight / scale;
 
-
-//Updates scrollbar and display position
+  //Updates scrollbar and display position
   const barPosition = useMotionValue(0);
-  const updateScrollBar = useCallback((event: TimeEvent) => {
-    requestAnimationFrame(() => {
-      if (divElement && event.payload.time != undefined) {
-        animate(barPosition, topPartOffset+((event.payload.time/1000-timeRange.from.unix())/60)*pixPerMin, "tween");
-        // if (barPosition.get() >= newGraphHeight-topPartOffset) {
-        //   animate(barPosition, barPosition.get());
-        // }
-        if (barPosition.get() > height/2) {
-        divElement.scrollTo({ top: topPartOffset+((event.payload.time/1000-timeRange.from.unix())/60)*pixPerMin-5*pixPerMin, behavior: 'smooth' });
-        //scrollPercentage.current += (topPartOffset+((event.payload.time/1000-timeRange.from.unix())/60)*pixPerMin);
+  const updateScrollBar = useCallback(
+    (event: TimeEvent) => {
+      requestAnimationFrame(() => {
+        if (divElement && event.payload.time !== undefined) {
+          animate(barPosition, topPartOffset + ((event.payload.time / 1000 - timeRange.from.unix()) / 60) * pixPerMin, {
+            type: 'tween',
+          });
+          if (barPosition.get() > height / 2) {
+            divElement.scrollTo({
+              top:
+                topPartOffset + ((event.payload.time / 1000 - timeRange.from.unix()) / 60) * pixPerMin - 5 * pixPerMin,
+              behavior: 'smooth',
+            });
+            //scrollPercentage.current += (topPartOffset+((event.payload.time/1000-timeRange.from.unix())/60)*pixPerMin);
+          }
         }
-      }
-    });
-  }, [divElement]);
+      });
+    },
+    [divElement, height, barPosition, pixPerMin, timeRange.from, topPartOffset]
+  );
   useCosmosTimeline(eventBus, updateScrollBar);
-
 
   // Callback for div reference acquisition
   const refDiv = useCallback((ref: HTMLDivElement | null) => {
@@ -162,59 +172,93 @@ export const MissionEventsDisplay = (props: { data: PanelData; width: number; he
           </Group>
           {/* Horizontal time tracker line */}
           {/* <Line from={{ x: 0, y: topPartOffset + scrollPercentage.current }} to={{ x: width, y: topPartOffset + scrollPercentage.current }} stroke={'#0f0'} /> */}
-          </Group>
-          {/* Example orbital events*/}
-          <Group>
-            {/* Event Rectangle*/}
-            {orbitalDummyEvents.map((v, i) => (
-                <Group>
-                  <rect x={colOffset+45} y={topPartOffset + ((orbitalDummyEvents[i].start-startTime)/10000)} width = {15} height = {orbitalDummyEvents[i].duration/60000} fill = {"#f00"} />
-                  <Text x={0} y={topPartOffset+10+(orbitalDummyEvents[i].start-startTime)/10000} fontSize={12} verticalAnchor="end" fill={'#f0f'}>
-                    {orbitalDummyEvents[i].name}
-                  </Text>
-                  <Text x={colOffsetEnd + 5} y={topPartOffset+12+(orbitalDummyEvents[i].start-startTime)/10000} fontSize={12} verticalAnchor="end" fill={'#fff'}>
-                    {orbitalDummyEvents[i].utcStart}
-                  </Text>
-                  {/* <Text x={colOffsetEnd + 120} y={topPartOffset+12} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
+        </Group>
+        {/* Example orbital events*/}
+        <Group>
+          {/* Event Rectangle*/}
+          {orbitalDummyEvents.map((v, i) => (
+            <Group key={`orbital-event-${i}`}>
+              <rect
+                x={colOffset + 45}
+                y={topPartOffset + (orbitalDummyEvents[i].start - startTime) / 10000}
+                width={15}
+                height={orbitalDummyEvents[i].duration / 60000}
+                fill={'#f00'}
+              />
+              <Text
+                x={0}
+                y={topPartOffset + 10 + (orbitalDummyEvents[i].start - startTime) / 10000}
+                fontSize={12}
+                verticalAnchor="end"
+                fill={'#f0f'}
+              >
+                {orbitalDummyEvents[i].name}
+              </Text>
+              <Text
+                x={colOffsetEnd + 5}
+                y={topPartOffset + 12 + (orbitalDummyEvents[i].start - startTime) / 10000}
+                fontSize={12}
+                verticalAnchor="end"
+                fill={'#fff'}
+              >
+                {orbitalDummyEvents[i].utcStart}
+              </Text>
+              {/* <Text x={colOffsetEnd + 120} y={topPartOffset+12} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
                   {dummyEvents[i].start-dummyEvents[0].start}
                   </Text> */}
-                </Group>
-              ))
-            }
-          </Group>
-           {/* Example spacecraft events*/}
-           <Group>
-            {/* Event Rectangle*/}
-            {spacecraftDummyEvents.map((v, i) => (
-                <Group>
-                  <rect x={colOffset+45} y={topPartOffset + ((spacecraftDummyEvents[i].start-startTime)/10000)} width = {15} height = {spacecraftDummyEvents[i].duration/60000} fill = {"#f00"} />
-                  <Text x={colOffsetEnd + 5} y={topPartOffset+12+(spacecraftDummyEvents[i].start-startTime)/10000} fontSize={12} verticalAnchor="end" fill={'#fff'}>
-                    {spacecraftDummyEvents[i].utcStart}
-                  </Text>
-                  <Text x={colOffsetEnd + 100} y={topPartOffset+12+(spacecraftDummyEvents[i].start-startTime)/10000} fontSize={12} verticalAnchor="end" fill={'#0f0'}>
-                  {spacecraftDummyEvents[i].name}
-                  </Text>
-                  {/* <Text x={colOffsetEnd + 120} y={topPartOffset+12} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
+            </Group>
+          ))}
+        </Group>
+        {/* Example spacecraft events*/}
+        <Group>
+          {/* Event Rectangle*/}
+          {spacecraftDummyEvents.map((v, i) => (
+            <Group key={`spacecraft-event-${i}`}>
+              <rect
+                x={colOffset + 45}
+                y={topPartOffset + (spacecraftDummyEvents[i].start - startTime) / 10000}
+                width={15}
+                height={spacecraftDummyEvents[i].duration / 60000}
+                fill={'#f00'}
+              />
+              <Text
+                x={colOffsetEnd + 5}
+                y={topPartOffset + 12 + (spacecraftDummyEvents[i].start - startTime) / 10000}
+                fontSize={12}
+                verticalAnchor="end"
+                fill={'#fff'}
+              >
+                {spacecraftDummyEvents[i].utcStart}
+              </Text>
+              <Text
+                x={colOffsetEnd + 100}
+                y={topPartOffset + 12 + (spacecraftDummyEvents[i].start - startTime) / 10000}
+                fontSize={12}
+                verticalAnchor="end"
+                fill={'#0f0'}
+              >
+                {spacecraftDummyEvents[i].name}
+              </Text>
+              {/* <Text x={colOffsetEnd + 120} y={topPartOffset+12} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
                   {dummyEvents[i].start-dummyEvents[0].start}
                   </Text> */}
-                </Group>
-              ))
-            }
-            {/* Timeline Bar */}
-            <motion.rect
+            </Group>
+          ))}
+          {/* Timeline Bar */}
+          <motion.rect
             initial={{ y: topPartOffset }}
             style={{
               x: 0,
               y: barPosition,
-              fill: "#00ff00",
+              fill: '#00ff00',
               opacity: 100,
               width: width,
               height: 5,
-              borderRadius: "5%",
-              background: "#00ff00"
+              borderRadius: '5%',
+              background: '#00ff00',
             }}
           />
-          </Group>
+        </Group>
       </svg>
     </div>
   );
