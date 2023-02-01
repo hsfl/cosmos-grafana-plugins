@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { PanelProps } from '@grafana/data';
 import { Button, InlineFieldRow, Input, Label, Select } from '@grafana/ui';
 import { SimpleOptions } from 'types';
-import { buildModuleUrl, ClockRange, JulianDate, TileMapServiceImageryProvider, Viewer as CesiumViewer } from 'cesium';
+import { buildModuleUrl, ClockRange, DataSourceCollection, JulianDate, TileMapServiceImageryProvider, Viewer as CesiumViewer } from 'cesium';
 import { CesiumComponentRef, Globe, Viewer } from 'resium';
 import { GlobeToolbar } from './GlobeToolbar';
 import './css/globe.css';
@@ -17,9 +17,8 @@ const globeTexture = new TileMapServiceImageryProvider({
 interface Props extends PanelProps<SimpleOptions> {}
 
 const datasourceName = 'CosmosCesiumDatasource';
-// const clock = new Clock();
-// const clockvm = new ClockViewModel(clock);
-//const cosmosDS = ;
+const datasources = new DataSourceCollection();
+datasources.add(new CosmosCesiumDatasource(datasourceName));
 
 export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, height, eventBus }) => {
   // Cesium object
@@ -65,6 +64,11 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
       }
       cesiumViewer.clock.startTime = timeRangeStart;
       cesiumViewer.clock.stopTime = timeRangeStop;
+      if (JulianDate.lessThan(cesiumViewer.clock.currentTime, cesiumViewer.clock.startTime)) {
+          cesiumViewer.clock.currentTime = cesiumViewer.clock.startTime.clone();
+      } else if (JulianDate.lessThan(cesiumViewer.clock.stopTime, cesiumViewer.clock.currentTime)) {
+        cesiumViewer.clock.currentTime = cesiumViewer.clock.stopTime.clone();
+      }
       cesiumViewer.clock.clockRange = ClockRange.CLAMPED;
       // }
     }
@@ -74,7 +78,7 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
     if (cesiumViewer !== undefined) {
       // Add our custom datasource when viewer is loaded to dom
       if (!cesiumViewer.dataSources.length) {
-        cesiumViewer.dataSources.add(new CosmosCesiumDatasource(datasourceName));
+        //cesiumViewer.dataSources.add();
       }
       // Disable fancy transition animations
       cesiumViewer.sceneModePicker.viewModel.duration = 0;
@@ -108,7 +112,7 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
         //maximumRenderTimeChange={0.5}
         // Track our custom datasource clock
         // automaticallyTrackDataSourceClocks={true}
-        // dataSources={datasources}
+        dataSources={datasources}
         //clockTrackedDataSource={datasources.get(0)}
         // clockViewModel={clockvm}
         // Various others to keep disabled
