@@ -12,6 +12,7 @@ import {
   SampledPositionProperty,
   TimeIntervalCollection,
 } from 'cesium';
+import { TimeRange } from '@grafana/data';
 
 /**
  * This class is an example of a custom DataSource.  It loads JSON data as
@@ -86,12 +87,10 @@ export class CosmosCesiumDatasource {
     }
   }
   // TODO: fix any type
-  load(Time: any, sx: any, sy: any, sz: any): void {
-    console.log('ccd0');
+  load(Time: any, sx: any, sy: any, sz: any, queryTimeRange: TimeRange): void {
     if (!defined(sx) || !defined(sy) || !defined(sz)) {
       throw new DeveloperError('data is required.');
     }
-    console.log('ccd1');
 
     //It's a good idea to suspend events when making changes to a
     //large amount of entities.  This will cause events to be batched up
@@ -113,9 +112,10 @@ export class CosmosCesiumDatasource {
       // console.log(julianDate, sx.get(i), sy.get(i), sz.get(i));
       pos.addSample(JulianDate.fromDate(julianDate), Cartesian3.fromElements(sx.get(i), sy.get(i), sz.get(i)));
     }
-    console.log('ccd2');
     //pos.addSamplesPackedArray([0, 5000000, 8500000, 0, 953550008, 8000000, 2500000, 0], JulianDate.fromIso8601('2021-02-25T23:30:00Z'));
-    const timeRange = TimeIntervalCollection.fromIso8601({ iso8601: '2022-10-22T20:00:00Z/2022-10-22T21:00:00Z' });
+    const timeRangeStart = JulianDate.fromDate(new Date(queryTimeRange.from.unix() * 1000));
+    const timeRangeStop = JulianDate.fromDate(new Date(queryTimeRange.to.unix() * 1000));
+    const timeRange = TimeIntervalCollection.fromJulianDateArray({ julianDates: [timeRangeStart, timeRangeStop] });
     entities.add({
       id: 'Sat2Id',
       name: 'Sat2',
@@ -132,7 +132,6 @@ export class CosmosCesiumDatasource {
     });
     let clock = new DataSourceClock();
     if (this.clock === undefined) {
-      console.log('clock created');
       this.clock = new DataSourceClock();
     }
     clock.clockRange = ClockRange.CLAMPED;
@@ -140,12 +139,8 @@ export class CosmosCesiumDatasource {
     clock.startTime = timeRange.start;
     clock.stopTime = timeRange.stop;
     if (!clock.equals(this.clock)) {
-      this.clock = clock.clone(this.clock);
-      console.log('clock updated');
+      this.clock = clock.clone();
     }
-    this.clock = clock.clone(this.clock);
-
-    console.log('ccd3');
 
     // Loop over each series
     // for (let x = 0; x < data.length; x++) {
@@ -200,7 +195,7 @@ export class CosmosCesiumDatasource {
 
     //Once all data is processed, call resumeEvents and raise the changed event.
     //entities.resumeEvents();
-    this.changedEvent.raiseEvent([this]);
+    this.changedEvent.raiseEvent();
     this.setLoading(false);
   }
 }

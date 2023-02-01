@@ -37,55 +37,61 @@ type event struct {
 }
 
 type avector struct {
-	Time string
+	Time float64
 	H    float64 `json:"h,omitempty"`
 	E    float64 `json:"e,omitempty"`
 	B    float64 `json:"b,omitempty"`
 }
 
 type qvatt struct {
-	Time string
+	Time float64
 	Qvx  float64 `json:"qvx"`
 	Qvy  float64 `json:"qvy"`
 	Qvz  float64 `json:"qvz"`
 }
 
 type qaatt struct {
-	Time string
+	Time float64
 	Qax  float64 `json:"qax"`
 	Qay  float64 `json:"qay"`
 	Qaz  float64 `json:"qaz"`
 }
 
 type eci struct {
-	Time string
-	Sx   float64 `json:"sx"`
-	Sy   float64 `json:"sy"`
-	Sz   float64 `json:"sz"`
+	Time float64
+	S_x  float64 `json:"s_x"`
+	S_y  float64 `json:"s_y"`
+	S_z  float64 `json:"s_z"`
+	V_x  float64 `json:"v_x"`
+	V_y  float64 `json:"v_y"`
+	V_z  float64 `json:"v_z"`
+	A_x  float64 `json:"a_x"`
+	A_y  float64 `json:"a_y"`
+	A_z  float64 `json:"a_z"`
 }
 
 type batt struct {
-	Time  string
+	Time  float64
 	Node  string  `json:"node"`
 	Amp   float64 `json:"amp"`
 	Power float64 `json:"power"`
 }
 
 type bcreg struct {
-	Time  string
+	Time  float64
 	Node  string  `json:"node"`
 	Amp   float64 `json:"amp"`
 	Power float64 `json:"power"`
 }
 
 type tsen struct {
-	Time string
+	Time float64
 	Node string  `json:"node"`
 	Temp float64 `json:"temp"`
 }
 
 type cpu struct {
-	Time    string
+	Time    float64
 	Node    string  `json:"node"`
 	Load    float64 `json:"load"`
 	Gib     float64 `json:"gib"`
