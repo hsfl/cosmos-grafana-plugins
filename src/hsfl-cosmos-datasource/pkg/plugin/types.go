@@ -29,10 +29,10 @@ type Cosmosresponse struct {
 }
 
 type event struct {
-	Time string
-	Node_name string  `json:"node_name,omitempty"`
-	Duration uint `json:"duration,omitempty"`
-	Event_id uint8 `json:"event_id,omitempty"`
+	Time       float64
+	Node_name  string `json:"node_name,omitempty"`
+	Duration   uint32 `json:"duration,omitempty"`
+	Event_id   uint8  `json:"event_id,omitempty"`
 	Event_name string `json:"event_name,omitempty"`
 }
 

@@ -268,6 +268,8 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableTime, 0)
 		case "node":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
+		case "node_name":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
 		case "event_name":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
 		case "event_id":
@@ -280,7 +282,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 		fields[i].Name = names[i]
 	}
 	frame := data.NewFrame("", fields...)
-
+	transform_to_timeseries := true
 	for _, v := range *jarg {
 		// vtype := reflect.ValueOf((*j)[0])
 		// row := make([]interface{}, len(names))
@@ -392,11 +394,8 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[4] = j.Storage
 			frame.AppendRow(row...)
 		case event:
-			timestamp, err := time.Parse(time.RFC3339, j.Time)
-			if err != nil {
-				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
-				return nil
-			}
+			transform_to_timeseries = false
+			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
 			row[1] = &j.Node_name
@@ -406,7 +405,9 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			frame.AppendRow(row...)
 		}
 	}
-
+	if !transform_to_timeseries {
+		return frame
+	}
 	// ---- end FrameFromRows
 	// ---- Format to timeseries
 	tsSchema := frame.TimeSeriesSchema()
