@@ -245,7 +245,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 	case qaatt:
 		names = []string{"Time", "AYAW", "APITCH", "AROLL"}
 	case eci:
-		names = []string{"Time", "sx", "sy", "sz"}
+		names = []string{"Time", "s_x", "s_y", "s_z", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z"}
 	case batt:
 		names = []string{"Time", "node", "amp", "power"}
 	case bcreg:
@@ -307,11 +307,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 		switch j := any(v).(type) {
 		case avector:
 			// Time must be in unix milliseconds
-			timestamp, err := time.Parse(time.RFC3339, j.Time)
-			if err != nil {
-				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
-				return nil
-			}
+			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
 			row[1] = j.B
@@ -319,11 +315,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[3] = j.H
 			frame.AppendRow(row...)
 		case qvatt:
-			timestamp, err := time.Parse(time.RFC3339, j.Time)
-			if err != nil {
-				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
-				return nil
-			}
+			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
 			row[1] = j.Qvx
@@ -331,11 +323,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[3] = j.Qvz
 			frame.AppendRow(row...)
 		case qaatt:
-			timestamp, err := time.Parse(time.RFC3339, j.Time)
-			if err != nil {
-				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
-				return nil
-			}
+			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
 			row[1] = j.Qax
@@ -343,23 +331,21 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[3] = j.Qaz
 			frame.AppendRow(row...)
 		case eci:
-			timestamp, err := time.Parse(time.RFC3339, j.Time)
-			if err != nil {
-				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
-				return nil
-			}
+			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
-			row[1] = j.Sx
-			row[2] = j.Sy
-			row[3] = j.Sz
+			row[1] = j.S_x
+			row[2] = j.S_y
+			row[3] = j.S_z
+			row[4] = j.V_x
+			row[5] = j.V_y
+			row[6] = j.V_z
+			row[7] = j.A_x
+			row[8] = j.A_y
+			row[9] = j.A_z
 			frame.AppendRow(row...)
 		case batt:
-			timestamp, err := time.Parse(time.RFC3339, j.Time)
-			if err != nil {
-				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
-				return nil
-			}
+			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
 			row[1] = &j.Node
@@ -367,11 +353,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[3] = j.Power
 			frame.AppendRow(row...)
 		case bcreg:
-			timestamp, err := time.Parse(time.RFC3339, j.Time)
-			if err != nil {
-				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
-				return nil
-			}
+			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
 			row[1] = &j.Node
@@ -388,11 +370,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[3] = j.Temp
 			frame.AppendRow(row...)
 		case cpu:
-			timestamp, err := time.Parse(time.RFC3339, j.Time)
-			if err != nil {
-				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
-				return nil
-			}
+			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
 			row[1] = &j.Node

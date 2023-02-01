@@ -2,7 +2,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { PanelProps } from '@grafana/data';
 import { Button, InlineFieldRow, Input, Label, Select } from '@grafana/ui';
 import { SimpleOptions } from 'types';
-import { buildModuleUrl, TileMapServiceImageryProvider, Viewer as CesiumViewer } from 'cesium';
+import {
+  buildModuleUrl,
+  ClockRange,
+  DataSourceCollection,
+  JulianDate,
+  TileMapServiceImageryProvider,
+  Viewer as CesiumViewer,
+} from 'cesium';
 import { CesiumComponentRef, Globe, Viewer } from 'resium';
 import { GlobeToolbar } from './GlobeToolbar';
 import './css/globe.css';
@@ -17,6 +24,8 @@ const globeTexture = new TileMapServiceImageryProvider({
 interface Props extends PanelProps<SimpleOptions> {}
 
 const datasourceName = 'CosmosCesiumDatasource';
+const datasources = new DataSourceCollection();
+datasources.add(new CosmosCesiumDatasource(datasourceName));
 
 export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, height, eventBus }) => {
   // Cesium object
@@ -35,36 +44,48 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
 
     // Load new data into custom cesium datasource
     if (cesiumViewer.dataSources.length) {
-      console.log('here1', cesiumViewer.dataSources);
+      // console.log('here1', cesiumViewer.dataSources);
       // Get the czml document we started at the top of this file
-      const cosmosDS = cesiumViewer.dataSources.getByName(datasourceName) as CosmosCesiumDatasource[];
-      console.log('viewer clock', cesiumViewer.clock, 'ds clock', cosmosDS, cosmosDS[0].clock);
+      const cosmosDS = cesiumViewer.dataSources.get(0) as CosmosCesiumDatasource;
+      // console.log('viewer clock', cesiumViewer.clock, 'ds clock', cosmosDS, cosmosDS.clock);
       // There should only ever be one
       // myczml[0] is our CZMLDataSource
-      if (cosmosDS.length === 1) {
-        console.log('here2', cosmosDS);
-        // series is an array of query responses
-        // fields is an array of the fields in those responses (in this case, 'historical' and 'predicted')
-        // values are the rows within that field
-        // const historical: string = data.series[0].fields.find((x) => x.name === 'historical')?.values.get(0);
-        const Time = data.series[0].fields.find((field) => field.name === 'Time')?.values;
-        const sx = data.series[0].fields.find((field) => field.name === 'sx')?.values;
-        const sy = data.series[0].fields.find((field) => field.name === 'sy')?.values;
-        const sz = data.series[0].fields.find((field) => field.name === 'sz')?.values;
-        if (Time === undefined || sx === undefined || sy === undefined || sz === undefined) {
-          return;
-        }
-        cosmosDS[0].load(Time, sx, sy, sz);
+      // if (cosmosDS.length === 1) {
+      // console.log('here2', cosmosDS, 'timerange', data.timeRange);
+      // series is an array of query responses
+      // fields is an array of the fields in those responses (in this case, 'historical' and 'predicted')
+      // values are the rows within that field
+      // const historical: string = data.series[0].fields.find((x) => x.name === 'historical')?.values.get(0);
+      const Time = data.series[0].fields.find((field) => field.name === 'Time')?.values;
+      const sx = data.series[0].fields.find((field) => field.name === 's_x')?.values;
+      const sy = data.series[0].fields.find((field) => field.name === 's_y')?.values;
+      const sz = data.series[0].fields.find((field) => field.name === 's_z')?.values;
+      if (Time === undefined || sx === undefined || sy === undefined || sz === undefined) {
+        return;
       }
+      cosmosDS.load(Time, sx, sy, sz, data.timeRange);
+      const timeRangeStart = JulianDate.fromDate(new Date(data.timeRange.from.unix() * 1000));
+      const timeRangeStop = JulianDate.fromDate(new Date(data.timeRange.to.unix() * 1000));
+      if (cesiumViewer.timeline !== undefined) {
+        cesiumViewer.timeline.zoomTo(timeRangeStart, timeRangeStop);
+      }
+      cesiumViewer.clock.startTime = timeRangeStart;
+      cesiumViewer.clock.stopTime = timeRangeStop;
+      if (JulianDate.lessThan(cesiumViewer.clock.currentTime, cesiumViewer.clock.startTime)) {
+        cesiumViewer.clock.currentTime = cesiumViewer.clock.startTime.clone();
+      } else if (JulianDate.lessThan(cesiumViewer.clock.stopTime, cesiumViewer.clock.currentTime)) {
+        cesiumViewer.clock.currentTime = cesiumViewer.clock.stopTime.clone();
+      }
+      cesiumViewer.clock.clockRange = ClockRange.CLAMPED;
+      // }
     }
   }, [data, cesiumViewer]);
 
   useEffect(() => {
     if (cesiumViewer !== undefined) {
       // Add our custom datasource when viewer is loaded to dom
-      if (!cesiumViewer.dataSources.getByName(datasourceName).length) {
-        const cosmosDS = new CosmosCesiumDatasource(datasourceName);
-        cesiumViewer.dataSources.add(cosmosDS);
+      if (!cesiumViewer.dataSources.length) {
+        //cesiumViewer.dataSources.add();
       }
       // Disable fancy transition animations
       cesiumViewer.sceneModePicker.viewModel.duration = 0;
@@ -94,10 +115,13 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
         animation={options.showAnimation}
         timeline={options.showTimeline}
         // Enables explicit render mode
-        requestRenderMode={true}
-        maximumRenderTimeChange={0.5}
+        requestRenderMode={false}
+        //maximumRenderTimeChange={0.5}
         // Track our custom datasource clock
-        automaticallyTrackDataSourceClocks={true}
+        // automaticallyTrackDataSourceClocks={true}
+        dataSources={datasources}
+        //clockTrackedDataSource={datasources.get(0)}
+        // clockViewModel={clockvm}
         // Various others to keep disabled
         fullscreenButton={false}
         homeButton={false}
@@ -145,13 +169,13 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
         <div style={{ gridRow: 2, gridColumn: 1 }}>Longitude</div>
         <div style={{ gridRow: 3, gridColumn: 1 }}>Altitude</div>
         <div style={{ gridRow: 1, gridColumn: 2 }}>
-          <Input ref={(ref) => (refInputs.current['sx'] = ref)} type="number" /*value="-49.1624"*/ />
+          <Input ref={(ref) => (refInputs.current['s_x'] = ref)} type="number" value="0" />
         </div>
         <div style={{ gridRow: 2, gridColumn: 2 }}>
-          <Input ref={(ref) => (refInputs.current['sy'] = ref)} type="number" value="166.1392" />
+          <Input ref={(ref) => (refInputs.current['s_y'] = ref)} type="number" value="0" />
         </div>
         <div style={{ gridRow: 3, gridColumn: 2 }}>
-          <Input ref={(ref) => (refInputs.current['sz'] = ref)} type="number" value="501.0841" />
+          <Input ref={(ref) => (refInputs.current['s_z'] = ref)} type="number" value="0" />
         </div>
         <div style={{ gridRow: 1, gridColumn: 4 }}>in Beta Angle</div>
         <div style={{ gridRow: 2, gridColumn: 4 }}>Time to Eclipse</div>

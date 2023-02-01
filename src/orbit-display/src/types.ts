@@ -67,7 +67,7 @@ export interface HashNum {
 export type RefDict = { [key in input_field]?: HTMLInputElement | null };
 export type IdxDict = { [key in input_field]?: number };
 
-export type input_field = 'sx' | 'sy' | 'sz' | 'beta' | 'eclipse' | 'sunlight';
+export type input_field = 's_x' | 's_y' | 's_z' | 'beta' | 'eclipse' | 'sunlight';
 
 export interface TimeEventPayload {
   // The starting time, positive unix timestamp
