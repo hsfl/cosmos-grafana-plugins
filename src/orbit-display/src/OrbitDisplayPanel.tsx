@@ -159,13 +159,13 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
         <div style={{ gridRow: 2, gridColumn: 1 }}>Longitude</div>
         <div style={{ gridRow: 3, gridColumn: 1 }}>Altitude</div>
         <div style={{ gridRow: 1, gridColumn: 2 }}>
-          <Input ref={(ref) => (refInputs.current['sx'] = ref)} type="number" /*value="-49.1624"*/ />
+          <Input ref={(ref) => (refInputs.current['s_x'] = ref)} type="number" value="0" />
         </div>
         <div style={{ gridRow: 2, gridColumn: 2 }}>
-          <Input ref={(ref) => (refInputs.current['sy'] = ref)} type="number" value="166.1392" />
+          <Input ref={(ref) => (refInputs.current['s_y'] = ref)} type="number" value="0" />
         </div>
         <div style={{ gridRow: 3, gridColumn: 2 }}>
-          <Input ref={(ref) => (refInputs.current['sz'] = ref)} type="number" value="501.0841" />
+          <Input ref={(ref) => (refInputs.current['s_z'] = ref)} type="number" value="0" />
         </div>
         <div style={{ gridRow: 1, gridColumn: 4 }}>in Beta Angle</div>
         <div style={{ gridRow: 2, gridColumn: 4 }}>Time to Eclipse</div>
