@@ -2,7 +2,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { PanelProps } from '@grafana/data';
 import { Button, InlineFieldRow, Input, Label, Select } from '@grafana/ui';
 import { SimpleOptions } from 'types';
-import { buildModuleUrl, ClockRange, DataSourceCollection, JulianDate, TileMapServiceImageryProvider, Viewer as CesiumViewer } from 'cesium';
+import {
+  buildModuleUrl,
+  ClockRange,
+  DataSourceCollection,
+  JulianDate,
+  TileMapServiceImageryProvider,
+  Viewer as CesiumViewer,
+} from 'cesium';
 import { CesiumComponentRef, Globe, Viewer } from 'resium';
 import { GlobeToolbar } from './GlobeToolbar';
 import './css/globe.css';
@@ -65,7 +72,7 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
       cesiumViewer.clock.startTime = timeRangeStart;
       cesiumViewer.clock.stopTime = timeRangeStop;
       if (JulianDate.lessThan(cesiumViewer.clock.currentTime, cesiumViewer.clock.startTime)) {
-          cesiumViewer.clock.currentTime = cesiumViewer.clock.startTime.clone();
+        cesiumViewer.clock.currentTime = cesiumViewer.clock.startTime.clone();
       } else if (JulianDate.lessThan(cesiumViewer.clock.stopTime, cesiumViewer.clock.currentTime)) {
         cesiumViewer.clock.currentTime = cesiumViewer.clock.stopTime.clone();
       }
