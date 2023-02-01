@@ -60,8 +60,7 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
       cosmosDS.load(Time, sx, sy, sz, data.timeRange);
       const timeRangeStart = JulianDate.fromDate(new Date(data.timeRange.from.unix() * 1000));
       const timeRangeStop = JulianDate.fromDate(new Date(data.timeRange.to.unix() * 1000));
-      if (cesiumViewer.timeline !== undefined)
-      {
+      if (cesiumViewer.timeline !== undefined) {
         cesiumViewer.timeline.zoomTo(timeRangeStart, timeRangeStop);
       }
       cesiumViewer.clock.startTime = timeRangeStart;
