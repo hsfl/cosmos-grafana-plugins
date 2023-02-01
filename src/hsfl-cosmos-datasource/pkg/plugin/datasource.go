@@ -213,7 +213,7 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 			response.Frames = append(response.Frames, frame9)
 		}
 		if frame10 != nil {
-			frame9.RefID = "mag"
+			frame10.RefID = "mag"
 			response.Frames = append(response.Frames, frame10)
 		}
 	}
