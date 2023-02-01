@@ -26,14 +26,7 @@ type Cosmosresponse struct {
 	Tsens    []tsen    `json:"tsens,omitempty"`
 	Cpus     []cpu     `json:"cpus,omitempty"`
 	Events   []event   `json:"events,omitempty"`
-}
-
-type event struct {
-	Time       float64
-	Node_name  string `json:"node_name,omitempty"`
-	Duration   uint32 `json:"duration,omitempty"`
-	Event_id   uint8  `json:"event_id,omitempty"`
-	Event_name string `json:"event_name,omitempty"`
+	Mags     []mag     `json:"mags,omitempty"`
 }
 
 type avector struct {
@@ -79,9 +72,10 @@ type bcreg struct {
 }
 
 type tsen struct {
-	Time string
-	Node string  `json:"node"`
-	Temp float64 `json:"temp"`
+	Time      float64
+	Node_name string  `json:"node_name,omitempty"`
+	Didx      uint8   `json:"didx,omitempty"`
+	Temp      float64 `json:"temp,omitempty"`
 }
 
 type cpu struct {
@@ -92,8 +86,25 @@ type cpu struct {
 	Storage float64 `json:"storage"`
 }
 
+type event struct {
+	Time       float64
+	Node_name  string `json:"node_name,omitempty"`
+	Duration   uint32 `json:"duration,omitempty"`
+	Event_id   uint8  `json:"event_id,omitempty"`
+	Event_name string `json:"event_name,omitempty"`
+}
+
+type mag struct {
+	Time      float64
+	Node_name string  `json:"node_name,omitempty"`
+	Didx      uint8   `json:"didx,omitempty"`
+	Mag_x     float64 `json:"mag_x,omitempty"`
+	Mag_y     float64 `json:"mag_y,omitempty"`
+	Mag_z     float64 `json:"mag_z,omitempty"`
+}
+
 type cosmostype interface {
-	avector | qvatt | qaatt | eci | batt | bcreg | tsen | cpu | event
+	avector | qvatt | qaatt | eci | batt | bcreg | tsen | cpu | event | mag
 }
 
 // Datasource is an example datasource which can respond to data queries, reports

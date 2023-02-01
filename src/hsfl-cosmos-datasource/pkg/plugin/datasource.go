@@ -173,6 +173,7 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 		frame7 := ConvertToFrame(&j.Payload.Tsens)
 		frame8 := ConvertToFrame(&j.Payload.Cpus)
 		frame9 := ConvertToFrame(&j.Payload.Events)
+		frame10 := ConvertToFrame(&j.Payload.Mags)
 
 		// add the frames to the response.
 		if frame1 != nil {
@@ -210,6 +211,10 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 		if frame9 != nil {
 			frame9.RefID = "event"
 			response.Frames = append(response.Frames, frame9)
+		}
+		if frame10 != nil {
+			frame9.RefID = "mag"
+			response.Frames = append(response.Frames, frame10)
 		}
 	}
 
@@ -251,6 +256,8 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 		names = []string{"Time", "node", "load", "gib", "storage"}
 	case event:
 		names = []string{"Time", "node_name", "duration", "event_id", "event_name"}
+	case mag:
+		names = []string{"Time", "node_name", "didx", "mag_x", "mag_y", "mag_z"}
 	default:
 		return nil
 	}
@@ -273,6 +280,8 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 		case "event_name":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
 		case "event_id":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeUint8, 0)
+		case "didx":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeUint8, 0)
 		case "duration":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeUint32, 0)
@@ -370,15 +379,13 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[3] = j.Power
 			frame.AppendRow(row...)
 		case tsen:
-			timestamp, err := time.Parse(time.RFC3339, j.Time)
-			if err != nil {
-				log.DefaultLogger.Error("Error in timestamp conversion", err.Error())
-				return nil
-			}
+			transform_to_timeseries = false
+			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
-			row[1] = &j.Node
-			row[2] = j.Temp
+			row[1] = &j.Node_name
+			row[2] = j.Didx
+			row[3] = j.Temp
 			frame.AppendRow(row...)
 		case cpu:
 			timestamp, err := time.Parse(time.RFC3339, j.Time)
@@ -402,6 +409,17 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[2] = j.Duration
 			row[3] = j.Event_id
 			row[4] = &j.Event_name
+			frame.AppendRow(row...)
+		case mag:
+			transform_to_timeseries = false
+			timestamp := mjd_to_time(j.Time)
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = &j.Node_name
+			row[2] = j.Didx
+			row[3] = j.Mag_x
+			row[4] = j.Mag_y
+			row[5] = j.Mag_z
 			frame.AppendRow(row...)
 		}
 	}
