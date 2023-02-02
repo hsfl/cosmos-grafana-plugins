@@ -39,8 +39,9 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     // .unix() returns unix seconds, convert to unix milliseconds
     const rangeStart = timeRange.from.unix() * 1000;
     const rangeEnd = timeRange.to.unix() * 1000;
-    setBoundedTime((boundedTime) => (boundedTime > rangeStart ? boundedTime : rangeStart));
-    setBoundedTime((boundedTime) => (boundedTime < rangeEnd ? boundedTime : rangeEnd));
+    // setBoundedTime((boundedTime) => (boundedTime > rangeStart ? boundedTime : rangeStart));
+    // setBoundedTime((boundedTime) => (boundedTime < rangeEnd ? boundedTime : rangeEnd));
+    setBoundedTime(rangeEnd);
     setStartTime(rangeStart);
     setEndTime(rangeEnd);
   }, [timeRange]);
@@ -67,6 +68,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
         // Use unix millisecond timestamps
         const newTime = refCurrentTime.current + 1000 * refTimeRate.current;
         if (newTime > endTime) {
+          refCurrentTime.current = endTime;
           setPaused(true);
         } else {
           refCurrentTime.current = newTime;
@@ -110,7 +112,18 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
         icon={paused ? 'play' : 'pause'}
         onClick={() => {
           // If paused, unpause
-          publishNewTime(paused ? { rate: refTimeRate.current } : { rate: 0 });
+          if (paused)
+          {
+              // If play was clicked when we were paused and were at the end of the timeline, then reset to start
+              if (refCurrentTime.current === endTime) {
+                publishNewTime({ rate: refTimeRate.current, time: startTime });
+              } else {
+                publishNewTime({ rate: refTimeRate.current });
+              }
+          } else {
+            // Pause
+            publishNewTime({ rate: 0 });
+          }
           setPaused((paused) => !paused);
         }}
       />
