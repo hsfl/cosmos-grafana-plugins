@@ -112,14 +112,13 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
         icon={paused ? 'play' : 'pause'}
         onClick={() => {
           // If paused, unpause
-          if (paused)
-          {
-              // If play was clicked when we were paused and were at the end of the timeline, then reset to start
-              if (refCurrentTime.current === endTime) {
-                publishNewTime({ rate: refTimeRate.current, time: startTime });
-              } else {
-                publishNewTime({ rate: refTimeRate.current });
-              }
+          if (paused) {
+            // If play was clicked when we were paused and were at the end of the timeline, then reset to start
+            if (refCurrentTime.current === endTime) {
+              publishNewTime({ rate: refTimeRate.current, time: startTime });
+            } else {
+              publishNewTime({ rate: refTimeRate.current });
+            }
           } else {
             // Pause
             publishNewTime({ rate: 0 });
