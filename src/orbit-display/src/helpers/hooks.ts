@@ -104,10 +104,11 @@ export const useDomUpdate = (cesiumViewer: CesiumViewer | undefined): DomUpdateR
       requestAnimationFrame(() => {
         if (cesiumViewer !== undefined) {
           const newTime = JulianDate.fromDate(new Date(event.payload.time!));
-          if (
-            JulianDate.greaterThanOrEquals(newTime, cesiumViewer.clock.startTime) &&
-            JulianDate.lessThan(newTime, cesiumViewer.clock.stopTime)
-          ) {
+          if (JulianDate.lessThan(newTime, cesiumViewer.clock.startTime)) {
+            cesiumViewer.clock.currentTime = cesiumViewer.clock.startTime.clone();
+          } else if (JulianDate.greaterThan(newTime, cesiumViewer.clock.stopTime)) {
+            cesiumViewer.clock.currentTime = cesiumViewer.clock.stopTime.clone();
+          } else {
             cesiumViewer.clock.currentTime = newTime;
           }
         }

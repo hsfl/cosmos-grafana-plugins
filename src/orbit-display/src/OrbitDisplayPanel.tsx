@@ -63,20 +63,21 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
       if (Time === undefined || sx === undefined || sy === undefined || sz === undefined) {
         return;
       }
-      cosmosDS.load(Time, sx, sy, sz, data.timeRange);
+      cosmosDS.load(Time, sx, sy, sz, cesiumViewer.clock);
+      // data.timeRange is in unix seconds, but the data.series Time is in unix milliseconds
       const timeRangeStart = JulianDate.fromDate(new Date(data.timeRange.from.unix() * 1000));
       const timeRangeStop = JulianDate.fromDate(new Date(data.timeRange.to.unix() * 1000));
       if (cesiumViewer.timeline !== undefined) {
         cesiumViewer.timeline.zoomTo(timeRangeStart, timeRangeStop);
       }
-      cesiumViewer.clock.startTime = timeRangeStart;
-      cesiumViewer.clock.stopTime = timeRangeStop;
-      if (JulianDate.lessThan(cesiumViewer.clock.currentTime, cesiumViewer.clock.startTime)) {
-        cesiumViewer.clock.currentTime = cesiumViewer.clock.startTime.clone();
-      } else if (JulianDate.lessThan(cesiumViewer.clock.stopTime, cesiumViewer.clock.currentTime)) {
-        cesiumViewer.clock.currentTime = cesiumViewer.clock.stopTime.clone();
-      }
-      cesiumViewer.clock.clockRange = ClockRange.CLAMPED;
+    //   cesiumViewer.clock.startTime = timeRangeStart;
+    //   cesiumViewer.clock.stopTime = timeRangeStop;
+    //   if (JulianDate.lessThan(cesiumViewer.clock.currentTime, cesiumViewer.clock.startTime)) {
+    //     cesiumViewer.clock.currentTime = cesiumViewer.clock.startTime.clone();
+    //   } else if (JulianDate.lessThan(cesiumViewer.clock.stopTime, cesiumViewer.clock.currentTime)) {
+    //     cesiumViewer.clock.currentTime = cesiumViewer.clock.stopTime.clone();
+    //   }
+    //   cesiumViewer.clock.clockRange = ClockRange.CLAMPED;
       // }
     }
   }, [data, cesiumViewer]);

@@ -1,6 +1,7 @@
 import {
   defined,
   Cartesian3,
+  Clock,
   ClockRange,
   DataSourceClock,
   DeveloperError,
@@ -12,7 +13,6 @@ import {
   SampledPositionProperty,
   TimeIntervalCollection,
 } from 'cesium';
-import { TimeRange } from '@grafana/data';
 
 /**
  * This class is an example of a custom DataSource.  It loads JSON data as
@@ -87,7 +87,7 @@ export class CosmosCesiumDatasource {
     }
   }
   // TODO: fix any type
-  load(Time: any, sx: any, sy: any, sz: any, queryTimeRange: TimeRange): void {
+  load(Time: any, sx: any, sy: any, sz: any, viewerClock: Clock): void {
     if (!defined(sx) || !defined(sy) || !defined(sz)) {
       throw new DeveloperError('data is required.');
     }
@@ -104,7 +104,7 @@ export class CosmosCesiumDatasource {
 
     // Data will be
     const maxLen = Math.max(Time.length, sx.length, sy.length, sz.length);
-    console.log('maxLen:', maxLen, Time, sx, sy, sz);
+    // console.log('maxLen:', maxLen, Time, sx, sy, sz);
     const pos: SampledPositionProperty = new SampledPositionProperty(ReferenceFrame.INERTIAL);
     for (let i = 0; i < maxLen; i++) {
       // if (sx[i] == null || sy[i] == null || sz)
@@ -113,8 +113,8 @@ export class CosmosCesiumDatasource {
       pos.addSample(JulianDate.fromDate(julianDate), Cartesian3.fromElements(sx.get(i), sy.get(i), sz.get(i)));
     }
     //pos.addSamplesPackedArray([0, 5000000, 8500000, 0, 953550008, 8000000, 2500000, 0], JulianDate.fromIso8601('2021-02-25T23:30:00Z'));
-    const timeRangeStart = JulianDate.fromDate(new Date(queryTimeRange.from.unix() * 1000));
-    const timeRangeStop = JulianDate.fromDate(new Date(queryTimeRange.to.unix() * 1000));
+    const timeRangeStart = JulianDate.fromDate(new Date(Time.get(0)));
+    const timeRangeStop = JulianDate.fromDate(new Date(Time.get(Time.length-1)));
     const timeRange = TimeIntervalCollection.fromJulianDateArray({ julianDates: [timeRangeStart, timeRangeStop] });
     entities.add({
       id: 'Sat2Id',
@@ -135,9 +135,13 @@ export class CosmosCesiumDatasource {
       this.clock = new DataSourceClock();
     }
     clock.clockRange = ClockRange.CLAMPED;
-    clock.currentTime = timeRange.start;
-    clock.startTime = timeRange.start;
-    clock.stopTime = timeRange.stop;
+    clock.currentTime = timeRangeStop;
+    clock.startTime = timeRangeStart;
+    clock.stopTime = timeRangeStop;
+    viewerClock.clockRange = clock.clockRange;
+    viewerClock.currentTime = clock.currentTime;
+    viewerClock.startTime = clock.startTime;
+    viewerClock.stopTime = clock.stopTime;
     if (!clock.equals(this.clock)) {
       this.clock = clock.clone();
     }
