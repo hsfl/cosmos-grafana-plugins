@@ -87,7 +87,7 @@ export class CosmosCesiumDatasource {
     }
   }
   // TODO: fix any type
-  load(Time: any, sx: any, sy: any, sz: any, viewerClock: Clock): void {
+  load(time: any, sx: any, sy: any, sz: any, viewerClock: Clock): void {
     if (!defined(sx) || !defined(sy) || !defined(sz)) {
       throw new DeveloperError('data is required.');
     }
@@ -103,18 +103,18 @@ export class CosmosCesiumDatasource {
     this.setLoading(true);
 
     // Data will be
-    const maxLen = Math.max(Time.length, sx.length, sy.length, sz.length);
-    // console.log('maxLen:', maxLen, Time, sx, sy, sz);
+    const maxLen = Math.max(time.length, sx.length, sy.length, sz.length);
+    // console.log('maxLen:', maxLen, time, sx, sy, sz);
     const pos: SampledPositionProperty = new SampledPositionProperty(ReferenceFrame.INERTIAL);
     for (let i = 0; i < maxLen; i++) {
       // if (sx[i] == null || sy[i] == null || sz)
-      const julianDate = new Date(Time.get(i));
+      const julianDate = new Date(time.get(i));
       // console.log(julianDate, sx.get(i), sy.get(i), sz.get(i));
       pos.addSample(JulianDate.fromDate(julianDate), Cartesian3.fromElements(sx.get(i), sy.get(i), sz.get(i)));
     }
     //pos.addSamplesPackedArray([0, 5000000, 8500000, 0, 953550008, 8000000, 2500000, 0], JulianDate.fromIso8601('2021-02-25T23:30:00Z'));
-    const timeRangeStart = JulianDate.fromDate(new Date(Time.get(0)));
-    const timeRangeStop = JulianDate.fromDate(new Date(Time.get(Time.length - 1)));
+    const timeRangeStart = JulianDate.fromDate(new Date(time.get(0)));
+    const timeRangeStop = JulianDate.fromDate(new Date(time.get(time.length - 1)));
     const timeRange = TimeIntervalCollection.fromJulianDateArray({ julianDates: [timeRangeStart, timeRangeStop] });
     entities.add({
       id: 'Sat2Id',
