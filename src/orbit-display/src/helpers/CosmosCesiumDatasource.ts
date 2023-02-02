@@ -114,7 +114,7 @@ export class CosmosCesiumDatasource {
     }
     //pos.addSamplesPackedArray([0, 5000000, 8500000, 0, 953550008, 8000000, 2500000, 0], JulianDate.fromIso8601('2021-02-25T23:30:00Z'));
     const timeRangeStart = JulianDate.fromDate(new Date(Time.get(0)));
-    const timeRangeStop = JulianDate.fromDate(new Date(Time.get(Time.length-1)));
+    const timeRangeStop = JulianDate.fromDate(new Date(Time.get(Time.length - 1)));
     const timeRange = TimeIntervalCollection.fromJulianDateArray({ julianDates: [timeRangeStart, timeRangeStop] });
     entities.add({
       id: 'Sat2Id',

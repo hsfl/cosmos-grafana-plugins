@@ -4,7 +4,6 @@ import { Button, InlineFieldRow, Input, Label, Select } from '@grafana/ui';
 import { SimpleOptions } from 'types';
 import {
   buildModuleUrl,
-  ClockRange,
   DataSourceCollection,
   JulianDate,
   TileMapServiceImageryProvider,
@@ -70,14 +69,14 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
       if (cesiumViewer.timeline !== undefined) {
         cesiumViewer.timeline.zoomTo(timeRangeStart, timeRangeStop);
       }
-    //   cesiumViewer.clock.startTime = timeRangeStart;
-    //   cesiumViewer.clock.stopTime = timeRangeStop;
-    //   if (JulianDate.lessThan(cesiumViewer.clock.currentTime, cesiumViewer.clock.startTime)) {
-    //     cesiumViewer.clock.currentTime = cesiumViewer.clock.startTime.clone();
-    //   } else if (JulianDate.lessThan(cesiumViewer.clock.stopTime, cesiumViewer.clock.currentTime)) {
-    //     cesiumViewer.clock.currentTime = cesiumViewer.clock.stopTime.clone();
-    //   }
-    //   cesiumViewer.clock.clockRange = ClockRange.CLAMPED;
+      //   cesiumViewer.clock.startTime = timeRangeStart;
+      //   cesiumViewer.clock.stopTime = timeRangeStop;
+      //   if (JulianDate.lessThan(cesiumViewer.clock.currentTime, cesiumViewer.clock.startTime)) {
+      //     cesiumViewer.clock.currentTime = cesiumViewer.clock.startTime.clone();
+      //   } else if (JulianDate.lessThan(cesiumViewer.clock.stopTime, cesiumViewer.clock.currentTime)) {
+      //     cesiumViewer.clock.currentTime = cesiumViewer.clock.stopTime.clone();
+      //   }
+      //   cesiumViewer.clock.clockRange = ClockRange.CLAMPED;
       // }
     }
   }, [data, cesiumViewer]);
