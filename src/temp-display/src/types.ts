@@ -10,9 +10,9 @@ export interface SimpleOptions {
 
 export interface TimeEventPayload {
   // The starting time, positive unix timestamp
-  time?: number,
+  time?: number;
   // Time progression rate, in seconds. Event fires sparsely
-  rate?: number,
+  rate?: number;
 }
 
 export class TimeEvent extends BusEventWithPayload<Partial<TimeEventPayload>> {
@@ -21,11 +21,11 @@ export class TimeEvent extends BusEventWithPayload<Partial<TimeEventPayload>> {
 
 export interface RectWithTextProps {
   /** Temperature in K */
-  temperature: number,
+  temperature: number;
   /** Width of one little bar gauge */
-  width: number,
+  width: number;
   /** Height of one little bar gauge */
-  height: number,
+  height: number;
   /** Ref to the inner SVG element */
 }
 
