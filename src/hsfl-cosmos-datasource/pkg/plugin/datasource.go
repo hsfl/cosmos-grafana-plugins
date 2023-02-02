@@ -401,9 +401,9 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			frame.AppendRow(row...)
 		}
 	}
-	if !transform_to_timeseries {
-		return frame
-	}
+	 if !transform_to_timeseries {
+	 	return frame
+	 }
 	// ---- end FrameFromRows
 	// ---- Format to timeseries
 	tsSchema := frame.TimeSeriesSchema()

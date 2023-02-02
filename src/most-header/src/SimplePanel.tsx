@@ -48,7 +48,7 @@ const useRadioButtonGroup = () => {
       <div style={{ width: '10%' }}>
         <div style={{ marginBottom: '32px' }}>
           <RadioButtonGroup
-            size = "sm"
+            size = "md"
             options={options}
             value={selected}
             onChange={(v) => setSelected(v!)}
@@ -148,7 +148,7 @@ const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: 
               name="start"
               type="number"
               value = {0}
-              width={6}
+              width={9}
             />
           </InlineField>
       </InlineFieldRow>
