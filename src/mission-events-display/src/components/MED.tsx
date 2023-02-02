@@ -7,42 +7,39 @@ import { TimeEvent } from '../types';
 import { EventBus, PanelData, TimeRange } from '@grafana/data';
 import { animate, motion, useMotionValue } from 'framer-motion';
 
-interface DummyEvent {
-  name: string;
-  start: number;
+interface UTCEvent {
   utcStart: string;
-  duration: number;
 }
 
 const startTime = 1666468859000;
 
-const orbitalEventTimes = [
-  1666468859000, // 0
-  1666469459000, // 10
-  1666469939000, // 18
-];
-const orbitalEventDurations = [15, 10, 5].map((v) => v * 60 * 1000);
-const orbitalDummyEvents: DummyEvent[] = orbitalEventTimes.map((v, i) => ({
-  name: 'O event' + i,
-  start: orbitalEventTimes[i],
-  utcStart: new Date(orbitalEventTimes[i]).toUTCString().slice(-11, -4),
-  duration: orbitalEventDurations[i],
-}));
+// const orbitalEventTimes = [
+//   1666468859000, // 0
+//   1666469459000, // 10
+//   1666469939000, // 18
+// ];
+// const orbitalEventDurations = [15, 10, 5].map((v) => v * 60 * 1000);
+// const orbitalDummyEvents: DummyEvent[] = orbitalEventTimes.map((v, i) => ({
+//   name: 'O event' + i,
+//   start: orbitalEventTimes[i],
+//   utcStart: new Date(orbitalEventTimes[i]).toUTCString().slice(-11, -4),
+//   duration: orbitalEventDurations[i],
+// }));
 
-// Some dummy events for time between UTC 2022-10-22 20:00:00 to 2022-10-22 21:00:00 (1666468859000 to 1666472399000)
-const spacecraftEventTimes = [
-  1666470359000, // 25
-  1666470659000, // 30
-  1666471859000, // 50
-  1666472159000, // 55
-];
-const spacecraftEventDurations = [20, 10, 20, 20].map((v) => v * 60 * 1000);
-const spacecraftDummyEvents: DummyEvent[] = spacecraftEventTimes.map((v, i) => ({
-  name: 'SC event' + i,
-  start: spacecraftEventTimes[i],
-  utcStart: new Date(spacecraftEventTimes[i]).toUTCString().slice(-11, -4),
-  duration: spacecraftEventDurations[i],
-}));
+// // Some dummy events for time between UTC 2022-10-22 20:00:00 to 2022-10-22 21:00:00 (1666468859000 to 1666472399000)
+// const spacecraftEventTimes = [
+//   1666470359000, // 25
+//   1666470659000, // 30
+//   1666471859000, // 50
+//   1666472159000, // 55
+// ];
+// const spacecraftEventDurations = [20, 10, 20, 20].map((v) => v * 60 * 1000);
+// const spacecraftDummyEvents: DummyEvent[] = spacecraftEventTimes.map((v, i) => ({
+//   name: 'SC event' + i,
+//   start: spacecraftEventTimes[i],
+//   utcStart: new Date(spacecraftEventTimes[i]).toUTCString().slice(-11, -4),
+//   duration: spacecraftEventDurations[i],
+// }));
 
 //const utcStart = new Date(startTime * 1000).toUTCString().slice(-11, -4)
 // const utcString = dateObj.toUTCString();
@@ -57,7 +54,7 @@ export const MissionEventsDisplay = (props: {
   eventBus: EventBus;
   timeRange: TimeRange;
 }) => {
-  const { width, height, eventBus, timeRange } = props;
+  const { data, width, height, eventBus, timeRange } = props;
   const columns = ['Umbra', 'kauai', 'surrey', 'payload1', 'payload2'];
   const colOffset = width / 4;
   const colOffsetEnd = colOffset + 15 * columns.length;
@@ -70,6 +67,12 @@ export const MissionEventsDisplay = (props: {
   //const scrollPercentage = useRef<number>(0);
   const [tickVals, setTickVals] = useState<number[]>([]);
   //const [lineHeight, setLineHeight] = useState<number>()
+
+  console.log(data);
+
+  const utcData: UTCEvent[] = data.series[0].fields[0].values.toArray().map((v, i) => ({
+    utcStart: new Date(data.series[0].fields[0].values.get(i)).toUTCString().slice(4, -4),
+  }));
 
   const timeSpan = timeRange.to.unix() * 1000 - timeRange.from.unix() * 1000;
   // Update various parameters of the graph: height, ticks, etc.
@@ -88,7 +91,7 @@ export const MissionEventsDisplay = (props: {
   const pixPerMin = tickHeight / scale;
 
   //Updates scrollbar and display position
-  const barPosition = useMotionValue(0);
+  const barPosition = useMotionValue(topPartOffset);
   const updateScrollBar = useCallback(
     (event: TimeEvent) => {
       requestAnimationFrame(() => {
@@ -136,7 +139,7 @@ export const MissionEventsDisplay = (props: {
             <Text x={colOffsetEnd + 5} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#fff'}>
               UTC
             </Text>
-            <Text x={colOffsetEnd + 100} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
+            <Text x={colOffsetEnd + 130} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
               Spacecraft Events
             </Text>
             {/* <Text x={colOffsetEnd + 120} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
@@ -176,77 +179,91 @@ export const MissionEventsDisplay = (props: {
         {/* Example orbital events*/}
         <Group>
           {/* Event Rectangle*/}
-          {orbitalDummyEvents.map((v, i) => (
-            <Group key={`orbital-event-${i}`}>
-              <rect
-                x={colOffset + 45}
-                y={topPartOffset + (orbitalDummyEvents[i].start - startTime) / 10000}
-                width={15}
-                height={orbitalDummyEvents[i].duration / 60000}
-                fill={'#f00'}
-              />
-              <Text
-                x={0}
-                y={topPartOffset + 10 + (orbitalDummyEvents[i].start - startTime) / 10000}
-                fontSize={12}
-                verticalAnchor="end"
-                fill={'#f0f'}
-              >
-                {orbitalDummyEvents[i].name}
-              </Text>
-              <Text
-                x={colOffsetEnd + 5}
-                y={topPartOffset + 12 + (orbitalDummyEvents[i].start - startTime) / 10000}
-                fontSize={12}
-                verticalAnchor="end"
-                fill={'#fff'}
-              >
-                {orbitalDummyEvents[i].utcStart}
-              </Text>
-              {/* <Text x={colOffsetEnd + 120} y={topPartOffset+12} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
-                  {dummyEvents[i].start-dummyEvents[0].start}
-                  </Text> */}
-            </Group>
-          ))}
+          {data.series[0].fields[0].values.toArray().reduce((a, v, i) => {
+            if (data.series[0].fields[0].values.get(i) - startTime < 0) {
+              return a;
+            } else if (data.series[0].fields[3].values.get(i) === 2) {
+              return a;
+            }
+            a.push(
+              <Group key={`orbital-event-${i}`}>
+                <rect
+                  x={colOffset + 15 * data.series[0].fields[3].values.get(i)}
+                  y={topPartOffset + ((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
+                  width={15}
+                  height={(data.series[0].fields[2].values.get(i) / 60) * tickHeight}
+                  fill={'#f0f'}
+                  strokeWidth={1}
+                  stroke={'#fff'}
+                />
+                <Text
+                  x={0}
+                  y={topPartOffset + ((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
+                  fontSize={12}
+                  verticalAnchor="end"
+                  fill={'#f0f'}
+                >
+                  {data.series[0].fields[4].values.get(i)}
+                </Text>
+                <Text
+                  x={colOffsetEnd + 5}
+                  y={topPartOffset + ((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
+                  fontSize={12}
+                  verticalAnchor="end"
+                  fill={'#fff'}
+                >
+                  {utcData[i].utcStart}
+                </Text>
+              </Group>
+            );
+            return a;
+          }, [])}
         </Group>
         {/* Example spacecraft events*/}
         <Group>
           {/* Event Rectangle*/}
-          {spacecraftDummyEvents.map((v, i) => (
-            <Group key={`spacecraft-event-${i}`}>
-              <rect
-                x={colOffset + 45}
-                y={topPartOffset + (spacecraftDummyEvents[i].start - startTime) / 10000}
-                width={15}
-                height={spacecraftDummyEvents[i].duration / 60000}
-                fill={'#f00'}
-              />
-              <Text
-                x={colOffsetEnd + 5}
-                y={topPartOffset + 12 + (spacecraftDummyEvents[i].start - startTime) / 10000}
-                fontSize={12}
-                verticalAnchor="end"
-                fill={'#fff'}
-              >
-                {spacecraftDummyEvents[i].utcStart}
-              </Text>
-              <Text
-                x={colOffsetEnd + 100}
-                y={topPartOffset + 12 + (spacecraftDummyEvents[i].start - startTime) / 10000}
-                fontSize={12}
-                verticalAnchor="end"
-                fill={'#0f0'}
-              >
-                {spacecraftDummyEvents[i].name}
-              </Text>
-              {/* <Text x={colOffsetEnd + 120} y={topPartOffset+12} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
-                  {dummyEvents[i].start-dummyEvents[0].start}
-                  </Text> */}
-            </Group>
-          ))}
+          {data.series[0].fields[0].values.toArray().reduce((a, v, i) => {
+            if (data.series[0].fields[0].values.get(i) - startTime < 0) {
+              return a;
+            } else if (data.series[0].fields[3].values.get(i) !== 2) {
+              return a;
+            }
+            a.push(
+              <Group key={`orbital-event-${i}`}>
+                <rect
+                  x={colOffset + 15 * data.series[0].fields[3].values.get(i)}
+                  y={topPartOffset + ((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
+                  width={15}
+                  height={(data.series[0].fields[2].values.get(i) / 60) * tickHeight}
+                  fill={'#0df'}
+                  strokeWidth={1}
+                  stroke={'#fff'}
+                />
+                <Text
+                  x={colOffsetEnd + 130}
+                  y={topPartOffset + ((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
+                  fontSize={12}
+                  verticalAnchor="end"
+                  fill={'#0df'}
+                >
+                  {data.series[0].fields[4].values.get(i)}
+                </Text>
+                <Text
+                  x={colOffsetEnd + 5}
+                  y={topPartOffset + ((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
+                  fontSize={12}
+                  verticalAnchor="end"
+                  fill={'#fff'}
+                >
+                  {utcData[i].utcStart}
+                </Text>
+              </Group>
+            );
+            return a;
+          }, [])}
           {/* Timeline Bar */}
           <motion.rect
-            initial={{ y: topPartOffset }}
+            //initial={{ y: topPartOffset }}
             style={{
               x: 0,
               y: barPosition,
