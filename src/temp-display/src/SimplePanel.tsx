@@ -14,6 +14,10 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, fie
   useEffect(() => {
     // Array of references
     // Number of columns is the total -1 to exclude the time column
+    if (!data.series.length)
+    {
+        return;
+    }
     const numColumns = data.series[0].fields.length - 1;
     setNumColumns(numColumns);
     if (refRects.current.length < numColumns) {
