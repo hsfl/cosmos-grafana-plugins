@@ -55,14 +55,14 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
       // fields is an array of the fields in those responses (in this case, 'historical' and 'predicted')
       // values are the rows within that field
       // const historical: string = data.series[0].fields.find((x) => x.name === 'historical')?.values.get(0);
-      const Time = data.series[0].fields.find((field) => field.name === 'Time')?.values;
+      const time = data.series[0].fields.find((field) => field.name === 'time')?.values;
       const sx = data.series[0].fields.find((field) => field.name === 's_x')?.values;
       const sy = data.series[0].fields.find((field) => field.name === 's_y')?.values;
       const sz = data.series[0].fields.find((field) => field.name === 's_z')?.values;
-      if (Time === undefined || sx === undefined || sy === undefined || sz === undefined) {
+      if (time === undefined || sx === undefined || sy === undefined || sz === undefined) {
         return;
       }
-      cosmosDS.load(Time, sx, sy, sz, cesiumViewer.clock);
+      cosmosDS.load(time, sx, sy, sz, cesiumViewer.clock);
       // data.timeRange is in unix seconds, but the data.series Time is in unix milliseconds
       const timeRangeStart = JulianDate.fromDate(new Date(data.timeRange.from.unix() * 1000));
       const timeRangeStop = JulianDate.fromDate(new Date(data.timeRange.to.unix() * 1000));

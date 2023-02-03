@@ -107,7 +107,7 @@ export const useInputSuggest = () => {
   // Event fired when user types into search
   const onInputChange = (value: string, actionMeta: InputActionMeta) => {
     console.log('onInputChange:', value, actionMeta);
-    console.log(selectRef.current);
+    console.log('selectRef.current:', selectRef.current);
 
     if (actionMeta.action === 'input-change') {
       // Called if typing
@@ -195,6 +195,9 @@ export const useInputSuggest = () => {
   console.log('rerender', options, 'idx:', searchQueryIdxRef.current, searchQueryTermRef.current);
 
   // Filters available options based on current searchQuery string
+  // Called for each option in the list of options
+  // option: contains label and value of the currently examined option
+  // searchQuery: The entire search string accumulated so far
   const filterOption = (option: SelectableValue<string>, searchQuery: string): boolean => {
     let ret = false;
 

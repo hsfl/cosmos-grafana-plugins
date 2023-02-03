@@ -239,25 +239,25 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 	// Create column names
 	switch any((*jarg)[0]).(type) {
 	case avector:
-		names = []string{"Time", "YAW", "PITCH", "ROLL"}
+		names = []string{"time", "YAW", "PITCH", "ROLL"}
 	case qvatt:
-		names = []string{"Time", "VYAW", "VPITCH", "VROLL"}
+		names = []string{"time", "VYAW", "VPITCH", "VROLL"}
 	case qaatt:
-		names = []string{"Time", "AYAW", "APITCH", "AROLL"}
+		names = []string{"time", "AYAW", "APITCH", "AROLL"}
 	case eci:
-		names = []string{"Time", "s_x", "s_y", "s_z", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z"}
+		names = []string{"time", "s_x", "s_y", "s_z", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z"}
 	case batt:
-		names = []string{"Time", "node", "amp", "power"}
+		names = []string{"time", "node", "amp", "power"}
 	case bcreg:
-		names = []string{"Time", "node", "amp", "power"}
+		names = []string{"time", "node", "amp", "power"}
 	case tsen:
-		names = []string{"Time", "node", "temp"}
+		names = []string{"time", "node:device", "temp"}
 	case cpu:
-		names = []string{"Time", "node", "load", "gib", "storage"}
+		names = []string{"time", "node", "load", "gib", "storage"}
 	case event:
-		names = []string{"Time", "node_name", "duration", "event_id", "event_name"}
+		names = []string{"time", "node_name", "duration", "event_id", "event_name"}
 	case mag:
-		names = []string{"Time", "node_name", "didx", "mag_x", "mag_y", "mag_z"}
+		names = []string{"time", "node_name", "didx", "mag_x", "mag_y", "mag_z"}
 	default:
 		return nil
 	}
@@ -271,9 +271,11 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 	fields := make(data.Fields, len(names))
 	for i, v := range names {
 		switch v {
-		case "Time":
+		case "time":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableTime, 0)
 		case "node":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
+		case "node:device":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
 		case "node_name":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
@@ -361,13 +363,11 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[3] = j.Power
 			frame.AppendRow(row...)
 		case tsen:
-			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
-			row[1] = &j.Node_name
-			row[2] = j.Didx
-			row[3] = j.Temp
+			row[1] = &j.Node_Device
+			row[2] = j.Temp
 			frame.AppendRow(row...)
 		case cpu:
 			timestamp := mjd_to_time(j.Time)

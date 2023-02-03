@@ -78,10 +78,9 @@ type bcreg struct {
 }
 
 type tsen struct {
-	Time      float64
-	Node_name string  `json:"node_name,omitempty"`
-	Didx      uint8   `json:"didx,omitempty"`
-	Temp      float64 `json:"temp,omitempty"`
+	Time        float64
+	Node_Device string  `json:"node:device,omitempty"`
+	Temp        float64 `json:"temp,omitempty"`
 }
 
 type cpu struct {
