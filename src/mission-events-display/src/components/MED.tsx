@@ -13,38 +13,6 @@ interface UTCEvent {
 
 const startTime = 1666468859000;
 
-// const orbitalEventTimes = [
-//   1666468859000, // 0
-//   1666469459000, // 10
-//   1666469939000, // 18
-// ];
-// const orbitalEventDurations = [15, 10, 5].map((v) => v * 60 * 1000);
-// const orbitalDummyEvents: DummyEvent[] = orbitalEventTimes.map((v, i) => ({
-//   name: 'O event' + i,
-//   start: orbitalEventTimes[i],
-//   utcStart: new Date(orbitalEventTimes[i]).toUTCString().slice(-11, -4),
-//   duration: orbitalEventDurations[i],
-// }));
-
-// // Some dummy events for time between UTC 2022-10-22 20:00:00 to 2022-10-22 21:00:00 (1666468859000 to 1666472399000)
-// const spacecraftEventTimes = [
-//   1666470359000, // 25
-//   1666470659000, // 30
-//   1666471859000, // 50
-//   1666472159000, // 55
-// ];
-// const spacecraftEventDurations = [20, 10, 20, 20].map((v) => v * 60 * 1000);
-// const spacecraftDummyEvents: DummyEvent[] = spacecraftEventTimes.map((v, i) => ({
-//   name: 'SC event' + i,
-//   start: spacecraftEventTimes[i],
-//   utcStart: new Date(spacecraftEventTimes[i]).toUTCString().slice(-11, -4),
-//   duration: spacecraftEventDurations[i],
-// }));
-
-//const utcStart = new Date(startTime * 1000).toUTCString().slice(-11, -4)
-// const utcString = dateObj.toUTCString();
-// const time = utcString.slice(-11, -4);
-
 const tickHeight = 30;
 
 export const MissionEventsDisplay = (props: {
@@ -193,6 +161,7 @@ export const MissionEventsDisplay = (props: {
                   width={15}
                   height={(data.series[0].fields[2].values.get(i) / 60) * tickHeight}
                   fill={'#f0f'}
+                  fillOpacity={0.7}
                   strokeWidth={1}
                   stroke={'#fff'}
                 />
@@ -236,6 +205,7 @@ export const MissionEventsDisplay = (props: {
                   width={15}
                   height={(data.series[0].fields[2].values.get(i) / 60) * tickHeight}
                   fill={'#0df'}
+                  fillOpacity={0.7}
                   strokeWidth={1}
                   stroke={'#fff'}
                 />

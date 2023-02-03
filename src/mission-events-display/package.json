@@ -29,6 +29,7 @@
     "@types/jest": "^27.4.1",
     "@types/lodash": "latest",
     "@types/node": "^17.0.19",
+    "@types/react-sticky": "^6.0.4",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
     "copy-webpack-plugin": "^10.0.0",
@@ -60,7 +61,8 @@
     "@visx/visx": "^2.16.0",
     "framer-motion": "^8.5.5",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "react-sticky": "^6.0.3"
   },
   "engines": {
     "node": ">=14"
