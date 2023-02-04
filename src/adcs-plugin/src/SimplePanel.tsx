@@ -46,7 +46,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   const [refRenderer, refScene, refCamera, refModel, refInputs, updateDOMRefs] = useDomUpdate(data);
   useCosmosTimeline(data, eventBus, updateDOMRefs);
 
-  // Setup scene
+  // Setup the scene
   useEffect(() => {
     // Get reference to the div container holding the webgl renderer
     const { current: container } = refWebGLContainer;
