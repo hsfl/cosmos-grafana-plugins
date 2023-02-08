@@ -11,8 +11,6 @@ interface UTCEvent {
   utcStart: string;
 }
 
-const startTime = 1666468859000;
-
 const tickHeight = 30;
 
 export const MissionEventsDisplay = (props: {
@@ -36,12 +34,10 @@ export const MissionEventsDisplay = (props: {
   const [tickVals, setTickVals] = useState<number[]>([]);
   //const [lineHeight, setLineHeight] = useState<number>()
 
-  console.log(data);
-
   const utcData: UTCEvent[] = data.series[0].fields[0].values.toArray().map((v, i) => ({
     utcStart: new Date(data.series[0].fields[0].values.get(i)).toUTCString().slice(4, -4),
   }));
-
+  const startTime = timeRange.from.unix() * 1000;
   const timeSpan = timeRange.to.unix() * 1000 - timeRange.from.unix() * 1000;
   // Update various parameters of the graph: height, ticks, etc.
   useEffect(() => {
