@@ -1,4 +1,4 @@
 src/testplugins/
-build/*
+build/cosmos-grafana-plugins
 **/node_modules
 **/dist

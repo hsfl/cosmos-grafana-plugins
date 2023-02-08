@@ -1,0 +1,3 @@
+FROM alpine as base
+WORKDIR /home/cosmos-grafana-plugins
+COPY ./cosmos-grafana-plugins ./build/cosmos-grafana-plugins

@@ -7,16 +7,23 @@
 # Usage: build_plugins.sh [--dist] [--cleanup]
 # Options:
 # dist: Builds and moves folders
+# clean-build: Builds afresh, deletes dist folder first
 # cleanup: Cleans up everything except the dist folders. True or false. To be used when building the docker image for release to reduce image size.
 
 
 DIST_BUILD=false
+CLEANBUILD=false
 CLEANUP=false
 for arg in "$@"
 do
     if [[ "$arg" == "--dist" ]]; then
+        echo "--dist flag set"
         DIST_BUILD=true
+    elif [[ "$arg" == "--clean-build" ]]; then
+        echo "--clean-build flag set"
+        CLEANBUILD=true
     elif [[ "$arg" == "--cleanup" ]]; then
+        echo "--cleanup flag set"
         CLEANUP=true
     fi
 done
@@ -35,6 +42,12 @@ for f in *; do
         echo "Found plugin folder $f"
         cd $f
 
+        # Remove dist folder first for a clean build
+        if [[ $CLEANBUILD == true && -d "./dist" ]]; then
+            echo "Removing existing dist folder"
+            rm -rf ./dist
+        fi
+
         # Backend datasources must also be built with mage
         if [[ -f "./Magefile.go" ]]; then
             echo "Found Magefile"
@@ -45,18 +58,25 @@ for f in *; do
         yarn install
         yarn build
 
-        if [[ $DIST_BUILD == true ]]; then
-            mkdir ../../build/cosmos-grafana-plugins/$f
-            if [[ $CLEANUP == true ]]; then
-                # Move dist folder to build/<PLUGIN_NAME>/dist
-                mv ./dist ../../build/cosmos-grafana-plugins/$f/
-            else
-                # Copy dist folder to build/<PLUGIN_NAME>/dist
-                cp -r ./dist ../../build/cosmos-grafana-plugins/$f/
+        # If build was successful
+        if [[ -d "./dist" ]]; then
+            if [[ $DIST_BUILD == true ]]; then
+                echo "Making dist folder in ../../build/cosmos-grafana-plugins/$f"
+                mkdir ../../build/cosmos-grafana-plugins/$f
+                if [[ $CLEANUP == true ]]; then
+                    # Move dist folder to build/<PLUGIN_NAME>/dist
+                    echo "Moving dist folder"
+                    mv ./dist ../../build/cosmos-grafana-plugins/$f/
+                else
+                    # Copy dist folder to build/<PLUGIN_NAME>/dist
+                    echo "Copying dist folder"
+                    cp -r ./dist ../../build/cosmos-grafana-plugins/$f/
+                fi
             fi
         fi
 
         # Repeat for other plugins
+        echo "Leaving plugin folder $f"
         cd ..
     fi
 done
