@@ -4,13 +4,22 @@
 # For the distribution version, the created dist folder will be moved to
 # a new subdirectory with the same plugin folder name in the build directory.
 
-# Usage: build_plugins.sh [--dist]
-# Positional arg 1: Cleans up everything except the dist folders. True or false. To be used when building the docker image for release to reduce image size.
+# Usage: build_plugins.sh [--dist] [--cleanup]
+# Options:
+# dist: Builds and moves folders
+# cleanup: Cleans up everything except the dist folders. True or false. To be used when building the docker image for release to reduce image size.
+
 
 DIST_BUILD=false
-if [[ $# -eq 1 && $1 == "--dist" ]]; then
-    DIST_BUILD=true
-fi
+CLEANUP=false
+for arg in "$@"
+do
+    if [[ "$arg" == "--dist" ]]; then
+        DIST_BUILD=true
+    elif [[ "$arg" == "--cleanup" ]]; then
+        CLEANUP=true
+    fi
+done
 
 if [[ $DIST_BUILD == true ]]; then
     # Move all dist folders to the build folder for release
@@ -37,9 +46,14 @@ for f in *; do
         yarn build
 
         if [[ $DIST_BUILD == true ]]; then
-            # Move dist folder to build/<PLUGIN_NAME>/dist
             mkdir ../../build/cosmos-grafana-plugins/$f
-            mv ./dist ../../build/cosmos-grafana-plugins/$f/
+            if [[ $CLEANUP == true ]]; then
+                # Move dist folder to build/<PLUGIN_NAME>/dist
+                mv ./dist ../../build/cosmos-grafana-plugins/$f/
+            else
+                # Copy dist folder to build/<PLUGIN_NAME>/dist
+                cp -r ./dist ../../build/cosmos-grafana-plugins/$f/
+            fi
         fi
 
         # Repeat for other plugins
@@ -48,7 +62,7 @@ for f in *; do
 done
 
 # Clean up yarn cache, which is probably several GiBs by now. And other cache while we're at it.
-if [[ $DIST_BUILD == true ]]; then
+if [[ $CLEANUP == true ]]; then
     # Cleanup src folder to reduce image size
     cd ..
     rm -rf src/
