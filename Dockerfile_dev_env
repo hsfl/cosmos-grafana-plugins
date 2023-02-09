@@ -14,6 +14,6 @@ WORKDIR /home/mage
 RUN go run bootstrap.go
 
 WORKDIR /home/cosmos-grafana-plugins
-COPY . .
-RUN chmod +x ./build_plugins.sh
-RUN ./build_plugins.sh build_arg
+# COPY . .
+# RUN chmod +x ./build_plugins.sh
+# RUN ./build_plugins.sh build_arg
