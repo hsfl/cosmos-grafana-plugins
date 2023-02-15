@@ -9,6 +9,8 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | b
 RUN source ~/.bashrc
 RUN nvm install 16.16.0
 
+RUN npm install --global yarn
+
 # Switch shell back
 SHELL ["/bin/sh", "-c"]
 
