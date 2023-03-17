@@ -60,13 +60,12 @@ export const MissionEventsDisplay = (props: {
     (event: TimeEvent) => {
       requestAnimationFrame(() => {
         if (divElement && event.payload.time !== undefined) {
-          animate(barPosition, topPartOffset + ((event.payload.time / 1000 - timeRange.from.unix()) / 60) * pixPerMin, {
+          animate(barPosition, ((event.payload.time / 1000 - timeRange.from.unix()) / 60) * pixPerMin, {
             type: 'tween',
           });
           if (barPosition.get() > height / 2) {
             divElement.scrollTo({
-              top:
-                topPartOffset + ((event.payload.time / 1000 - timeRange.from.unix()) / 60) * pixPerMin - 5 * pixPerMin,
+              top: ((event.payload.time / 1000 - timeRange.from.unix()) / 60) * pixPerMin - 5 * pixPerMin,
               behavior: 'smooth',
             });
             //scrollPercentage.current += (topPartOffset+((event.payload.time/1000-timeRange.from.unix())/60)*pixPerMin);
@@ -74,7 +73,7 @@ export const MissionEventsDisplay = (props: {
         }
       });
     },
-    [divElement, height, barPosition, pixPerMin, timeRange.from, topPartOffset]
+    [divElement, height, barPosition, pixPerMin, timeRange.from]
   );
   useCosmosTimeline(eventBus, updateScrollBar);
 
@@ -92,33 +91,62 @@ export const MissionEventsDisplay = (props: {
 
   return (
     <div ref={refDiv} style={{ width: width, height: height, overflow: 'scroll' }}>
-      <svg width={width} height={graphHeight}>
-        <rect width={width} height={graphHeight} fill={'#000'} rx={14} />
-        <Group top={0} left={0}>
-          {/* header texts */}
-          <Group>
-            <Text x={0} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#03fcf0'}>
-              Orbital Events
-            </Text>
-            <Text x={colOffsetEnd + 5} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#fff'}>
-              UTC
-            </Text>
-            <Text x={colOffsetEnd + 130} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
-              Spacecraft Events
-            </Text>
-            {/* <Text x={colOffsetEnd + 120} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
+      <div ref={refDiv} style={{ width: width, height: topPartOffset, position: 'fixed' }}>
+        <svg width={width} height={topPartOffset}>
+          <Group top={0} left={0}>
+            <motion.rect
+              style={{
+                x: 0,
+                y: 0,
+                fill: '#000000',
+                opacity: 50,
+                width: width,
+                height: topPartOffset,
+                position: 'fixed',
+                borderRadius: '5%',
+                background: '#000000',
+              }}
+            />
+            <Group>
+              <Text x={0} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#03fcf0'}>
+                Orbital Events
+              </Text>
+              <Text x={colOffsetEnd + 5} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#fff'}>
+                UTC
+              </Text>
+              <Text x={colOffsetEnd + 130} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
+                Spacecraft Events
+              </Text>
+              {/* <Text x={colOffsetEnd + 120} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
               Executed
             </Text> */}
+            </Group>
+            {/* white horizontal line */}
+            <Line from={{ x: 0, y: topPartOffset }} to={{ x: width, y: topPartOffset }} stroke={'#ffffff'} />
+            {/* columns*/}
+            <Line from={{ x: colOffset, y: 0 }} to={{ x: colOffset, y: graphHeight }} stroke={'#ffff00'} />
+            {columns.map((val, i) => (
+              <Group key={`radar-line-${i}`}>
+                <Text x={colOffset + 15 * i} y={20} angle={90} fill={'#ffffff'}>
+                  {val}
+                </Text>
+                <Line
+                  from={{ x: colOffset + 15 * (i + 1), y: 0 }}
+                  to={{ x: colOffset + 15 * (i + 1), y: graphHeight }}
+                  stroke={'#ffff00'}
+                />
+              </Group>
+            ))}
           </Group>
-          {/* white horizontal line */}
-          <Line from={{ x: 0, y: topPartOffset }} to={{ x: width, y: topPartOffset }} stroke={'#ffffff'} />
+        </svg>
+      </div>
+      <svg width={width} height={graphHeight}>
+        <rect width={width} height={graphHeight} fill={'#000'} rx={14} />
+        <Group top={topPartOffset} left={0}>
           {/* columns*/}
           <Line from={{ x: colOffset, y: 0 }} to={{ x: colOffset, y: graphHeight }} stroke={'#ffff00'} />
           {columns.map((val, i) => (
             <Group key={`radar-line-${i}`}>
-              <Text x={colOffset + 15 * i} y={20} angle={90} fill={'#ffffff'}>
-                {val}
-              </Text>
               <Line
                 from={{ x: colOffset + 15 * (i + 1), y: 0 }}
                 to={{ x: colOffset + 15 * (i + 1), y: graphHeight }}
@@ -131,8 +159,8 @@ export const MissionEventsDisplay = (props: {
             {tickVals.map((val, i) => (
               <Line
                 key={`tick-line-${i}`}
-                from={{ x: colOffset, y: topPartOffset + val }}
-                to={{ x: colOffsetEnd, y: topPartOffset + val }}
+                from={{ x: colOffset, y: 0 + val }}
+                to={{ x: colOffsetEnd, y: 0 + val }}
                 stroke={'#ffff00'}
               />
             ))}
@@ -141,7 +169,7 @@ export const MissionEventsDisplay = (props: {
           {/* <Line from={{ x: 0, y: topPartOffset + scrollPercentage.current }} to={{ x: width, y: topPartOffset + scrollPercentage.current }} stroke={'#0f0'} /> */}
         </Group>
         {/* Example orbital events*/}
-        <Group>
+        <Group top={topPartOffset} left={0}>
           {/* Event Rectangle*/}
           {data.series[0].fields[0].values.toArray().reduce((a, v, i) => {
             if (data.series[0].fields[0].values.get(i) - startTime < 0) {
@@ -153,7 +181,7 @@ export const MissionEventsDisplay = (props: {
               <Group key={`orbital-event-${i}`}>
                 <rect
                   x={colOffset + 15 * data.series[0].fields[3].values.get(i)}
-                  y={topPartOffset + ((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
+                  y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
                   width={15}
                   height={(data.series[0].fields[2].values.get(i) / 60) * tickHeight}
                   fill={'#f0f'}
@@ -163,7 +191,7 @@ export const MissionEventsDisplay = (props: {
                 />
                 <Text
                   x={0}
-                  y={topPartOffset + ((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
+                  y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
                   fontSize={12}
                   verticalAnchor="end"
                   fill={'#f0f'}
@@ -172,7 +200,7 @@ export const MissionEventsDisplay = (props: {
                 </Text>
                 <Text
                   x={colOffsetEnd + 5}
-                  y={topPartOffset + ((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
+                  y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
                   fontSize={12}
                   verticalAnchor="end"
                   fill={'#fff'}
@@ -185,7 +213,7 @@ export const MissionEventsDisplay = (props: {
           }, [])}
         </Group>
         {/* Example spacecraft events*/}
-        <Group>
+        <Group top={topPartOffset} left={0}>
           {/* Event Rectangle*/}
           {data.series[0].fields[0].values.toArray().reduce((a, v, i) => {
             if (data.series[0].fields[0].values.get(i) - startTime < 0) {
@@ -197,7 +225,7 @@ export const MissionEventsDisplay = (props: {
               <Group key={`orbital-event-${i}`}>
                 <rect
                   x={colOffset + 15 * data.series[0].fields[3].values.get(i)}
-                  y={topPartOffset + ((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
+                  y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
                   width={15}
                   height={(data.series[0].fields[2].values.get(i) / 60) * tickHeight}
                   fill={'#0df'}
@@ -207,7 +235,7 @@ export const MissionEventsDisplay = (props: {
                 />
                 <Text
                   x={colOffsetEnd + 130}
-                  y={topPartOffset + ((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
+                  y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
                   fontSize={12}
                   verticalAnchor="end"
                   fill={'#0df'}
@@ -216,7 +244,7 @@ export const MissionEventsDisplay = (props: {
                 </Text>
                 <Text
                   x={colOffsetEnd + 5}
-                  y={topPartOffset + ((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
+                  y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
                   fontSize={12}
                   verticalAnchor="end"
                   fill={'#fff'}
@@ -227,9 +255,11 @@ export const MissionEventsDisplay = (props: {
             );
             return a;
           }, [])}
+        </Group>
+        <Group top={topPartOffset} left={0}>
           {/* Timeline Bar */}
           <motion.rect
-            //initial={{ y: topPartOffset }}
+            initial={{ y: 0 }}
             style={{
               x: 0,
               y: barPosition,
