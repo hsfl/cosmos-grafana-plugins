@@ -48,15 +48,16 @@ for f in *; do
             rm -rf ./dist
         fi
 
-        # Backend datasources must also be built with mage
+        # Build frontend part of plugin
+        yarn install
+        yarn build
+
+	# Backend datasources must also be built with mage
+	# (yarn then mage, order matters)
         if [[ -f "./Magefile.go" ]]; then
             echo "Found Magefile"
             mage -v
         fi
-
-        # Build frontend part of plugin
-        yarn install
-        yarn build
 
         # If build was successful
         if [[ -d "./dist" ]]; then
