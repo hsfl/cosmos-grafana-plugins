@@ -2,6 +2,7 @@ package plugin
 
 type queryModel struct {
 	QueryText string `json:"queryText"`
+	TypeText  string `json:"typeText"`
 }
 
 // JSON model of Grafana Backend Datasource config
@@ -27,6 +28,9 @@ type Cosmosresponse struct {
 	Cpus     []cpu     `json:"cpus,omitempty"`
 	Events   []event   `json:"events,omitempty"`
 	Mags     []mag     `json:"mags,omitempty"`
+	Geods    []geod    `json:"geods,omitempty"`
+	Geoss    []geos    `json:"geoss,omitempty"`
+	Lvlhs    []lvlh    `json:"lvlhs,omitempty"`
 }
 
 type avector struct {
@@ -108,8 +112,48 @@ type mag struct {
 	Mag_z     float64 `json:"mag_z,omitempty"`
 }
 
+type geod struct {
+	Time  float64
+	S_lat float64 `json:"s_lat,omitempty"`
+	S_lon float64 `json:"s_lon,omitempty"`
+	S_h   float64 `json:"s_h,omitempty"`
+	V_lat float64 `json:"v_lat,omitempty"`
+	V_lon float64 `json:"v_lon,omitempty"`
+	V_h   float64 `json:"v_h,omitempty"`
+	A_lat float64 `json:"a_lat,omitempty"`
+	A_lon float64 `json:"a_lon,omitempty"`
+	A_h   float64 `json:"a_h,omitempty"`
+}
+
+type geos struct {
+	Time     float64
+	S_phi    float64 `json:"s_phi,omitempty"`
+	S_lambda float64 `json:"s_lambda,omitempty"`
+	S_r      float64 `json:"s_r,omitempty"`
+	V_phi    float64 `json:"v_phi,omitempty"`
+	V_lambda float64 `json:"v_lambda,omitempty"`
+	V_r      float64 `json:"v_r,omitempty"`
+	A_phi    float64 `json:"a_phi,omitempty"`
+	A_lambda float64 `json:"a_lambda,omitempty"`
+	A_r      float64 `json:"a_r,omitempty"`
+}
+
+type lvlh struct {
+	Time  float64
+	S_d_x float64 `json:"s_d_x,omitempty"`
+	S_d_y float64 `json:"s_d_y,omitempty"`
+	S_d_z float64 `json:"s_d_z,omitempty"`
+	S_w   float64 `json:"s_w,omitempty"`
+	V_x   float64 `json:"v_x,omitempty"`
+	V_y   float64 `json:"v_y,omitempty"`
+	V_z   float64 `json:"v_z,omitempty"`
+	A_x   float64 `json:"a_x,omitempty"`
+	A_y   float64 `json:"a_y,omitempty"`
+	A_z   float64 `json:"a_z,omitempty"`
+}
+
 type cosmostype interface {
-	avector | qvatt | qaatt | eci | batt | bcreg | tsen | cpu | event | mag
+	avector | qvatt | qaatt | eci | batt | bcreg | tsen | cpu | event | mag | geod | geos | lvlh
 }
 
 // Datasource is an example datasource which can respond to data queries, reports

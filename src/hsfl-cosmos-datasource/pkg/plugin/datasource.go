@@ -58,12 +58,16 @@ func NewDatasource(instanceSettings backend.DataSourceInstanceSettings) (instanc
 
 // COSMOS Web backend api endpoint call
 // msg: json encoded string
-func (d *Datasource) GetEndpoint(queryText string, timeRange backend.TimeRange) (string, error) {
+func (d *Datasource) GetEndpoint(queryText string, typeText string, timeRange backend.TimeRange) (string, error) {
 	if queryText == "" {
 		err := fmt.Errorf("queryText wrong")
 		return "", err
 	}
-	base := d.url + "/db/" + queryText + "/"
+	typeAdd := ""
+	// if typeText != "" {
+	// 	typeAdd = "-" + typeText
+	// }
+	base := d.url + "/db/" + queryText + typeAdd + "?"
 	req, err := http.NewRequest("GET", base, nil)
 	if err != nil {
 		log.DefaultLogger.Error("Error in http.NewRequest", err.Error())
@@ -76,16 +80,22 @@ func (d *Datasource) GetEndpoint(queryText string, timeRange backend.TimeRange) 
 	to_str := fmt.Sprintf("%f", time_to_mjd(timeRange.To))
 	q.Add("from", from_str)
 	q.Add("to", to_str)
+	if typeText != "" {
+		q.Add("type", typeText)
+	}
 
 	req.URL.RawQuery = q.Encode()
+
+	log.DefaultLogger.Info("curl url test", "url", req.URL.String())
+	// fmt.Printf(req.URL.String())
 
 	return req.URL.String(), nil
 }
 
 // msg: json encoded string
 // url: URL or Hostname of API endpoint
-func (d *Datasource) CosmosBackendCall(queryText string, timeRange backend.TimeRange, j *jsonResponse) error {
-	endpoint, err := d.GetEndpoint(queryText, timeRange)
+func (d *Datasource) CosmosBackendCall(queryText string, typeText string, timeRange backend.TimeRange, j *jsonResponse) error {
+	endpoint, err := d.GetEndpoint(queryText, typeText, timeRange)
 	if err != nil {
 		return err
 	}
@@ -154,9 +164,13 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 	qm.QueryText = strings.ReplaceAll(qm.QueryText, " ", "")
 	queryTexts := strings.Split(qm.QueryText, ",")
 
+	qm.TypeText = strings.TrimSpace(qm.TypeText)
+	qm.TypeText = strings.ReplaceAll(qm.TypeText, " ", "")
+	units := (qm.TypeText)
+
 	for _, v := range queryTexts {
 		var j jsonResponse
-		err := d.CosmosBackendCall(v, query.TimeRange, &j)
+		err := d.CosmosBackendCall(v, units, query.TimeRange, &j)
 		if err != nil {
 			log.DefaultLogger.Error("Error in Cosmos Backend call", err.Error())
 			response.Error = err
@@ -174,6 +188,9 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 		frame8 := ConvertToFrame(&j.Payload.Cpus)
 		frame9 := ConvertToFrame(&j.Payload.Events)
 		frame10 := ConvertToFrame(&j.Payload.Mags)
+		frame11 := ConvertToFrame(&j.Payload.Geods)
+		frame12 := ConvertToFrame(&j.Payload.Geoss)
+		frame13 := ConvertToFrame(&j.Payload.Lvlhs)
 
 		// add the frames to the response.
 		if frame1 != nil {
@@ -215,6 +232,18 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 		if frame10 != nil {
 			frame10.RefID = "mag"
 			response.Frames = append(response.Frames, frame10)
+		}
+		if frame11 != nil {
+			frame11.RefID = "geod"
+			response.Frames = append(response.Frames, frame11)
+		}
+		if frame12 != nil {
+			frame12.RefID = "geos"
+			response.Frames = append(response.Frames, frame12)
+		}
+		if frame13 != nil {
+			frame13.RefID = "lvlh"
+			response.Frames = append(response.Frames, frame13)
 		}
 	}
 
@@ -258,6 +287,12 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 		names = []string{"time", "node_name", "duration", "event_id", "event_name"}
 	case mag:
 		names = []string{"time", "node_name", "didx", "mag_x", "mag_y", "mag_z"}
+	case geod:
+		names = []string{"time", "s_lat", "s_lon", "s_h", "v_lat", "v_lon", "v_h", "a_lat", "a_lon", "a_h"}
+	case geos:
+		names = []string{"time", "s_phi", "s_lambda", "s_r", "v_phi", "v_lambda", "v_r", "a_phi", "a_lambda", "a_r"}
+	case lvlh:
+		names = []string{"time", "s_d_x", "s_d_y", "s_d_z", "s_w", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z"}
 	default:
 		return nil
 	}
@@ -399,11 +434,57 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[4] = j.Mag_y
 			row[5] = j.Mag_z
 			frame.AppendRow(row...)
+		case geod:
+			transform_to_timeseries = false
+			timestamp := mjd_to_time(j.Time)
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = j.S_lat
+			row[2] = j.S_lon
+			row[3] = j.S_h
+			row[4] = j.V_lat
+			row[5] = j.V_lon
+			row[6] = j.V_h
+			row[7] = j.A_lat
+			row[8] = j.A_lon
+			row[9] = j.A_h
+			frame.AppendRow(row...)
+		case geos:
+			transform_to_timeseries = false
+			timestamp := mjd_to_time(j.Time)
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = j.S_phi
+			row[2] = j.S_lambda
+			row[3] = j.S_r
+			row[4] = j.V_phi
+			row[5] = j.V_lambda
+			row[6] = j.V_r
+			row[7] = j.A_phi
+			row[8] = j.A_lambda
+			row[9] = j.A_r
+			frame.AppendRow(row...)
+		case lvlh:
+			transform_to_timeseries = false
+			timestamp := mjd_to_time(j.Time)
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = j.S_d_x
+			row[2] = j.S_d_y
+			row[3] = j.S_d_z
+			row[4] = j.S_w
+			row[5] = j.V_x
+			row[6] = j.V_y
+			row[7] = j.V_z
+			row[8] = j.A_x
+			row[9] = j.A_y
+			row[10] = j.A_z
+			frame.AppendRow(row...)
 		}
 	}
-	 if !transform_to_timeseries {
-	 	return frame
-	 }
+	if !transform_to_timeseries {
+		return frame
+	}
 	// ---- end FrameFromRows
 	// ---- Format to timeseries
 	tsSchema := frame.TimeSeriesSchema()
@@ -449,7 +530,7 @@ func (d *Datasource) CheckHealth(_ context.Context, req *backend.CheckHealthRequ
 	timeRange := backend.TimeRange{From: time.Now(), To: time.Now()}
 
 	var j jsonResponse
-	err := d.CosmosBackendCall("Attitude", timeRange, &j)
+	err := d.CosmosBackendCall("Attitude", "", timeRange, &j)
 	if err != nil {
 		status = backend.HealthStatusError
 		message = err.Error()
