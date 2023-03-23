@@ -2,12 +2,16 @@ import { DataQuery, DataSourceJsonData } from '@grafana/data';
 
 export type queryValues = 'attitude' | 'position' | 'battery' | 'bcreg' | 'cpu' | 'event' | 'tsen';
 
+export type typeValues = 'eci' | 'geos' | 'geod' | 'lvlh';
+
 export interface MyQuery extends DataQuery {
   queryText?: queryValues;
+  typeText?: typeValues;
 }
 
 export const defaultQuery: Partial<MyQuery> = {
   queryText: 'position',
+  typeText: 'eci',
 };
 
 /**
