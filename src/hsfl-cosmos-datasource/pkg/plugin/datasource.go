@@ -191,6 +191,9 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 		frame11 := ConvertToFrame(&j.Payload.Geods)
 		frame12 := ConvertToFrame(&j.Payload.Geoss)
 		frame13 := ConvertToFrame(&j.Payload.Lvlhs)
+		frame14 := ConvertToFrame(&j.Payload.Geoidposs)
+		frame15 := ConvertToFrame(&j.Payload.Spherposs)
+		frame16 := ConvertToFrame(&j.Payload.Qatts)
 
 		// add the frames to the response.
 		if frame1 != nil {
@@ -245,6 +248,18 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 			frame13.RefID = "lvlh"
 			response.Frames = append(response.Frames, frame13)
 		}
+		if frame14 != nil {
+			frame14.RefID = "geoidpos"
+			response.Frames = append(response.Frames, frame14)
+		}
+		if frame15 != nil {
+			frame15.RefID = "spherpos"
+			response.Frames = append(response.Frames, frame15)
+		}
+		if frame16 != nil {
+			frame16.RefID = "qatt"
+			response.Frames = append(response.Frames, frame16)
+		}
 	}
 
 	return response
@@ -289,9 +304,15 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 		names = []string{"time", "node_name", "didx", "mag_x", "mag_y", "mag_z"}
 	case geod:
 		names = []string{"time", "s_lat", "s_lon", "s_h", "v_lat", "v_lon", "v_h", "a_lat", "a_lon", "a_h"}
+	case geoidpos:
+		names = []string{"time", "s_lat", "s_lon", "s_h", "v_lat", "v_lon", "v_h", "a_lat", "a_lon", "a_h"}
 	case geos:
 		names = []string{"time", "s_phi", "s_lambda", "s_r", "v_phi", "v_lambda", "v_r", "a_phi", "a_lambda", "a_r"}
+	case spherpos:
+		names = []string{"time", "s_phi", "s_lambda", "s_r", "v_phi", "v_lambda", "v_r", "a_phi", "a_lambda", "a_r"}
 	case lvlh:
+		names = []string{"time", "s_d_x", "s_d_y", "s_d_z", "s_w", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z"}
+	case qatt:
 		names = []string{"time", "s_d_x", "s_d_y", "s_d_z", "s_w", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z"}
 	default:
 		return nil
@@ -449,6 +470,22 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[8] = j.A_lon
 			row[9] = j.A_h
 			frame.AppendRow(row...)
+		case geoidpos:
+			log.DefaultLogger.Info("geoidpos test", "s obj Lat ~", j.S.Lat)
+			transform_to_timeseries = false
+			timestamp := mjd_to_time(j.Time)
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = j.S.Lat
+			row[2] = j.S.Lon
+			row[3] = j.S.H
+			row[4] = j.V.Lat
+			row[5] = j.V.Lon
+			row[6] = j.V.H
+			row[7] = j.A.Lat
+			row[8] = j.A.Lon
+			row[9] = j.A.H
+			frame.AppendRow(row...)
 		case geos:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -463,6 +500,21 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[7] = j.A_phi
 			row[8] = j.A_lambda
 			row[9] = j.A_r
+			frame.AppendRow(row...)
+		case spherpos:
+			transform_to_timeseries = false
+			timestamp := mjd_to_time(j.Time)
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = j.S.Phi
+			row[2] = j.S.Lambda
+			row[3] = j.S.R
+			row[4] = j.V.Phi
+			row[5] = j.V.Lambda
+			row[6] = j.V.R
+			row[7] = j.A.Phi
+			row[8] = j.A.Lambda
+			row[9] = j.A.R
 			frame.AppendRow(row...)
 		case lvlh:
 			transform_to_timeseries = false
@@ -479,6 +531,22 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[8] = j.A_x
 			row[9] = j.A_y
 			row[10] = j.A_z
+			frame.AppendRow(row...)
+		case qatt:
+			transform_to_timeseries = false
+			timestamp := mjd_to_time(j.Time)
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = j.S.D.X
+			row[2] = j.S.D.Y
+			row[3] = j.S.D.Z
+			row[4] = j.S.W
+			row[5] = j.V.Col[0]
+			row[6] = j.V.Col[1]
+			row[7] = j.V.Col[2]
+			row[8] = j.A.Col[0]
+			row[9] = j.A.Col[1]
+			row[10] = j.A.Col[2]
 			frame.AppendRow(row...)
 		}
 	}
