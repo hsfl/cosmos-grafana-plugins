@@ -101,7 +101,7 @@ const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: 
             name = "start"
             type="text"
             value = {""}
-            width={9}
+            width={12}
           />
         </InlineField>
       </InlineFieldRow>
@@ -117,7 +117,7 @@ const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: 
               name="start"
               type="text"
               value = {""}
-              width={9}
+              width={12}
             />
           </InlineField>
       </InlineFieldRow>
@@ -133,7 +133,7 @@ const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: 
               name="start"
               type="text"
               value = {0}
-              width={9}
+              width={12}
             />
           </InlineField>
       </InlineFieldRow>
@@ -148,7 +148,7 @@ const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: 
               name="start"
               type="number"
               value = {0}
-              width={9}
+              width={12}
             />
           </InlineField>
       </InlineFieldRow>
