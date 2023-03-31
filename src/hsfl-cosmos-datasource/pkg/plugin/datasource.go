@@ -289,7 +289,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 	case qaatt:
 		names = []string{"time", "AYAW", "APITCH", "AROLL"}
 	case eci:
-		names = []string{"time", "s_x", "s_y", "s_z", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z"}
+		names = []string{"time", "node_name", "node_type", "s_x", "s_y", "s_z", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z"}
 	case batt:
 		names = []string{"time", "node", "amp", "power"}
 	case bcreg:
@@ -305,15 +305,15 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 	case geod:
 		names = []string{"time", "s_lat", "s_lon", "s_h", "v_lat", "v_lon", "v_h", "a_lat", "a_lon", "a_h"}
 	case geoidpos:
-		names = []string{"time", "s_lat", "s_lon", "s_h", "v_lat", "v_lon", "v_h", "a_lat", "a_lon", "a_h"}
+		names = []string{"time", "node_name", "node_type", "s_lat", "s_lon", "s_h", "v_lat", "v_lon", "v_h", "a_lat", "a_lon", "a_h"}
 	case geos:
 		names = []string{"time", "s_phi", "s_lambda", "s_r", "v_phi", "v_lambda", "v_r", "a_phi", "a_lambda", "a_r"}
 	case spherpos:
-		names = []string{"time", "s_phi", "s_lambda", "s_r", "v_phi", "v_lambda", "v_r", "a_phi", "a_lambda", "a_r"}
+		names = []string{"time", "node_name", "node_type", "s_phi", "s_lambda", "s_r", "v_phi", "v_lambda", "v_r", "a_phi", "a_lambda", "a_r"}
 	case lvlh:
 		names = []string{"time", "s_d_x", "s_d_y", "s_d_z", "s_w", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z"}
 	case qatt:
-		names = []string{"time", "s_d_x", "s_d_y", "s_d_z", "s_w", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z"}
+		names = []string{"time", "node_name", "node_type", "s_d_x", "s_d_y", "s_d_z", "s_w", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z"}
 	default:
 		return nil
 	}
@@ -334,6 +334,8 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 		case "node:device":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
 		case "node_name":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
+		case "Node_name":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
 		case "event_name":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
@@ -389,18 +391,21 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[3] = j.Qaz
 			frame.AppendRow(row...)
 		case eci:
+			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
-			row[1] = j.S_x
-			row[2] = j.S_y
-			row[3] = j.S_z
-			row[4] = j.V_x
-			row[5] = j.V_y
-			row[6] = j.V_z
-			row[7] = j.A_x
-			row[8] = j.A_y
-			row[9] = j.A_z
+			row[1] = &j.Node_name
+			row[2] = j.Node_type
+			row[3] = j.S_x
+			row[4] = j.S_y
+			row[5] = j.S_z
+			row[6] = j.V_x
+			row[7] = j.V_y
+			row[8] = j.V_z
+			row[9] = j.A_x
+			row[10] = j.A_y
+			row[11] = j.A_z
 			frame.AppendRow(row...)
 		case batt:
 			timestamp := mjd_to_time(j.Time)
@@ -471,20 +476,21 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[9] = j.A_h
 			frame.AppendRow(row...)
 		case geoidpos:
-			log.DefaultLogger.Info("geoidpos test", "s obj Lat ~", j.S.Lat)
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
-			row[1] = j.S.Lat
-			row[2] = j.S.Lon
-			row[3] = j.S.H
-			row[4] = j.V.Lat
-			row[5] = j.V.Lon
-			row[6] = j.V.H
-			row[7] = j.A.Lat
-			row[8] = j.A.Lon
-			row[9] = j.A.H
+			row[1] = &j.Node_name
+			row[2] = j.Node_type
+			row[3] = j.S.Lat
+			row[4] = j.S.Lon
+			row[5] = j.S.H
+			row[6] = j.V.Lat
+			row[7] = j.V.Lon
+			row[8] = j.V.H
+			row[9] = j.A.Lat
+			row[10] = j.A.Lon
+			row[11] = j.A.H
 			frame.AppendRow(row...)
 		case geos:
 			transform_to_timeseries = false
@@ -506,15 +512,17 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
-			row[1] = j.S.Phi
-			row[2] = j.S.Lambda
-			row[3] = j.S.R
-			row[4] = j.V.Phi
-			row[5] = j.V.Lambda
-			row[6] = j.V.R
-			row[7] = j.A.Phi
-			row[8] = j.A.Lambda
-			row[9] = j.A.R
+			row[1] = &j.Node_name
+			row[2] = j.Node_type
+			row[3] = j.S.Phi
+			row[4] = j.S.Lambda
+			row[5] = j.S.R
+			row[6] = j.V.Phi
+			row[7] = j.V.Lambda
+			row[8] = j.V.R
+			row[9] = j.A.Phi
+			row[10] = j.A.Lambda
+			row[11] = j.A.R
 			frame.AppendRow(row...)
 		case lvlh:
 			transform_to_timeseries = false
@@ -537,16 +545,18 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
-			row[1] = j.S.D.X
-			row[2] = j.S.D.Y
-			row[3] = j.S.D.Z
-			row[4] = j.S.W
-			row[5] = j.V.Col[0]
-			row[6] = j.V.Col[1]
-			row[7] = j.V.Col[2]
-			row[8] = j.A.Col[0]
-			row[9] = j.A.Col[1]
-			row[10] = j.A.Col[2]
+			row[1] = &j.Node_name
+			row[2] = j.Node_type
+			row[3] = j.S.D.X
+			row[4] = j.S.D.Y
+			row[5] = j.S.D.Z
+			row[6] = j.S.W
+			row[7] = j.V.Col[0]
+			row[8] = j.V.Col[1]
+			row[9] = j.V.Col[2]
+			row[10] = j.A.Col[0]
+			row[11] = j.A.Col[1]
+			row[12] = j.A.Col[2]
 			frame.AppendRow(row...)
 		}
 	}
@@ -564,6 +574,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			log.DefaultLogger.Error("Error in Cosmos Backend call", err.Error())
 			return nil
 		}
+		// log.DefaultLogger.Info("field data labels test", "og data field count: ", len(originalData.Fields))
 
 		// Before 8x, a special metric column was used to name time series. The LongToWide transforms that into a metric label on the value field.
 		// But that makes series name have both the value column name AND the metric name. So here we are removing the metric label here and moving it to the

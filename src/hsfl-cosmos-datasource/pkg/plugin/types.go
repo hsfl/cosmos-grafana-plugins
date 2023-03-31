@@ -58,16 +58,18 @@ type qaatt struct {
 }
 
 type eci struct {
-	Time float64
-	S_x  float64 `json:"s_x"`
-	S_y  float64 `json:"s_y"`
-	S_z  float64 `json:"s_z"`
-	V_x  float64 `json:"v_x"`
-	V_y  float64 `json:"v_y"`
-	V_z  float64 `json:"v_z"`
-	A_x  float64 `json:"a_x"`
-	A_y  float64 `json:"a_y"`
-	A_z  float64 `json:"a_z"`
+	Time      float64
+	Node_name string
+	Node_type float64
+	S_x       float64 `json:"s_x"`
+	S_y       float64 `json:"s_y"`
+	S_z       float64 `json:"s_z"`
+	V_x       float64 `json:"v_x"`
+	V_y       float64 `json:"v_y"`
+	V_z       float64 `json:"v_z"`
+	A_x       float64 `json:"a_x"`
+	A_y       float64 `json:"a_y"`
+	A_z       float64 `json:"a_z"`
 }
 
 type batt struct {
@@ -162,10 +164,12 @@ type gvector struct {
 }
 
 type geoidpos struct {
-	Time float64
-	S    gvector `json:"s,omitempty"`
-	V    gvector `json:"v,omitempty"`
-	A    gvector `json:"a,omitempty"`
+	Time      float64
+	Node_name string
+	Node_type float64
+	S         gvector `json:"s,omitempty"`
+	V         gvector `json:"v,omitempty"`
+	A         gvector `json:"a,omitempty"`
 }
 
 type svector struct {
@@ -175,10 +179,12 @@ type svector struct {
 }
 
 type spherpos struct {
-	Time float64
-	S    svector `json:"s,omitempty"`
-	V    svector `json:"v,omitempty"`
-	A    svector `json:"a,omitempty"`
+	Time      float64
+	Node_name string
+	Node_type float64
+	S         svector `json:"s,omitempty"`
+	V         svector `json:"v,omitempty"`
+	A         svector `json:"a,omitempty"`
 }
 
 type rvector struct {
@@ -197,10 +203,12 @@ type quaternion struct {
 }
 
 type qatt struct {
-	Time float64
-	S    quaternion `json:"s,omitempty"`
-	V    rvector    `json:"v,omitempty"`
-	A    rvector    `json:"a,omitempty"`
+	Time      float64
+	Node_name string
+	Node_type float64
+	S         quaternion `json:"s,omitempty"`
+	V         rvector    `json:"v,omitempty"`
+	A         rvector    `json:"a,omitempty"`
 }
 
 type cosmostype interface {
