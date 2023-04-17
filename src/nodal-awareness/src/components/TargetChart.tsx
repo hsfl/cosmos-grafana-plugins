@@ -37,13 +37,67 @@ export const TargetChart = (props: { width: number; height: number; data: PanelD
         );
       })}
       {/** Row cells */}
-      {['kauaicc', 'fairbanks', 'surreysc'].map((target, ti) =>
-        [0, 1, 2, 3, 4, 5].map((col, ci) => (
+      <div style={{ gridRow: 2, gridColumn: 2 }}>
+        <Input type="text" value={props.data.series[0].fields[2].values.get(0)}></Input>
+      </div>
+      <div style={{ gridRow: 2, gridColumn: 3 }}>
+        <Input type="text" value={props.data.series[0].fields[3].values.get(0)}></Input>
+      </div>
+      <div style={{ gridRow: 2, gridColumn: 4 }}>
+        <Input type="text" value={props.data.series[0].fields[4].values.get(0)}></Input>
+      </div>
+      <div style={{ gridRow: 2, gridColumn: 5 }}>
+        <Input type="text" value={props.data.series[0].fields[5].values.get(0)}></Input>
+      </div>
+      <div style={{ gridRow: 2, gridColumn: 6 }}>
+        <Input type="text" value={'?'}></Input>
+      </div>
+      <div style={{ gridRow: 2, gridColumn: 7 }}>
+        <Input type="text" value={'?'}></Input>
+      </div>
+      <div style={{ gridRow: 3, gridColumn: 2 }}>
+        <Input type="text" value={props.data.series[0].fields[2].values.get(0)}></Input>
+      </div>
+      <div style={{ gridRow: 3, gridColumn: 3 }}>
+        <Input type="text" value={props.data.series[0].fields[3].values.get(0)}></Input>
+      </div>
+      <div style={{ gridRow: 3, gridColumn: 4 }}>
+        <Input type="text" value={props.data.series[0].fields[4].values.get(0)}></Input>
+      </div>
+      <div style={{ gridRow: 3, gridColumn: 5 }}>
+        <Input type="text" value={props.data.series[0].fields[5].values.get(0)}></Input>
+      </div>
+      <div style={{ gridRow: 3, gridColumn: 6 }}>
+        <Input type="text" value={'?'}></Input>
+      </div>
+      <div style={{ gridRow: 3, gridColumn: 7 }}>
+        <Input type="text" value={'?'}></Input>
+      </div>
+      <div style={{ gridRow: 4, gridColumn: 2 }}>
+        <Input type="text" value={props.data.series[0].fields[2].values.get(0)}></Input>
+      </div>
+      <div style={{ gridRow: 4, gridColumn: 3 }}>
+        <Input type="text" value={props.data.series[0].fields[3].values.get(0)}></Input>
+      </div>
+      <div style={{ gridRow: 4, gridColumn: 4 }}>
+        <Input type="text" value={props.data.series[0].fields[4].values.get(0)}></Input>
+      </div>
+      <div style={{ gridRow: 4, gridColumn: 5 }}>
+        <Input type="text" value={props.data.series[0].fields[5].values.get(0)}></Input>
+      </div>
+      <div style={{ gridRow: 4, gridColumn: 6 }}>
+        <Input type="text" value={'?'}></Input>
+      </div>
+      <div style={{ gridRow: 4, gridColumn: 7 }}>
+        <Input type="text" value={'?'}></Input>
+      </div>
+      {/* {['kauaicc', 'fairbanks', 'surreysc'].map((target, ti) =>
+        [0, 1, 2, 3].map((col, ci) => (
           <div key={`na-target-row-${target}-${ti}-${ci}`} style={{ gridRow: ti + 2, gridColumn: ci + 2 }}>
-            <Input type="text" value={props.data.series[0].fields[ci].values.get(0)}></Input>
+            <Input type="text" value={props.data.series[0].fields[ci + 2].values.get(0)}></Input>
           </div>
         ))
-      )}
+      )} */}
     </div>
   );
 };
