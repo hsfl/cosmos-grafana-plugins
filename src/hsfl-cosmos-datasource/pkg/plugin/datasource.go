@@ -178,96 +178,76 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 		}
 
 		// Convert sql json to timeseries dataframe
-		frame1 := ConvertToFrame(&j.Payload.Avectors)
-		frame2 := ConvertToFrame(&j.Payload.Qvatts)
-		frame3 := ConvertToFrame(&j.Payload.Qaatts)
-		frame4 := ConvertToFrame(&j.Payload.Ecis)
-		frame5 := ConvertToFrame(&j.Payload.Batts)
-		frame6 := ConvertToFrame(&j.Payload.Bcregs)
-		frame7 := ConvertToFrame(&j.Payload.Tsens)
-		frame8 := ConvertToFrame(&j.Payload.Cpus)
-		frame9 := ConvertToFrame(&j.Payload.Events)
-		frame10 := ConvertToFrame(&j.Payload.Mags)
-		frame11 := ConvertToFrame(&j.Payload.Geods)
-		frame12 := ConvertToFrame(&j.Payload.Geoss)
-		frame13 := ConvertToFrame(&j.Payload.Lvlhs)
-		frame14 := ConvertToFrame(&j.Payload.Geoidposs)
-		frame15 := ConvertToFrame(&j.Payload.Spherposs)
-		frame16 := ConvertToFrame(&j.Payload.Qatts)
-
-		// add the frames to the response.
-		if frame1 != nil {
-			frame1.RefID = "avector"
-			response.Frames = append(response.Frames, frame1)
-		}
-		if frame2 != nil {
-			frame2.RefID = "qvatt"
-			response.Frames = append(response.Frames, frame2)
-		}
-		if frame3 != nil {
-			frame3.RefID = "qaatt"
-			response.Frames = append(response.Frames, frame3)
-		}
-		if frame4 != nil {
-			frame4.RefID = "eci"
-			response.Frames = append(response.Frames, frame4)
-		}
-		if frame5 != nil {
-			frame5.RefID = "batt"
-			response.Frames = append(response.Frames, frame5)
-		}
-		if frame6 != nil {
-			frame6.RefID = "bcreg"
-			response.Frames = append(response.Frames, frame6)
-		}
-		if frame7 != nil {
-			frame7.RefID = "tsen"
-			response.Frames = append(response.Frames, frame7)
-		}
-		if frame8 != nil {
-			frame8.RefID = "cpu"
-			response.Frames = append(response.Frames, frame8)
-		}
-		if frame9 != nil {
-			frame9.RefID = "event"
-			response.Frames = append(response.Frames, frame9)
-		}
-		if frame10 != nil {
-			frame10.RefID = "mag"
-			response.Frames = append(response.Frames, frame10)
-		}
-		if frame11 != nil {
-			frame11.RefID = "geod"
-			response.Frames = append(response.Frames, frame11)
-		}
-		if frame12 != nil {
-			frame12.RefID = "geos"
-			response.Frames = append(response.Frames, frame12)
-		}
-		if frame13 != nil {
-			frame13.RefID = "lvlh"
-			response.Frames = append(response.Frames, frame13)
-		}
-		if frame14 != nil {
-			frame14.RefID = "geoidpos"
-			response.Frames = append(response.Frames, frame14)
-		}
-		if frame15 != nil {
-			frame15.RefID = "spherpos"
-			response.Frames = append(response.Frames, frame15)
-		}
-		if frame16 != nil {
-			frame16.RefID = "qatt"
-			response.Frames = append(response.Frames, frame16)
-		}
+		ConvertToFrame(&response.Frames, &j.Payload.Avectors)
+		ConvertToFrame(&response.Frames, &j.Payload.Qvatts)
+		ConvertToFrame(&response.Frames, &j.Payload.Qaatts)
+		ConvertToFrame(&response.Frames, &j.Payload.Ecis)
+		ConvertToFrame(&response.Frames, &j.Payload.Batts)
+		ConvertToFrame(&response.Frames, &j.Payload.Bcregs)
+		ConvertToFrame(&response.Frames, &j.Payload.Tsens)
+		ConvertToFrame(&response.Frames, &j.Payload.Cpus)
+		ConvertToFrame(&response.Frames, &j.Payload.Events)
+		ConvertToFrame(&response.Frames, &j.Payload.Mags)
+		ConvertToFrame(&response.Frames, &j.Payload.Geods)
+		ConvertToFrame(&response.Frames, &j.Payload.Geoss)
+		ConvertToFrame(&response.Frames, &j.Payload.Lvlhs)
+		ConvertToFrame(&response.Frames, &j.Payload.Geoidposs)
+		ConvertToFrame(&response.Frames, &j.Payload.Spherposs)
+		ConvertToFrame(&response.Frames, &j.Payload.Qatts)
 	}
 
 	return response
 }
 
+// Returns frame fields with appropriate types given a slice of names
+func CreateFields(names []string) data.Fields {
+	fields := make(data.Fields, len(names))
+	for i, v := range names {
+		switch v {
+		case "time":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableTime, 0)
+		case "node":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
+		case "node:device":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
+		case "node_name":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
+		case "Node_name":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
+		case "event_name":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
+		case "event_id":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeUint8, 0)
+		case "didx":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeUint8, 0)
+		case "duration":
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeUint32, 0)
+		default:
+			fields[i] = data.NewFieldFromFieldType(data.FieldTypeFloat64, 0)
+		}
+		fields[i].Name = names[i]
+	}
+	return fields
+}
+
+// Checks if the frame_map contains an entry for the given frame_name, and if not, creates a new entry for it
+// using the names slice.
+// Appends the row to the specified Frame in the map.
+// frame_map: Map of data.Frame, used to collect all telem for a given node to a separate Frame
+// frame_name: Name of the fram
+// row: Row to append to the node's Frame
+// names: Column names for the Frame
+func AppendRowtoMap(frame_map map[string]*data.Frame, frame_name string, row []interface{}, names []string) {
+	_, ok := frame_map[frame_name]
+	if !ok {
+		frame_map[frame_name] = data.NewFrame(frame_name, CreateFields(names)...)
+	}
+	frame_map[frame_name].AppendRow(row...)
+}
+
 // Convert a json of mysql col/rows into a grafana timeseries data frame
 // Heavily references (and abbreviates) executeQuery in grafana/pkg/tsdb/sqleng/sql_engine.go
-func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
+func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 	// reflection setup, get field names
 	if len(*jarg) < 1 {
 		return nil
@@ -323,34 +303,8 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 	// ---- FrameFromRows
 	// Create response frame
 	// Based on sqlutil NewFrame
-	//names := []string{"Time", "b", "e", "h"}
-	fields := make(data.Fields, len(names))
-	for i, v := range names {
-		switch v {
-		case "time":
-			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableTime, 0)
-		case "node":
-			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
-		case "node:device":
-			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
-		case "node_name":
-			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
-		case "Node_name":
-			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
-		case "event_name":
-			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
-		case "event_id":
-			fields[i] = data.NewFieldFromFieldType(data.FieldTypeUint8, 0)
-		case "didx":
-			fields[i] = data.NewFieldFromFieldType(data.FieldTypeUint8, 0)
-		case "duration":
-			fields[i] = data.NewFieldFromFieldType(data.FieldTypeUint32, 0)
-		default:
-			fields[i] = data.NewFieldFromFieldType(data.FieldTypeFloat64, 0)
-		}
-		fields[i].Name = names[i]
-	}
-	frame := data.NewFrame("", fields...)
+	// Separate out nodes into a new series
+	frame_map := make(map[string]*data.Frame)
 	transform_to_timeseries := true
 	for _, v := range *jarg {
 		// vtype := reflect.ValueOf((*j)[0])
@@ -373,7 +327,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[1] = j.B
 			row[2] = j.E
 			row[3] = j.H
-			frame.AppendRow(row...)
+			AppendRowtoMap(frame_map, "node", row, names)
 		case qvatt:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
@@ -381,7 +335,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[1] = j.Qvx
 			row[2] = j.Qvy
 			row[3] = j.Qvz
-			frame.AppendRow(row...)
+			AppendRowtoMap(frame_map, "node", row, names)
 		case qaatt:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
@@ -389,9 +343,8 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[1] = j.Qax
 			row[2] = j.Qay
 			row[3] = j.Qaz
-			frame.AppendRow(row...)
+			AppendRowtoMap(frame_map, "node", row, names)
 		case eci:
-			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
@@ -406,7 +359,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[9] = j.A_x
 			row[10] = j.A_y
 			row[11] = j.A_z
-			frame.AppendRow(row...)
+			AppendRowtoMap(frame_map, j.Node_name, row, names)
 		case batt:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
@@ -414,7 +367,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[1] = &j.Node
 			row[2] = j.Amp
 			row[3] = j.Power
-			frame.AppendRow(row...)
+			AppendRowtoMap(frame_map, j.Node, row, names)
 		case bcreg:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
@@ -422,14 +375,14 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[1] = &j.Node
 			row[2] = j.Amp
 			row[3] = j.Power
-			frame.AppendRow(row...)
+			AppendRowtoMap(frame_map, j.Node, row, names)
 		case tsen:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
 			row[1] = &j.Node_Device
 			row[2] = j.Temp
-			frame.AppendRow(row...)
+			AppendRowtoMap(frame_map, j.Node_Device, row, names)
 		case cpu:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
@@ -438,7 +391,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[2] = j.Load
 			row[3] = j.Gib
 			row[4] = j.Storage
-			frame.AppendRow(row...)
+			AppendRowtoMap(frame_map, j.Node, row, names)
 		case event:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -448,7 +401,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[2] = j.Duration
 			row[3] = j.Event_id
 			row[4] = &j.Event_name
-			frame.AppendRow(row...)
+			AppendRowtoMap(frame_map, j.Node_name, row, names)
 		case mag:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -459,7 +412,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[3] = j.Mag_x
 			row[4] = j.Mag_y
 			row[5] = j.Mag_z
-			frame.AppendRow(row...)
+			AppendRowtoMap(frame_map, j.Node_name, row, names)
 		case geod:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -474,7 +427,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[7] = j.A_lat
 			row[8] = j.A_lon
 			row[9] = j.A_h
-			frame.AppendRow(row...)
+			AppendRowtoMap(frame_map, "node", row, names)
 		case geoidpos:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -491,7 +444,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[9] = j.A.Lat
 			row[10] = j.A.Lon
 			row[11] = j.A.H
-			frame.AppendRow(row...)
+			AppendRowtoMap(frame_map, j.Node_name, row, names)
 		case geos:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -506,7 +459,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[7] = j.A_phi
 			row[8] = j.A_lambda
 			row[9] = j.A_r
-			frame.AppendRow(row...)
+			AppendRowtoMap(frame_map, "node", row, names)
 		case spherpos:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -523,7 +476,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[9] = j.A.Phi
 			row[10] = j.A.Lambda
 			row[11] = j.A.R
-			frame.AppendRow(row...)
+			AppendRowtoMap(frame_map, j.Node_name, row, names)
 		case lvlh:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -539,7 +492,7 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[8] = j.A_x
 			row[9] = j.A_y
 			row[10] = j.A_z
-			frame.AppendRow(row...)
+			AppendRowtoMap(frame_map, "node", row, names)
 		case qatt:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -557,43 +510,49 @@ func ConvertToFrame[T cosmostype](jarg *[]T) *data.Frame {
 			row[10] = j.A.Col[0]
 			row[11] = j.A.Col[1]
 			row[12] = j.A.Col[2]
-			frame.AppendRow(row...)
+			AppendRowtoMap(frame_map, j.Node_name, row, names)
 		}
 	}
 	if !transform_to_timeseries {
-		return frame
+		for _, frame := range frame_map {
+			*frames = append(*frames, frame)
+		}
+		return nil
 	}
 	// ---- end FrameFromRows
 	// ---- Format to timeseries
-	tsSchema := frame.TimeSeriesSchema()
-	if tsSchema.Type == data.TimeSeriesTypeLong {
-		var err error
-		originalData := frame
-		frame, err = data.LongToWide(frame, &data.FillMissing{Mode: data.FillModeNull})
-		if err != nil {
-			log.DefaultLogger.Error("Error in Cosmos Backend call", err.Error())
-			return nil
-		}
-		// log.DefaultLogger.Info("field data labels test", "og data field count: ", len(originalData.Fields))
+	for _, frame := range frame_map {
+		tsSchema := frame.TimeSeriesSchema()
+		if tsSchema.Type == data.TimeSeriesTypeLong {
+			var err error
+			originalData := frame
+			frame, err = data.LongToWide(frame, &data.FillMissing{Mode: data.FillModeNull})
+			if err != nil {
+				log.DefaultLogger.Error("Error in Cosmos Backend call", err.Error())
+				return nil
+			}
+			// log.DefaultLogger.Info("field data labels test", "og data field count: ", len(originalData.Fields))
 
-		// Before 8x, a special metric column was used to name time series. The LongToWide transforms that into a metric label on the value field.
-		// But that makes series name have both the value column name AND the metric name. So here we are removing the metric label here and moving it to the
-		// field name to get the same naming for the series as pre v8
-		if len(originalData.Fields) == 3 {
-			for _, field := range frame.Fields {
-				if len(field.Labels) == 1 { // 7x only supported one label
-					name, ok := field.Labels["metric"]
-					if ok {
-						field.Name = name
-						field.Labels = nil
+			// Before 8x, a special metric column was used to name time series. The LongToWide transforms that into a metric label on the value field.
+			// But that makes series name have both the value column name AND the metric name. So here we are removing the metric label here and moving it to the
+			// field name to get the same naming for the series as pre v8
+			if len(originalData.Fields) == 3 {
+				for _, field := range frame.Fields {
+					if len(field.Labels) == 1 { // 7x only supported one label
+						name, ok := field.Labels["metric"]
+						if ok {
+							field.Name = name
+							field.Labels = nil
+						}
 					}
 				}
 			}
 		}
-	}
-	// ---- end format to timeseries
+		// ---- end format to timeseries
 
-	return frame
+		*frames = append(*frames, frame)
+	}
+	return nil
 }
 
 // CheckHealth handles health checks sent from Grafana to the plugin.
