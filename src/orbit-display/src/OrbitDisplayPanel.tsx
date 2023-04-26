@@ -51,18 +51,16 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
       // myczml[0] is our CZMLDataSource
       // if (cosmosDS.length === 1) {
       // console.log('here2', cosmosDS, 'timerange', data.timeRange);
-      // series is an array of query responses
+      // series is an array of query responses, each query returns multiple series grouped by node name
       // fields is an array of the fields in those responses (in this case, 'historical' and 'predicted')
       // values are the rows within that field
       // const historical: string = data.series[0].fields.find((x) => x.name === 'historical')?.values.get(0);
-      const time = data.series[0].fields.find((field) => field.name === 'time')?.values;
-      const sx = data.series[0].fields.find((field) => field.name === 's_x')?.values;
-      const sy = data.series[0].fields.find((field) => field.name === 's_y')?.values;
-      const sz = data.series[0].fields.find((field) => field.name === 's_z')?.values;
-      if (time === undefined || sx === undefined || sy === undefined || sz === undefined) {
-        return;
+      // cosmosDS.clearEntities();
+      for (let i=0; i<data.series.length; i++) {
+        const node_name = data.series[i].name ?? 'node';
+        cosmosDS.load(node_name, data.series[i], cesiumViewer.clock);
       }
-      cosmosDS.load(time, sx, sy, sz, cesiumViewer.clock);
+      
       // data.timeRange is in unix seconds, but the data.series Time is in unix milliseconds
       const timeRangeStart = JulianDate.fromDate(new Date(data.timeRange.from.unix() * 1000));
       const timeRangeStop = JulianDate.fromDate(new Date(data.timeRange.to.unix() * 1000));

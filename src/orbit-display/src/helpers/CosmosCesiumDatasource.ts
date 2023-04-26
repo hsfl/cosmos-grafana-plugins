@@ -1,8 +1,8 @@
 import {
-  defined,
   Cartesian3,
   Clock,
   ClockRange,
+  Color,
   DataSourceClock,
   DeveloperError,
   EntityCluster,
@@ -13,6 +13,7 @@ import {
   SampledPositionProperty,
   TimeIntervalCollection,
 } from 'cesium';
+import { DataFrame } from '@grafana/data';
 
 /**
  * This class is an example of a custom DataSource.  It loads JSON data as
@@ -86,21 +87,54 @@ export class CosmosCesiumDatasource {
       this.loadingEvent.raiseEvent([isLoading]);
     }
   }
+  clearEntities(): void {
+    //Clear out any data that might already exist.
+    const entities = this.entities;
+    entities.removeAll();
+  }
   // TODO: fix any type
-  load(time: any, sx: any, sy: any, sz: any, viewerClock: Clock): void {
-    if (!defined(sx) || !defined(sy) || !defined(sz)) {
+  load(node_name: string, series: DataFrame, viewerClock: Clock): void {
+    const time = series.fields.find((field) => field.name === 'time')?.values;
+    const sx = series.fields.find((field) => field.name === 's_x')?.values;
+    const sy = series.fields.find((field) => field.name === 's_y')?.values;
+    const sz = series.fields.find((field) => field.name === 's_z')?.values;
+    if (time === undefined || sx === undefined || sy === undefined || sz === undefined) {
       throw new DeveloperError('data is required.');
     }
-
+    const node_type = series.fields.find((field) => field.name === 'node_type')?.values.get(0) ?? 0;
+    let node_model = undefined;
+    let node_path = undefined;
+    let node_graphic = undefined;
+    // if node is type 0 = a satellite, use a model for this, 
+    // 
+    if (node_type === 0) {
+      node_model = {
+        uri: './public/plugins/hsfl-orbit-display/img/GenericSatellite.glb',
+        scale: 1.0,
+        minimumPixelSize: 64,
+      };
+      node_path = {
+        leadTime: 0,
+        width: 2,
+        show: true
+      };
+    } else {
+      // Every other type is just a sphere, and with no trailing path
+      node_graphic = {
+        color: Color.BROWN,
+        outlineColor: Color.WHITE,
+        outlineWidth: 2,
+        pixelSize: 10,
+      };
+    }
     //It's a good idea to suspend events when making changes to a
     //large amount of entities.  This will cause events to be batched up
     //into the minimal amount of function calls and all take place at the
     //end of processing (when resumeEvents is called).
     // entities.suspendEvents();
-    //Clear out any data that might already exist.
-    const entities = this.entities;
-    entities.removeAll();
     this.setLoading(true);
+
+    const entities = this.entities;
 
     // Data will be
     const maxLen = Math.max(time.length, sx.length, sy.length, sz.length);
@@ -116,20 +150,23 @@ export class CosmosCesiumDatasource {
     const timeRangeStart = JulianDate.fromDate(new Date(time.get(0)));
     const timeRangeStop = JulianDate.fromDate(new Date(time.get(time.length - 1)));
     const timeRange = TimeIntervalCollection.fromJulianDateArray({ julianDates: [timeRangeStart, timeRangeStop] });
-    entities.add({
-      id: 'Sat2Id',
-      name: 'Sat2',
-      path: {
-        width: 2,
-      },
-      position: pos,
-      model: {
-        uri: './public/plugins/hsfl-orbit-display/img/GenericSatellite.glb',
-        scale: 1.0,
-        minimumPixelSize: 64,
-      },
-      availability: timeRange,
-    });
+    
+    const entity = entities.getById(node_name+'id');
+    if (entity === undefined) {
+      entities.add({
+        id: node_name+'id',
+        name: node_name,
+        path: node_path,
+        position: pos,
+        model: node_model,
+        point: node_graphic,
+        availability: timeRange,
+      });
+    } else {
+      entity.position = pos;
+      entity.availability = timeRange;
+    }
+    
     let clock = new DataSourceClock();
     if (this.clock === undefined) {
       this.clock = new DataSourceClock();
