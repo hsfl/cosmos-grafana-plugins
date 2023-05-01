@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input } from '@grafana/ui';
+import { InlineFieldRow, Input, Select } from '@grafana/ui';
 import { PanelData } from '@grafana/data';
 
 export const TargetChart = (props: { width: number; height: number; data: PanelData }) => {
@@ -20,6 +20,16 @@ export const TargetChart = (props: { width: number; height: number; data: PanelD
         overflow: 'scroll',
       }}
     >
+      <div>
+        <InlineFieldRow>
+          <Select
+            value={{ label: 'ECI' }}
+            options={[{ label: 'ECI' }, { label: 'ICRF' }, { label: 'GEOD' }, { label: 'GEOS' }, { label: 'LVLH' }]}
+            onChange={() => {}}
+            width="auto"
+          />
+        </InlineFieldRow>
+      </div>
       {/** Column labels */}
       <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 2 }}>Type</div>
       <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 3 }}>Lon</div>
