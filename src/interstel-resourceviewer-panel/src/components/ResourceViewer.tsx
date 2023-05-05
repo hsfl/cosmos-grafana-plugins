@@ -39,9 +39,6 @@ export const ResourceViewer = (props: { data: PanelData; width: number; height: 
       }
     });
   }, [data, displayedSeries.length]);
-  console.log('dom', domain);
-  console.log('ds', dataSeries);
-  console.log('dis', displayedSeries);
 
   // scales, memoize for performance
   const xScale = useMemo(
@@ -93,7 +90,6 @@ export const ResourceViewer = (props: { data: PanelData; width: number; height: 
             <Group
               key={`bargroup-${key}`}
               onClick={(event) => {
-                console.log(key, event)
                 setDisplayedSeries(displayedSeries => {
                   // If this key is the only series currently selected for display,
                   // then on this click, display everything again.
