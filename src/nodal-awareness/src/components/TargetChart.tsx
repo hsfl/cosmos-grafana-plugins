@@ -4,7 +4,7 @@ import { PanelData } from '@grafana/data';
 
 export const TargetChart = (props: { width: number; height: number; data: PanelData }) => {
   //const { data, width, height } = props;
-  console.log(props.data);
+  console.log(props.data.series[0].name);
   return (
     <div
       style={{
@@ -39,7 +39,8 @@ export const TargetChart = (props: { width: number; height: number; data: PanelD
       <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 7 }}>Elev</div>
 
       {/** Row label */}
-      {['kauaicc', 'fairbanks', 'surreysc'].map((val, i) => {
+      {/** Takes name from node data */}
+      {[props.data.series[0].name, props.data.series[1].name, props.data.series[2].name].map((val, i) => {
         return (
           <div key={`na-target-header-${val}`} style={{ gridRow: i + 2, gridColumn: 1, marginInlineEnd: '1em' }}>
             {val}
@@ -47,17 +48,18 @@ export const TargetChart = (props: { width: number; height: number; data: PanelD
         );
       })}
       {/** Row cells */}
+      {/** Node 1 */}
       <div style={{ gridRow: 2, gridColumn: 2 }}>
-        <Input type="text" value={props.data.series[0].fields[2].values.get(0)}></Input>
-      </div>
-      <div style={{ gridRow: 2, gridColumn: 3 }}>
-        <Input type="text" value={props.data.series[0].fields[3].values.get(0)}></Input>
-      </div>
-      <div style={{ gridRow: 2, gridColumn: 4 }}>
         <Input type="text" value={props.data.series[0].fields[4].values.get(0)}></Input>
       </div>
-      <div style={{ gridRow: 2, gridColumn: 5 }}>
+      <div style={{ gridRow: 2, gridColumn: 3 }}>
         <Input type="text" value={props.data.series[0].fields[5].values.get(0)}></Input>
+      </div>
+      <div style={{ gridRow: 2, gridColumn: 4 }}>
+        <Input type="text" value={props.data.series[0].fields[6].values.get(0)}></Input>
+      </div>
+      <div style={{ gridRow: 2, gridColumn: 5 }}>
+        <Input type="text" value={props.data.series[0].fields[7].values.get(0)}></Input>
       </div>
       <div style={{ gridRow: 2, gridColumn: 6 }}>
         <Input type="text" value={'?'}></Input>
@@ -66,16 +68,16 @@ export const TargetChart = (props: { width: number; height: number; data: PanelD
         <Input type="text" value={'?'}></Input>
       </div>
       <div style={{ gridRow: 3, gridColumn: 2 }}>
-        <Input type="text" value={props.data.series[0].fields[2].values.get(0)}></Input>
+        <Input type="text" value={props.data.series[1].fields[4].values.get(0)}></Input>
       </div>
       <div style={{ gridRow: 3, gridColumn: 3 }}>
-        <Input type="text" value={props.data.series[0].fields[3].values.get(0)}></Input>
+        <Input type="text" value={props.data.series[1].fields[5].values.get(0)}></Input>
       </div>
       <div style={{ gridRow: 3, gridColumn: 4 }}>
-        <Input type="text" value={props.data.series[0].fields[4].values.get(0)}></Input>
+        <Input type="text" value={props.data.series[1].fields[6].values.get(0)}></Input>
       </div>
       <div style={{ gridRow: 3, gridColumn: 5 }}>
-        <Input type="text" value={props.data.series[0].fields[5].values.get(0)}></Input>
+        <Input type="text" value={props.data.series[1].fields[7].values.get(0)}></Input>
       </div>
       <div style={{ gridRow: 3, gridColumn: 6 }}>
         <Input type="text" value={'?'}></Input>
@@ -84,16 +86,16 @@ export const TargetChart = (props: { width: number; height: number; data: PanelD
         <Input type="text" value={'?'}></Input>
       </div>
       <div style={{ gridRow: 4, gridColumn: 2 }}>
-        <Input type="text" value={props.data.series[0].fields[2].values.get(0)}></Input>
+        <Input type="text" value={props.data.series[2].fields[4].values.get(0)}></Input>
       </div>
       <div style={{ gridRow: 4, gridColumn: 3 }}>
-        <Input type="text" value={props.data.series[0].fields[3].values.get(0)}></Input>
+        <Input type="text" value={props.data.series[2].fields[5].values.get(0)}></Input>
       </div>
       <div style={{ gridRow: 4, gridColumn: 4 }}>
-        <Input type="text" value={props.data.series[0].fields[4].values.get(0)}></Input>
+        <Input type="text" value={props.data.series[2].fields[6].values.get(0)}></Input>
       </div>
       <div style={{ gridRow: 4, gridColumn: 5 }}>
-        <Input type="text" value={props.data.series[0].fields[5].values.get(0)}></Input>
+        <Input type="text" value={props.data.series[2].fields[7].values.get(0)}></Input>
       </div>
       <div style={{ gridRow: 4, gridColumn: 6 }}>
         <Input type="text" value={'?'}></Input>
