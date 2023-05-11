@@ -214,7 +214,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
         if (refMOCTimeDiv.current !== null) {
           // Unix timestamp to mjd
           // .unix takes unix seconds argument, so convert milliseconds to seconds
-          const newMOCTime = moment.unix(event.payload.time/1000).tz('America/Honolulu').format('HH:mm:ss');
+          const newMOCTime = moment.unix(event.payload.time/1000).tz('Pacific/Honolulu').format('HH:mm:ss');
           refMOCTimeDiv.current.value = newMOCTime;
         }
         if (refMETTimeDiv.current !== null) {
