@@ -21,7 +21,7 @@ export interface MyQuery extends DataQuery {
   queryText: string;
   typeText?: string;
   latestOnly: boolean;
-  filters: filter[];
+  filters: Filter[];
 }
 
 export const defaultQuery: Partial<MyQuery> = {

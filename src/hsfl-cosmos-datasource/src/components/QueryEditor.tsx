@@ -9,7 +9,7 @@ import {
   MyDataSourceOptions,
   MyQuery,
   compareTypeOptions,
-  filter,
+  Filter,
   filterTypeOptions,
   queryOptions,
   posTypeOptions,
@@ -37,7 +37,7 @@ export class QueryEditor extends PureComponent<Props> {
 
   onAddFilterClick = () => {
     const { onChange, query } = this.props;
-    const newFilter: filter = {
+    const newFilter: Filter = {
       filterType: 'node',
       compareType: 'equals',
       filterValue: '',
