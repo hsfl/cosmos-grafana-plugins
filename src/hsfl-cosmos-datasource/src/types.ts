@@ -1,6 +1,12 @@
 import { DataQuery, DataSourceJsonData, SelectableValue } from '@grafana/data';
 
-export const queryOptions: Array<SelectableValue<string>> = [
+export interface SelectOption<T> {
+  label: string;
+  value: T;
+  description?: string;
+}
+
+export const queryOptions: Array<SelectOption<string>> = [
   { label: 'Attitude', value: 'attitude' },
   { label: 'Position', value: 'position' },
   { label: 'Battery', value: 'battery' },
@@ -10,7 +16,7 @@ export const queryOptions: Array<SelectableValue<string>> = [
   { label: 'Thermal', value: 'tsen' },
 ];
 
-export const posTypeOptions: Array<SelectableValue<string>> = [
+export const posTypeOptions: Array<SelectOption<string>> = [
   { label: 'ECI', value: 'eci', description: 'Earth-Centered Inertial' },
   { label: 'Geospheric', value: 'geos', description: '' },
   { label: 'Geodetic', value: 'geod', description: 'Lat/Lon/Alt' },
@@ -22,6 +28,7 @@ export interface MyQuery extends DataQuery {
   typeText?: string;
   latestOnly: boolean;
   filters: Filter[];
+  functions: QueryFunction[];
 }
 
 export const defaultQuery: Partial<MyQuery> = {
@@ -29,6 +36,7 @@ export const defaultQuery: Partial<MyQuery> = {
   typeText: 'eci',
   latestOnly: false,
   filters: [],
+  functions: [],
 };
 
 /**
@@ -51,20 +59,40 @@ export const url_options: Array<SelectableValue<string>> = [
   { label: 'URL', value: '' },
 ];
 
-type filterType = 'node' | 'name' | 'col';
-type compareType = 'equals' | 'contains';
-export const filterTypeOptions: Array<SelectableValue<string>> = [
+export type FilterType = 'node' | 'name' | 'col';
+export type CompareType = 'equals' | 'contains';
+export type FunctionType = 'sum' | 'groundstation' | 'magnitude';
+export const FunctionArgs = new Map<FunctionType, string[]>([
+  ['sum', []],
+  ['groundstation', ['Origin node name']],
+  ['magnitude', []],
+]);
+export const filterTypeOptions: Array<SelectOption<FilterType>> = [
   { label: 'Node', value: 'node' },
   { label: 'Name', value: 'name' },
   { label: 'Column', value: 'col' },
 ];
-export const compareTypeOptions: Array<SelectableValue<string>> = [
+export const compareTypeOptions: Array<SelectOption<CompareType>> = [
   { label: '=', value: 'equals', description: 'Exactly equals' },
   { label: '~=', value: 'contains', description: 'Contains' },
 ];
+export const functionTypeOptions: Array<SelectOption<FunctionType>> = [
+  { label: 'Sum', value: 'sum', description: 'Compute sum of values' },
+  {
+    label: 'Groundstation',
+    value: 'groundstation',
+    description: 'Get slant angle/range/elev. from origin node to other nodes',
+  },
+  { label: 'Magnitude', value: 'magnitude', description: 'Compute magnitude of a vector-quantity' },
+];
 
 export interface Filter {
-  filterType: filterType;
-  compareType: compareType;
+  filterType: FilterType;
+  compareType: CompareType;
   filterValue: string;
+}
+
+export interface QueryFunction {
+  functionType: FunctionType;
+  args: string[];
 }
