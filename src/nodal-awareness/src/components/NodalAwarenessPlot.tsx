@@ -52,14 +52,14 @@ export const NodalAwarenessPlot = (props: { width: number; height: number }) => 
     return null;
   }
 
-  const horizonCX = width / 3;
-  const horizonCY = height / 2.5;
+  const horizonCX = (width * 0.6) / 2;
+  const horizonCY = height / 2.5 + height / 5;
 
   // Update scale output to match component dimensions
   yScale.range([0, height / 2 - padding]);
   return (
-    <motion.svg width={width} height={height}>
-      <motion.rect width={width} height={height} fill={'#000'} rx={14} />
+    <motion.svg width={width * 0.6} height={height}>
+      <motion.rect width={width * 0.6} height={height} fill={'#000'} rx={0} />
       {/** Horizon subcircle */}
       <motion.g>
         <motion.circle
@@ -67,7 +67,7 @@ export const NodalAwarenessPlot = (props: { width: number; height: number }) => 
           cy={horizonCY}
           fill="#f00"
           fillOpacity={0.2}
-          r={dimMax / 2 - padding}
+          r={dimMax / 2.5 - padding}
           stroke="#f00"
           strokeOpacity={0.2}
         />
@@ -80,7 +80,7 @@ export const NodalAwarenessPlot = (props: { width: number; height: number }) => 
           const ringIdx = radialTicks.length - i;
           const tickSpacing = dimMax / 2 / (radialTicks.length + 1);
           const r = tickSpacing * ringIdx;
-          const gridCenterX = width / 2;
+          const gridCenterX = (width * 0.6) / 2;
           const gridCenterY = height / 2;
           return (
             <motion.circle
@@ -100,7 +100,7 @@ export const NodalAwarenessPlot = (props: { width: number; height: number }) => 
         {radialTicks.map((v, i) => {
           const ringIdx = radialTicks.length - i;
           const tickSpacing = dimMax / 2 / (radialTicks.length + 1);
-          const gridCenterX = width / 2;
+          const gridCenterX = (width * 0.6) / 2;
           const gridCenterY = height / 2;
           return (
             <motion.text
@@ -116,7 +116,7 @@ export const NodalAwarenessPlot = (props: { width: number; height: number }) => 
         })}
         {/** Dashed radial lines */}
         {[0, 1, 2, 3, 4, 5, 6, 7].map((v, i) => {
-          const gridCenterX = width / 2;
+          const gridCenterX = (width * 0.6) / 2;
           const gridCenterY = height / 2;
           const gridRadius = dimMax / 2 - padding;
           const x2 = Math.cos((i * Math.PI) / 4) * gridRadius + gridCenterX;

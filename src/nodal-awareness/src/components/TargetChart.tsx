@@ -1,10 +1,24 @@
-import React from 'react';
-import { InlineFieldRow, Input, Select } from '@grafana/ui';
-import { PanelData } from '@grafana/data';
+import React, { useState } from 'react';
+import { Input, RadioButtonGroup, Select } from '@grafana/ui';
+import { PanelData, SelectableValue } from '@grafana/data';
 
 export const TargetChart = (props: { width: number; height: number; data: PanelData }) => {
   //const { data, width, height } = props;
-  console.log(props.data.series[0].name);
+  console.log(props.data);
+  const defaultOptions = [
+    { label: 'Az/Elev', value: 'Az/Elev' },
+    { label: 'Az/Slant', value: 'Az/Slant' },
+  ];
+  const [, setValue] = useState<SelectableValue<string>>();
+  const [selected, setSelected] = useState<string>(defaultOptions[0].value!);
+  const names = [];
+
+  for (let i = 0; i < props.data.series.length; i++) {
+    names.push(props.data.series[i].name);
+  }
+
+  const sortedNames = names.sort();
+
   return (
     <div
       style={{
@@ -21,14 +35,14 @@ export const TargetChart = (props: { width: number; height: number; data: PanelD
       }}
     >
       <div>
-        <InlineFieldRow>
-          <Select
-            value={{ label: 'ECI' }}
-            options={[{ label: 'ECI' }, { label: 'ICRF' }, { label: 'GEOD' }, { label: 'GEOS' }, { label: 'LVLH' }]}
-            onChange={() => {}}
-            width="auto"
-          />
-        </InlineFieldRow>
+        <Select
+          value={{ label: 'ECI' }}
+          options={[{ label: 'ECI' }, { label: 'ICRF' }, { label: 'GEOD' }, { label: 'GEOS' }, { label: 'LVLH' }]}
+          onChange={(v) => {
+            setValue(v.value);
+          }}
+          width="auto"
+        />
       </div>
       {/** Column labels */}
       <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 2 }}>Type</div>
@@ -40,7 +54,7 @@ export const TargetChart = (props: { width: number; height: number; data: PanelD
 
       {/** Row label */}
       {/** Takes name from node data */}
-      {[props.data.series[0].name, props.data.series[1].name, props.data.series[2].name].map((val, i) => {
+      {[sortedNames[0], sortedNames[1], sortedNames[2]].map((val, i) => {
         return (
           <div key={`na-target-header-${val}`} style={{ gridRow: i + 2, gridColumn: 1, marginInlineEnd: '1em' }}>
             {val}
@@ -110,6 +124,10 @@ export const TargetChart = (props: { width: number; height: number; data: PanelD
           </div>
         ))
       )} */}
+      {/* Az/Elev, Az/Slant Option*/}
+      <div style={{ marginBottom: '32px' }}>
+        <RadioButtonGroup options={defaultOptions} value={selected} onChange={(v) => setSelected(v!)} size="sm" />
+      </div>
     </div>
   );
 };
