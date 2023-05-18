@@ -77,7 +77,7 @@ export class QueryEditor extends PureComponent<Props> {
       return;
     }
     query.filters[idx].filterType = value;
-    onChange({ ...query, filters: query.filters });
+    onChange({ ...query });
   };
 
   onFilterChangeCompareType = (value: CompareType, idx: number) => {
@@ -86,7 +86,7 @@ export class QueryEditor extends PureComponent<Props> {
       return;
     }
     query.filters[idx].compareType = value;
-    onChange({ ...query, filters: query.filters });
+    onChange({ ...query });
   };
 
   onFilterChangeValue = (event: FormEvent<HTMLInputElement>, idx: number) => {
@@ -104,7 +104,7 @@ export class QueryEditor extends PureComponent<Props> {
       return;
     }
     query.filters.splice(idx, 1);
-    onChange({ ...query, filters: query.filters });
+    onChange({ ...query });
   };
 
   onAddFunctionClick = () => {
@@ -127,7 +127,7 @@ export class QueryEditor extends PureComponent<Props> {
     for (let i = 0; i < args.length; i++) {
       query.functions[idx].args.push('');
     }
-    onChange({ ...query, functions: query.functions });
+    onChange({ ...query });
   };
 
   onFunctionDelete = (idx: number) => {
@@ -136,7 +136,7 @@ export class QueryEditor extends PureComponent<Props> {
       return;
     }
     query.functions.splice(idx, 1);
-    onChange({ ...query, functions: query.functions });
+    onChange({ ...query });
   };
 
   onFunctionArgChange = (event: FormEvent<HTMLInputElement>, funcIdx: number, argIdx: number) => {
@@ -145,7 +145,7 @@ export class QueryEditor extends PureComponent<Props> {
       return;
     }
     query.functions[funcIdx].args[argIdx] = event.currentTarget.value;
-    onChange({ ...query, functions: query.functions });
+    onChange({ ...query });
   };
 
   // Custom rendering for Select dropdown options -- displays label and description
