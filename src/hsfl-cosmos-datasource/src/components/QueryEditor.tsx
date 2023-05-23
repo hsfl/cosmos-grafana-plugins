@@ -4,27 +4,25 @@ import React, { ChangeEvent, FormEvent, PureComponent } from 'react';
 import { Button, Input } from '@grafana/ui';
 import { QueryEditorProps } from '@grafana/data';
 import Autocomplete from '@mui/material/Autocomplete';
-import ListItem from '@mui/material/ListItem';
 import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
-import { DataSource } from '../datasource';
+import { DataSource } from 'datasource';
+import { QueryArgComponent, renderOption } from 'components/QueryEditorElements';
 import {
   compareTypeOptions,
   defaultQuery,
   filterTypeOptions,
   functionTypeOptions,
-  posTypeOptions,
   queryOptions,
-  Filter,
+  QueryFilter,
   MyDataSourceOptions,
   MyQuery,
-  SelectOption,
   CompareType,
   FilterType,
   FunctionArgs,
   FunctionType,
   QueryFunction,
-} from '../types';
+} from 'types';
 
 type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 
@@ -36,12 +34,12 @@ export class QueryEditor extends PureComponent<Props> {
   };
   onQueryTextChange = (value: string) => {
     const { onChange, query } = this.props;
-    onChange({ ...query, queryText: value });
+    onChange({ ...query, type: value, arg: '' });
   };
 
   onTypeTextChange = (value: string) => {
     const { onChange, query } = this.props;
-    onChange({ ...query, typeText: value });
+    onChange({ ...query, arg: value });
   };
 
   onLatestOnlySwitchChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -63,7 +61,7 @@ export class QueryEditor extends PureComponent<Props> {
 
   onAddFilterClick = () => {
     const { onChange, query } = this.props;
-    const newFilter: Filter = {
+    const newFilter: QueryFilter = {
       filterType: 'node',
       compareType: 'equals',
       filterValue: '',
@@ -148,17 +146,9 @@ export class QueryEditor extends PureComponent<Props> {
     onChange({ ...query });
   };
 
-  // Custom rendering for Select dropdown options -- displays label and description
-  renderOption = <T,>(props: React.HTMLAttributes<HTMLLIElement>, option: SelectOption<T>) => (
-    <ListItem {...props} style={{ display: 'block' }}>
-      <div>{option.label}</div>
-      <div style={{ color: 'grey' }}>{option.description}</div>
-    </ListItem>
-  );
-
   render() {
     const query = defaults(this.props.query, defaultQuery);
-    const { queryText, typeText, latestOnly, filters, functions } = query;
+    const { type, arg, latestOnly, filters, functions } = query;
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5em' }}>
@@ -203,31 +193,17 @@ export class QueryEditor extends PureComponent<Props> {
             <Autocomplete
               disableClearable
               options={queryOptions}
-              value={queryOptions.find((option) => option.value === queryText)}
+              value={queryOptions.find((option) => option.value === type)}
               onChange={(event, value) => this.onQueryTextChange(value.value)}
               renderInput={(params) => <TextField {...params} />}
-              renderOption={this.renderOption}
+              renderOption={renderOption}
               componentsProps={{
                 popper: { disablePortal: true, placement: 'bottom-start', style: { minWidth: '100%' } },
               }}
               style={{ gridColumn: 1 }}
             />
           </div>
-          {queryText === 'position' ? (
-            <div>
-              Type
-              <Autocomplete
-                disableClearable
-                options={posTypeOptions}
-                value={posTypeOptions.find((option) => option.value === typeText)}
-                onChange={(event, value) => this.onTypeTextChange(value.value)}
-                renderInput={(params) => <TextField {...params} />}
-                renderOption={this.renderOption}
-                componentsProps={{ popper: { placement: 'bottom-start', style: { width: 'fit-content' } } }}
-                style={{ gridColumn: 2, width: 'fit-content' }}
-              />
-            </div>
-          ) : null}
+          <QueryArgComponent onChange={this.onTypeTextChange} type={type} arg={arg} />
         </div>
         {/* Filters */}
         {!this.state.applyFilters ? null : (
@@ -253,7 +229,7 @@ export class QueryEditor extends PureComponent<Props> {
                   value={filterTypeOptions.find((option) => option.value === v.filterType)}
                   onChange={(event, value) => this.onFilterChangeFilterType(value.value, i)}
                   renderInput={(params) => <TextField {...params} />}
-                  renderOption={this.renderOption}
+                  renderOption={renderOption}
                   componentsProps={{ popper: { placement: 'bottom-start', style: { minWidth: 'fit-content' } } }}
                 />
                 <Autocomplete
@@ -263,7 +239,7 @@ export class QueryEditor extends PureComponent<Props> {
                   value={compareTypeOptions.find((option) => option.value === v.compareType)}
                   onChange={(event, value) => this.onFilterChangeCompareType(value.value, i)}
                   renderInput={(params) => <TextField {...params} />}
-                  renderOption={this.renderOption}
+                  renderOption={renderOption}
                   componentsProps={{ popper: { placement: 'bottom-start', style: { minWidth: 'fit-content' } } }}
                 />
                 <Input
@@ -316,7 +292,7 @@ export class QueryEditor extends PureComponent<Props> {
                   value={functionTypeOptions.find((option) => option.value === v.functionType)}
                   onChange={(event, value) => this.onFunctionChangeFunctionType(value.value, i)}
                   renderInput={(params) => <TextField {...params} />}
-                  renderOption={this.renderOption}
+                  renderOption={renderOption}
                   componentsProps={{ popper: { placement: 'bottom-start', style: { minWidth: 'fit-content' } } }}
                 />
                 {v.args.map((arg, argIdx) => (

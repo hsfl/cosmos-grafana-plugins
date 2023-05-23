@@ -14,8 +14,10 @@ export const queryOptions: Array<SelectOption<string>> = [
   { label: 'CPU', value: 'cpu' },
   { label: 'Events', value: 'event' },
   { label: 'Thermal', value: 'tsen' },
+  { label: 'Nodal Awareness', value: 'nodalaware', description: 'Relative angle/range to other nodes' },
 ];
 
+// Coordinate-frame conversion options for the Position query type
 export const posTypeOptions: Array<SelectOption<string>> = [
   { label: 'ECI', value: 'eci', description: 'Earth-Centered Inertial' },
   { label: 'Geospheric', value: 'geos', description: '' },
@@ -23,17 +25,22 @@ export const posTypeOptions: Array<SelectOption<string>> = [
   { label: 'LVLH', value: 'lvlh', description: 'Local Vertical Local Horizontal' },
 ];
 
+// Origin point node options for Nodal Awareness query type, todo: async-ify
+export const nodalawareTypeArgs: Array<SelectOption<string>> = [
+  { label: 'Mothership', value: 'mother' },
+];
+
 export interface MyQuery extends DataQuery {
-  queryText: string;
-  typeText?: string;
+  type: string;
+  arg: string;
   latestOnly: boolean;
-  filters: Filter[];
+  filters: QueryFilter[];
   functions: QueryFunction[];
 }
 
 export const defaultQuery: Partial<MyQuery> = {
-  queryText: 'position',
-  typeText: 'eci',
+  type: 'position',
+  arg: '',
   latestOnly: false,
   filters: [],
   functions: [],
@@ -61,11 +68,10 @@ export const url_options: Array<SelectableValue<string>> = [
 
 export type FilterType = 'node' | 'name' | 'col';
 export type CompareType = 'equals' | 'contains';
-export type FunctionType = 'sum' | 'groundstation' | 'magnitude';
+export type FunctionType = 'sum' | 'magnitude';
 export const FunctionArgs = new Map<FunctionType, string[]>([
   ['sum', []],
-  ['groundstation', ['Origin node name']],
-  ['magnitude', []],
+  ['magnitude', ['Vector name']],
 ]);
 export const filterTypeOptions: Array<SelectOption<FilterType>> = [
   { label: 'Node', value: 'node' },
@@ -78,15 +84,10 @@ export const compareTypeOptions: Array<SelectOption<CompareType>> = [
 ];
 export const functionTypeOptions: Array<SelectOption<FunctionType>> = [
   { label: 'Sum', value: 'sum', description: 'Compute sum of values' },
-  {
-    label: 'Groundstation',
-    value: 'groundstation',
-    description: 'Get slant angle/range/elev. from origin node to other nodes',
-  },
   { label: 'Magnitude', value: 'magnitude', description: 'Compute magnitude of a vector-quantity' },
 ];
 
-export interface Filter {
+export interface QueryFilter {
   filterType: FilterType;
   compareType: CompareType;
   filterValue: string;

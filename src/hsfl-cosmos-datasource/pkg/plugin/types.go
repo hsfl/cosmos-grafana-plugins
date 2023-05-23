@@ -1,8 +1,25 @@
 package plugin
 
+// Query sent from front end's Query Editor, mirror of the MyQuery interface in types.ts
 type queryModel struct {
-	QueryText string `json:"queryText"`
-	TypeText  string `json:"typeText"`
+	Type       string          `json:"type"`
+	Arg        string          `json:"arg"`
+	LatestOnly bool            `json:"latestOnly"`
+	Filters    []queryFilter   `json:"filters"`
+	Functions  []queryFunction `json:"functions"`
+}
+
+// From types.ts
+type queryFilter struct {
+	FilterType  string `json:"filterType"`
+	CompareType string `json:"compareType"`
+	FilterValue string `json:"filterValue"`
+}
+
+// From types.ts
+type queryFunction struct {
+	FunctionType string   `json:"functionType"`
+	Args         []string `json:"args"`
 }
 
 // JSON model of Grafana Backend Datasource config
@@ -33,14 +50,17 @@ type Cosmosresponse struct {
 	Lvlhs     []lvlh     `json:"lvlhs,omitempty"`
 	Geoidposs []geoidpos `json:"geoidposs,omitempty"`
 	Spherposs []spherpos `json:"spherposs,omitempty"`
+	Svectors  []svector  `json:"svectors,omitempty"`
 	Qatts     []qatt     `json:"qatts,omitempty"`
 }
 
 type avector struct {
-	Time float64
-	H    float64 `json:"h,omitempty"`
-	E    float64 `json:"e,omitempty"`
-	B    float64 `json:"b,omitempty"`
+	Time      float64
+	Node_name string
+	Node_type float64
+	H         float64 `json:"h,omitempty"`
+	E         float64 `json:"e,omitempty"`
+	B         float64 `json:"b,omitempty"`
 }
 
 type qvatt struct {
@@ -173,9 +193,12 @@ type geoidpos struct {
 }
 
 type svector struct {
-	Phi    float64 `json:"phi,omitempty"`
-	Lambda float64 `json:"lambda,omitempty"`
-	R      float64 `json:"r,omitempty"`
+	Time      float64 `json:"Time,omitempty"` // TODO: consider nested structs better?
+	Node_name string  `json:"Node_name,omitempty"`
+	Node_type float64 `json:"Node_type,omitempty"`
+	Phi       float64 `json:"phi,omitempty"`
+	Lambda    float64 `json:"lambda,omitempty"`
+	R         float64 `json:"r,omitempty"`
 }
 
 type spherpos struct {
