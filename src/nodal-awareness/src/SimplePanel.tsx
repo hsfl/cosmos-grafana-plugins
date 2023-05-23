@@ -12,7 +12,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
   return (
     // TODO: fix plot/table relative spacing
     <div style={{ width, height, display: 'grid', gridTemplateColumns: 'auto auto auto' }}>
-      <NodalAwarenessPlotText width={plotWidth} height={height} data={data}/>
+      <NodalAwarenessPlotText width={plotWidth} height={height} data={data} />
       <NodalAwarenessPlot width={plotWidth} height={height} />
       <TargetChart width={width / 3} height={height} data={data} />
     </div>
