@@ -67,7 +67,7 @@ export const NodalAwarenessPlotText = (props: { width: number; height: number; d
             Central Node
           </tspan>
           <tspan x="10" dy="1em">
-            Node Type: {props.data.series[0].fields[4].values.get(0)}
+            Node Type: {props.data.series[0].fields[1].values.get(0)}
           </tspan>
           <tspan x="10" dy="1em">
             Name: {props.data.series[0].name}
@@ -75,19 +75,19 @@ export const NodalAwarenessPlotText = (props: { width: number; height: number; d
         </motion.text>
         <motion.text x="10" y="70" initial="hidden" animate="visible" style={{ fill: '#32CD32' }}>
           <tspan x="10" dy="1em">
-            Node Type: {props.data.series[1].fields[4].values.get(0)}
+            Node Type: {props.data.series[1].fields[2].values.get(0)}
           </tspan>
           <tspan x="10" dy="1em">
             Node Name: {props.data.series[1].name}
           </tspan>
           <tspan x="10" dy="1em">
-            Azimuth: 5.9 deg
+            Azimuth: {props.data.series[1].fields[1].values.get(0)}
           </tspan>
           <tspan x="10" dy="1em">
-            Elevation: 22.34 deg
+            Elevation: {props.data.series[1].fields[3].values.get(0)}
           </tspan>
           <tspan x="10" dy="1em">
-            Slant Range: 2868 km
+            Slant Range: {props.data.series[1].fields[4].values.get(0)}
           </tspan>
         </motion.text>
       </motion.svg>

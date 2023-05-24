@@ -11,13 +11,16 @@ export const TargetChart = (props: { width: number; height: number; data: PanelD
   ];
   const [, setValue] = useState<SelectableValue<string>>();
   const [selected, setSelected] = useState<string>(defaultOptions[0].value!);
-  const names = [];
 
-  for (let i = 0; i < props.data.series.length; i++) {
-    names.push(props.data.series[i].name);
+  {
+    /* For when data was coming in random orders*/
   }
+  // const names = [];
+  // for (let i = 0; i < props.data.series.length; i++) {
+  //   names.push(props.data.series[i].name);
+  // }
 
-  const sortedNames = names.sort();
+  // const sortedNames = names.sort();
 
   return (
     <div
@@ -53,8 +56,17 @@ export const TargetChart = (props: { width: number; height: number; data: PanelD
       <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 7 }}>Elev</div>
 
       {/** Row label */}
-      {/** Takes name from node data */}
-      {[sortedNames[0], sortedNames[1], sortedNames[2]].map((val, i) => {
+
+      {/** Takes name from node data (This was for when data was coming in in random orders, leaving in case we need again) */}
+      {/* {[sortedNames[0], sortedNames[1], sortedNames[2]].map((val, i) => {
+        return (
+          <div key={`na-target-header-${val}`} style={{ gridRow: i + 2, gridColumn: 1, marginInlineEnd: '1em' }}>
+            {val}
+          </div>
+        );
+      })} */}
+
+      {[props.data.series[1].name, props.data.series[2].name, props.data.series[3].name].map((val, i) => {
         return (
           <div key={`na-target-header-${val}`} style={{ gridRow: i + 2, gridColumn: 1, marginInlineEnd: '1em' }}>
             {val}
@@ -64,58 +76,60 @@ export const TargetChart = (props: { width: number; height: number; data: PanelD
       {/** Row cells */}
       {/** Node 1 */}
       <div style={{ gridRow: 2, gridColumn: 2 }}>
-        <Input type="text" value={props.data.series[0].fields[4].values.get(0)}></Input>
+        <Input label="Type" type="text" value={props.data.series[1].fields[2].values.get(0)}></Input>
       </div>
       <div style={{ gridRow: 2, gridColumn: 3 }}>
-        <Input type="text" value={props.data.series[0].fields[5].values.get(0)}></Input>
+        <Input label="Lon" type="text" value={'?'}></Input>
       </div>
       <div style={{ gridRow: 2, gridColumn: 4 }}>
-        <Input type="text" value={props.data.series[0].fields[6].values.get(0)}></Input>
+        <Input label="Lat" type="text" value={'?'}></Input>
       </div>
       <div style={{ gridRow: 2, gridColumn: 5 }}>
-        <Input type="text" value={props.data.series[0].fields[7].values.get(0)}></Input>
+        <Input label="Alt" type="text" value={'?'}></Input>
       </div>
       <div style={{ gridRow: 2, gridColumn: 6 }}>
-        <Input type="text" value={'?'}></Input>
+        <Input label="Slant" type="text" value={props.data.series[1].fields[4].values.get(0)}></Input>
       </div>
       <div style={{ gridRow: 2, gridColumn: 7 }}>
-        <Input type="text" value={'?'}></Input>
+        <Input label="Elev" type="text" value={props.data.series[1].fields[3].values.get(0)}></Input>
       </div>
+      {/* Node 2*/}
       <div style={{ gridRow: 3, gridColumn: 2 }}>
-        <Input type="text" value={props.data.series[1].fields[4].values.get(0)}></Input>
+        <Input label="Type" type="text" value={props.data.series[2].fields[2].values.get(0)}></Input>
       </div>
       <div style={{ gridRow: 3, gridColumn: 3 }}>
-        <Input type="text" value={props.data.series[1].fields[5].values.get(0)}></Input>
+        <Input label="Lon" type="text" value={'?'}></Input>
       </div>
       <div style={{ gridRow: 3, gridColumn: 4 }}>
-        <Input type="text" value={props.data.series[1].fields[6].values.get(0)}></Input>
+        <Input label="Lat" type="text" value={'?'}></Input>
       </div>
       <div style={{ gridRow: 3, gridColumn: 5 }}>
-        <Input type="text" value={props.data.series[1].fields[7].values.get(0)}></Input>
+        <Input label="Alt" type="text" value={'?'}></Input>
       </div>
       <div style={{ gridRow: 3, gridColumn: 6 }}>
-        <Input type="text" value={'?'}></Input>
+        <Input label="Slant" type="text" value={props.data.series[2].fields[4].values.get(0)}></Input>
       </div>
       <div style={{ gridRow: 3, gridColumn: 7 }}>
-        <Input type="text" value={'?'}></Input>
+        <Input label="Elev" type="text" value={props.data.series[2].fields[3].values.get(0)}></Input>
       </div>
+      {/* Node 2*/}
       <div style={{ gridRow: 4, gridColumn: 2 }}>
-        <Input type="text" value={props.data.series[2].fields[4].values.get(0)}></Input>
+        <Input label="Type" type="text" value={props.data.series[3].fields[2].values.get(0)}></Input>
       </div>
       <div style={{ gridRow: 4, gridColumn: 3 }}>
-        <Input type="text" value={props.data.series[2].fields[5].values.get(0)}></Input>
+        <Input label="Lon" type="text" value={'?'}></Input>
       </div>
       <div style={{ gridRow: 4, gridColumn: 4 }}>
-        <Input type="text" value={props.data.series[2].fields[6].values.get(0)}></Input>
+        <Input label="Lat" type="text" value={'?'}></Input>
       </div>
       <div style={{ gridRow: 4, gridColumn: 5 }}>
-        <Input type="text" value={props.data.series[2].fields[7].values.get(0)}></Input>
+        <Input label="Alt" type="text" value={'?'}></Input>
       </div>
       <div style={{ gridRow: 4, gridColumn: 6 }}>
-        <Input type="text" value={'?'}></Input>
+        <Input label="Slant" type="text" value={props.data.series[3].fields[4].values.get(0)}></Input>
       </div>
       <div style={{ gridRow: 4, gridColumn: 7 }}>
-        <Input type="text" value={'?'}></Input>
+        <Input label="Elev" type="text" value={props.data.series[3].fields[3].values.get(0)}></Input>
       </div>
       {/* {['kauaicc', 'fairbanks', 'surreysc'].map((target, ti) =>
         [0, 1, 2, 3].map((col, ci) => (
