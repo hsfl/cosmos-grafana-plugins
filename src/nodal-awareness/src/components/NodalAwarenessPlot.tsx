@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { scaleLinear } from '@visx/scale';
 import { motion } from 'framer-motion';
+import { PanelData } from '@grafana/data';
 
 // interface Point {
 //   theta: number;
@@ -24,7 +25,7 @@ const radialTicks: number[] = [0, 22.5, 45.0, 67.5];
 
 // const blue = '#aeeef8';
 
-export const NodalAwarenessPlot = (props: { width: number; height: number }) => {
+export const NodalAwarenessPlot = (props: { width: number; height: number; data: PanelData }) => {
   const { width, height } = props;
   const dimMax = Math.min(width, height);
   const padding = Math.min(dimMax / 2 / (radialTicks.length + 1), 100000);
@@ -54,6 +55,24 @@ export const NodalAwarenessPlot = (props: { width: number; height: number }) => 
 
   const horizonCX = (width * 0.6) / 2;
   const horizonCY = height / 2.5 + height / 5;
+
+  //Positioning of secondary node indicator dot
+  const ringIdx = radialTicks.length;
+  const tickSpacing = dimMax / 2 / (radialTicks.length + 1);
+  const concentricR = tickSpacing * ringIdx;
+  //distance from center of concentric rings to indicator dot using elevation
+  const nodeR = ((90 - Math.abs(props.data.series[1].fields[3].values.get(0)) * (180 / Math.PI)) / 90) * concentricR;
+  //x and y position of indicator dot using azimuth
+  const nodeY =
+    height -
+    concentricR -
+    (height - 2 * concentricR) / 2 -
+    nodeR * Math.sin(90 * (Math.PI / 180) - props.data.series[1].fields[1].values.get(0));
+  const nodeX =
+    (width * 0.6) / 2 -
+    concentricR -
+    (width * 0.6 - 2 * concentricR) / 2 -
+    nodeR * Math.cos(90 * (Math.PI / 180) - props.data.series[1].fields[1].values.get(0));
 
   // Update scale output to match component dimensions
   yScale.range([0, height / 2 - padding]);
@@ -133,6 +152,10 @@ export const NodalAwarenessPlot = (props: { width: number; height: number }) => 
             />
           );
         })}
+      </motion.g>
+
+      <motion.g>
+        <motion.circle cx={nodeX} cy={nodeY} fill="#0f0" fillOpacity={0.5} r={4} stroke="#0f0" strokeOpacity={0.5} />
       </motion.g>
     </motion.svg>
   );
