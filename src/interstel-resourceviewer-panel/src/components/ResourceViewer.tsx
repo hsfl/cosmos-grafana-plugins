@@ -5,7 +5,7 @@ import { GridRows } from '@visx/grid';
 import { Group } from '@visx/group';
 import { scaleBand, scaleLinear } from '@visx/scale';
 import { Bar } from '@visx/shape';
-import { Text } from '@visx/text';
+import { DisplaySeriesTuple } from 'types';
 
 const colors = ["lightcoral", "skyblue", "lightgreen", "lightsalmon"];
 
@@ -16,13 +16,14 @@ export const ResourceViewer = (props: {
   domain: number[],
   // Resource usage at the timestamp
   dataSeries: {[name: string]: number[]},
+  // Array of series to display
+  displayedSeries: DisplaySeriesTuple[],
   // Width of the render window for this graph
   width: number,
   // Height of the render window for this graph
   height: number
 }) => {
-  const { domain, dataSeries, width, height } = props;
-  const [displayedSeries, setDisplayedSeries] = useState<string[]>([]);
+  const { domain, dataSeries, displayedSeries, width, height } = props;
   // Cumulative sum of resource usage
   const [dataSeriesCumulative, setDataSeriesCumulative] = useState<{[name: string]: number[]}>({});
   // Reference to base svg element, to acquire local mouse positions within it
@@ -33,20 +34,7 @@ export const ResourceViewer = (props: {
   const yMax = height - 120;
   // Margin between top of component and where the rendering starts
   const topMargin = 10;
-  // Margin between text area and graph area
-  const graphTopMargin = 120/2;
-  const centerOfGraphY = graphTopMargin + yMax/2;
-
-  // Add all names initially
-  useEffect(() => {
-    if (displayedSeries.length ?? 0 !== 0) {
-        return;
-    }
-    // Add all series for displaying if it is empty
-    Object.keys(dataSeries).forEach((name) => {
-      setDisplayedSeries(displayedSeries => [...displayedSeries, name]);
-    });
-  }, [dataSeries, displayedSeries.length]);
+  const centerOfGraphY = yMax/2;
 
   // Compute cumulative sum for displaying
   useEffect(() => {
@@ -81,7 +69,7 @@ export const ResourceViewer = (props: {
       // Filter among only the series selected for display
       let maxval = 1;
       for (const [key,v] of Object.entries(dataSeriesCumulative)) {
-        if (!(displayedSeries.some(x => x === key))) {
+        if (!(displayedSeries.some(ds => ds.name === key && ds.show))) {
           continue;
         }
         maxval = Math.max(
@@ -112,34 +100,12 @@ export const ResourceViewer = (props: {
         Object.keys(dataSeriesCumulative).map((key, series_idx) => {
           return (
             <Group key={`bargroup-${key}`} >
-              {/* Name of resource, clickable */}
-              <Text
-                x={0}
-                y={series_idx*20}
-                verticalAnchor="start"
-                fill={colors[series_idx]}
-                opacity={displayedSeries.some(x => x === key) ? 0.75 : 0.25}
-                style={{userSelect: 'none'}}
-                onClick={(event) => {
-                  setDisplayedSeries(displayedSeries => {
-                    // If this key is the only series currently selected for display,
-                    // then on this click, display everything again.
-                    if (displayedSeries.length === 1 && displayedSeries[0] === key) {
-                      return Object.keys(dataSeriesCumulative).map((key) => key);
-                    }
-                    // Otherwise hide all but this series
-                    return [key];
-                  })
-                }}
-              >
-                {key}
-              </Text>
               {/* Bars */}
               {
                 // Iterate over every point in the resource usage
                 dataSeriesCumulative[key].reduce((accumulator: JSX.Element[], v,i) => {
                   // Only display series' selected for displaying
-                  if (!displayedSeries.some(x => x === key)) {
+                  if (!displayedSeries.some(ds => ds.name === key && ds.show)) {
                     return accumulator;
                   }
                   // Scale value to graph coordinates
@@ -152,7 +118,7 @@ export const ResourceViewer = (props: {
                   //  if positive, then y must be displaced by the height
                   const barY = v > 0 ? yMax/2 - barHeight : yMax/2;
                   accumulator.push(
-                    <Group top={graphTopMargin}>
+                    <Group>
                         {/* Visible bar */}
                         <Bar
                           key={`bar-${i}`}

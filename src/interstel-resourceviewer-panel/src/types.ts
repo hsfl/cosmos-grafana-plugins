@@ -24,3 +24,10 @@ export interface DataChanges {
 
 // The parsed dataseries for internal use
 export type ResourceUsage = {[resourceName: string]: number[]};
+
+export interface DisplaySeriesTuple {
+    // Name of the series
+    name: string;
+    // Show or hide this series
+    show: boolean;
+}
