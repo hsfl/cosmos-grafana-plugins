@@ -228,10 +228,12 @@ func CreateFields(names []string) data.Fields {
 // frame_name: Name of the fram
 // row: Row to append to the node's Frame
 // names: Column names for the Frame
-func AppendRowtoMap(frame_map map[string]*data.Frame, frame_name string, row []interface{}, names []string) {
+// tag: The name of the query type, additional info to append to the Frame as custom meta info
+func AppendRowtoMap(frame_map map[string]*data.Frame, frame_name string, row []interface{}, names []string, tag string) {
 	_, ok := frame_map[frame_name]
 	if !ok {
 		frame_map[frame_name] = data.NewFrame(frame_name, CreateFields(names)...)
+		frame_map[frame_name].SetMeta(&data.FrameMeta{Custom: tag})
 	}
 	frame_map[frame_name].AppendRow(row...)
 }
@@ -322,7 +324,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[3] = j.B
 			row[4] = j.E
 			row[5] = j.H
-			AppendRowtoMap(frame_map, j.Node_name, row, names)
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "avector")
 		case qvatt:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
@@ -330,7 +332,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[1] = j.Qvx
 			row[2] = j.Qvy
 			row[3] = j.Qvz
-			AppendRowtoMap(frame_map, "node", row, names)
+			AppendRowtoMap(frame_map, "node", row, names, "qvatt")
 		case qaatt:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
@@ -338,7 +340,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[1] = j.Qax
 			row[2] = j.Qay
 			row[3] = j.Qaz
-			AppendRowtoMap(frame_map, "node", row, names)
+			AppendRowtoMap(frame_map, "node", row, names, "qaatt")
 		case eci:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
@@ -354,7 +356,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[9] = j.A_x
 			row[10] = j.A_y
 			row[11] = j.A_z
-			AppendRowtoMap(frame_map, j.Node_name, row, names)
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "eci")
 		case batt:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
@@ -362,7 +364,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[1] = &j.Node
 			row[2] = j.Amp
 			row[3] = j.Power
-			AppendRowtoMap(frame_map, j.Node, row, names)
+			AppendRowtoMap(frame_map, j.Node, row, names, "batt")
 		case bcreg:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
@@ -370,14 +372,14 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[1] = &j.Node
 			row[2] = j.Amp
 			row[3] = j.Power
-			AppendRowtoMap(frame_map, j.Node, row, names)
+			AppendRowtoMap(frame_map, j.Node, row, names, "bcreg")
 		case tsen:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
 			row[1] = &j.Node_Device
 			row[2] = j.Temp
-			AppendRowtoMap(frame_map, j.Node_Device, row, names)
+			AppendRowtoMap(frame_map, j.Node_Device, row, names, "tsen")
 		case cpu:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
@@ -386,7 +388,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[2] = j.Load
 			row[3] = j.Gib
 			row[4] = j.Storage
-			AppendRowtoMap(frame_map, j.Node, row, names)
+			AppendRowtoMap(frame_map, j.Node, row, names, "cpu")
 		case event:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -396,7 +398,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[2] = j.Duration
 			row[3] = j.Event_id
 			row[4] = &j.Event_name
-			AppendRowtoMap(frame_map, j.Node_name, row, names)
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "event")
 		case mag:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -407,7 +409,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[3] = j.Mag_x
 			row[4] = j.Mag_y
 			row[5] = j.Mag_z
-			AppendRowtoMap(frame_map, j.Node_name, row, names)
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "mag")
 		case geod:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -422,7 +424,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[7] = j.A_lat
 			row[8] = j.A_lon
 			row[9] = j.A_h
-			AppendRowtoMap(frame_map, "node", row, names)
+			AppendRowtoMap(frame_map, "node", row, names, "geod")
 		case geoidpos:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -439,7 +441,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[9] = j.A.Lat
 			row[10] = j.A.Lon
 			row[11] = j.A.H
-			AppendRowtoMap(frame_map, j.Node_name, row, names)
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "geoidpos")
 		case geos:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -454,7 +456,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[7] = j.A_phi
 			row[8] = j.A_lambda
 			row[9] = j.A_r
-			AppendRowtoMap(frame_map, "node", row, names)
+			AppendRowtoMap(frame_map, "node", row, names, "geos")
 		case spherpos:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -471,7 +473,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[9] = j.A.Phi
 			row[10] = j.A.Lambda
 			row[11] = j.A.R
-			AppendRowtoMap(frame_map, j.Node_name, row, names)
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "spherepos")
 		case svector:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
@@ -481,7 +483,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[3] = j.Phi
 			row[4] = j.Lambda
 			row[5] = j.R
-			AppendRowtoMap(frame_map, j.Node_name, row, names)
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "svector")
 		case lvlh:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -497,7 +499,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[8] = j.A_x
 			row[9] = j.A_y
 			row[10] = j.A_z
-			AppendRowtoMap(frame_map, "node", row, names)
+			AppendRowtoMap(frame_map, "node", row, names, "lvlh")
 		case qatt:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
@@ -515,7 +517,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[10] = j.A.Col[0]
 			row[11] = j.A.Col[1]
 			row[12] = j.A.Col[2]
-			AppendRowtoMap(frame_map, j.Node_name, row, names)
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "qatt")
 		}
 	}
 	if !transform_to_timeseries {
