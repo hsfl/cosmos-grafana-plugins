@@ -53,6 +53,24 @@ export const NodalAwarenessPlotText = (props: { width: number; height: number; d
     return null;
   }
 
+  const dataArray = [];
+  for (let i = 0; i < props.data.series.length; i++) {
+    dataArray.push(props.data.series[i]);
+  }
+
+  dataArray.sort((a, b) => {
+    const nameA = a.name!.toUpperCase(); // Convert names to uppercase for case-insensitive sorting
+    const nameB = b.name!.toUpperCase();
+
+    if (nameA < nameB) {
+      return -1; // a comes before b
+    }
+    if (nameA > nameB) {
+      return 1; // a comes after b
+    }
+    return 0; // a and b have the same order
+  });
+
   //const horizonCX = (width * 0.6) / 2;
   //const horizonCY = height / 2.5 + height / 5;
 
@@ -67,27 +85,27 @@ export const NodalAwarenessPlotText = (props: { width: number; height: number; d
             Central Node
           </tspan>
           <tspan x="10" dy="1em">
-            Node Type: {props.data.series[0].fields[1].values.get(0)}
+            Node Type: {dataArray[8].fields[1].values.get(0)}
           </tspan>
           <tspan x="10" dy="1em">
-            Name: {props.data.series[0].name}
+            Name: {dataArray[8].name}
           </tspan>
         </motion.text>
         <motion.text x="10" y="70" initial="hidden" animate="visible" style={{ fill: '#32CD32' }}>
           <tspan x="10" dy="1em">
-            Node Type: {props.data.series[1].fields[2].values.get(0)}
+            Node Type: {dataArray[1].fields[2].values.get(0)}
           </tspan>
           <tspan x="10" dy="1em">
-            Node Name: {props.data.series[1].name}
+            Node Name: {dataArray[1].name}
           </tspan>
           <tspan x="10" dy="1em">
-            Azimuth: {props.data.series[1].fields[1].values.get(0)}
+            Azimuth: {(dataArray[1].fields[1].values.get(0) * (180 / Math.PI)).toFixed(5)}
           </tspan>
           <tspan x="10" dy="1em">
-            Elevation: {props.data.series[1].fields[3].values.get(0)}
+            Elevation: {(dataArray[1].fields[3].values.get(0) * (180 / Math.PI)).toFixed(5)}
           </tspan>
           <tspan x="10" dy="1em">
-            Slant Range: {props.data.series[1].fields[4].values.get(0)}
+            Slant Range: {dataArray[1].fields[4].values.get(0).toFixed(5)}
           </tspan>
         </motion.text>
       </motion.svg>

@@ -38,6 +38,25 @@ export const NodalAwarenessPlot = (props: { width: number; height: number; data:
   //     }),
   //   []
   // );
+
+  const dataArray = [];
+  for (let i = 0; i < props.data.series.length; i++) {
+    dataArray.push(props.data.series[i]);
+  }
+
+  dataArray.sort((a, b) => {
+    const nameA = a.name!.toUpperCase();
+    const nameB = b.name!.toUpperCase();
+
+    if (nameA < nameB) {
+      return -1; // a comes before b
+    }
+    if (nameA > nameB) {
+      return 1; // a comes after b
+    }
+    return 0; // a and b have the same order
+  });
+
   const yScale = useMemo(
     () =>
       scaleLinear({
@@ -56,23 +75,25 @@ export const NodalAwarenessPlot = (props: { width: number; height: number; data:
   const horizonCX = (width * 0.6) / 2;
   const horizonCY = height / 2.5 + height / 5;
 
-  //Positioning of secondary node indicator dot
+  //Positioning of target node indicator dot
   const ringIdx = radialTicks.length;
   const tickSpacing = dimMax / 2 / (radialTicks.length + 1);
   const concentricR = tickSpacing * ringIdx;
   //distance from center of concentric rings to indicator dot using elevation
-  const nodeR = ((90 - Math.abs(props.data.series[1].fields[3].values.get(0)) * (180 / Math.PI)) / 90) * concentricR;
+  const nodeR = ((90 - Math.abs(dataArray[1].fields[3].values.get(0)) * (180 / Math.PI)) / 90) * concentricR;
   //x and y position of indicator dot using azimuth
   const nodeY =
     height -
     concentricR -
     (height - 2 * concentricR) / 2 -
-    nodeR * Math.sin(90 * (Math.PI / 180) - props.data.series[1].fields[1].values.get(0));
+    nodeR * Math.sin(dataArray[1].fields[1].values.get(0) + 90 * (Math.PI / 180));
   const nodeX =
-    (width * 0.6) / 2 -
+    width * 0.6 -
     concentricR -
     (width * 0.6 - 2 * concentricR) / 2 -
-    nodeR * Math.cos(90 * (Math.PI / 180) - props.data.series[1].fields[1].values.get(0));
+    nodeR * Math.cos(dataArray[1].fields[1].values.get(0) + 90 * (Math.PI / 180));
+
+  console.log(nodeX, nodeY);
 
   // Update scale output to match component dimensions
   yScale.range([0, height / 2 - padding]);
