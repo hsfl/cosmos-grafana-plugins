@@ -6,6 +6,7 @@ import { useCosmosTimeline, useDomUpdate } from '../helpers/hooks';
 import { TimeEvent } from '../types';
 import { EventBus, PanelData, TimeRange } from '@grafana/data';
 import { animate, motion, useMotionValue } from 'framer-motion';
+//import moment from 'moment-timezone';
 
 interface UTCEvent {
   utcStart: string;
@@ -39,6 +40,7 @@ export const MissionEventsDisplay = (props: {
   }));
   const startTime = timeRange.from.unix() * 1000;
   const timeSpan = timeRange.to.unix() * 1000 - timeRange.from.unix() * 1000;
+
   // Update various parameters of the graph: height, ticks, etc.
   useEffect(() => {
     const newGraphHeight = tickHeight * (timeSpan / (60000 * scale));
@@ -53,6 +55,8 @@ export const MissionEventsDisplay = (props: {
   }, [timeSpan, height, scale]);
 
   const pixPerMin = tickHeight / scale;
+
+  console.log(utcData[0]);
 
   //Updates scrollbar and display position
   const barPosition = useMotionValue(topPartOffset);
@@ -77,6 +81,8 @@ export const MissionEventsDisplay = (props: {
   );
   useCosmosTimeline(eventBus, updateScrollBar);
 
+  console.log(Math.abs(timeRange.from.unix() - startTime));
+
   // Callback for div reference acquisition
   const refDiv = useCallback((ref: HTMLDivElement | null) => {
     if (ref !== null) {
@@ -94,6 +100,7 @@ export const MissionEventsDisplay = (props: {
       <div ref={refDiv} style={{ width: width, height: topPartOffset, position: 'fixed' }}>
         <svg width={width} height={topPartOffset}>
           <Group top={0} left={0}>
+            {/* Header Background */}
             <motion.rect
               style={{
                 x: 0,
@@ -107,6 +114,7 @@ export const MissionEventsDisplay = (props: {
                 background: '#000000',
               }}
             />
+            {/* Header Labels */}
             <Group>
               <Text x={0} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#03fcf0'}>
                 Orbital Events
@@ -114,8 +122,11 @@ export const MissionEventsDisplay = (props: {
               <Text x={colOffsetEnd + 5} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#fff'}>
                 UTC
               </Text>
-              <Text x={colOffsetEnd + 130} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
+              <Text x={colOffsetEnd + 140} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
                 Spacecraft Events
+              </Text>
+              <Text x={colOffsetEnd + 275} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#f0f'}>
+                Countdown Timer
               </Text>
               {/* <Text x={colOffsetEnd + 120} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
               Executed
@@ -177,6 +188,9 @@ export const MissionEventsDisplay = (props: {
             } else if (data.series[0].fields[3].values.get(i) === 2) {
               return a;
             }
+            {
+              /* Orbital Events Rectangle */
+            }
             a.push(
               <Group key={`orbital-event-${i}`}>
                 <rect
@@ -189,6 +203,7 @@ export const MissionEventsDisplay = (props: {
                   strokeWidth={1}
                   stroke={'#fff'}
                 />
+                {/* Orbital Events Text */}
                 <Text
                   x={0}
                   y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
@@ -198,6 +213,7 @@ export const MissionEventsDisplay = (props: {
                 >
                   {data.series[0].fields[4].values.get(i)}
                 </Text>
+                {/* UTC Time */}
                 <Text
                   x={colOffsetEnd + 5}
                   y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
@@ -206,6 +222,17 @@ export const MissionEventsDisplay = (props: {
                   fill={'#fff'}
                 >
                   {utcData[i].utcStart}
+                </Text>
+                {/* Countdown Timer (Work in Progress) */}
+
+                <Text
+                  x={colOffsetEnd + 275}
+                  y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
+                  fontSize={12}
+                  verticalAnchor="end"
+                  fill={'#fff'}
+                >
+                  {Math.floor(((Date.parse(utcData[i].utcStart) - startTime) / (1000 * 60)) % 60)}
                 </Text>
               </Group>
             );
@@ -234,7 +261,7 @@ export const MissionEventsDisplay = (props: {
                   stroke={'#fff'}
                 />
                 <Text
-                  x={colOffsetEnd + 130}
+                  x={colOffsetEnd + 140}
                   y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
                   fontSize={12}
                   verticalAnchor="end"
