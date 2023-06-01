@@ -2,7 +2,13 @@ import React, { useState } from 'react';
 import { Input, RadioButtonGroup, Select } from '@grafana/ui';
 import { PanelData, SelectableValue } from '@grafana/data';
 
-export const TargetChart = (props: { width: number; height: number; data: PanelData }) => {
+export const TargetChart = (props: {
+  width: number;
+  height: number;
+  data: PanelData;
+  radialArray: number[];
+  onRadioButtonChange: (value: string) => void;
+}) => {
   //const { data, width, height } = props;
   console.log(props.data);
   const defaultOptions = [
@@ -154,8 +160,17 @@ export const TargetChart = (props: { width: number; height: number; data: PanelD
       )} */}
       {/* Az/Elev, Az/Slant Option*/}
       <div style={{ marginBottom: '32px' }}>
-        <RadioButtonGroup options={defaultOptions} value={selected} onChange={(v) => setSelected(v!)} size="sm" />
+        <RadioButtonGroup
+          options={defaultOptions}
+          value={selected}
+          onChange={(v) => {
+            setSelected(v!);
+            props.onRadioButtonChange(v!);
+          }}
+          size="sm"
+        />
       </div>
     </div>
   );
 };
+export default TargetChart;

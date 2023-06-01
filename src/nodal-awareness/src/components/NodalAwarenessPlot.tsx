@@ -16,6 +16,8 @@ import { PanelData } from '@grafana/data';
 // ];
 // const angleTicks: number[] = [0, 1, 2, 3, 4, 5, 6, 7].map((v) => v * 45);
 const radialTicks: number[] = [0, 22.5, 45.0, 67.5];
+
+//const radialTicksSlant: number[] = [1000, 750, 500, 250]
 // accessors
 // const getTheta = (d: Point) => d.theta;
 // const getRadius = (d: Point) => d.r;
@@ -25,7 +27,12 @@ const radialTicks: number[] = [0, 22.5, 45.0, 67.5];
 
 // const blue = '#aeeef8';
 
-export const NodalAwarenessPlot = (props: { width: number; height: number; data: PanelData }) => {
+export const NodalAwarenessPlot = (props: {
+  width: number;
+  height: number;
+  data: PanelData;
+  radialArray: number[];
+}) => {
   const { width, height } = props;
   const dimMax = Math.min(width, height);
   const padding = Math.min(dimMax / 2 / (radialTicks.length + 1), 100000);
@@ -38,6 +45,8 @@ export const NodalAwarenessPlot = (props: { width: number; height: number; data:
   //     }),
   //   []
   // );
+
+  const radialTicks2 = props.radialArray;
 
   const dataArray = [];
   for (let i = 0; i < props.data.series.length; i++) {
@@ -136,10 +145,29 @@ export const NodalAwarenessPlot = (props: { width: number; height: number; data:
             />
           );
         })}
-        {/** Tick labels */}
-        {radialTicks.map((v, i) => {
+        {/** Tick labels (Elevation) */}
+        {/* {radialTicks.map((v, i) => {
           const ringIdx = radialTicks.length - i;
           const tickSpacing = dimMax / 2 / (radialTicks.length + 1);
+          const gridCenterX = (width * 0.6) / 2;
+          const gridCenterY = height / 2;
+          return (
+            <motion.text
+              key={`radial-tick-${i}`}
+              x={gridCenterX}
+              y={gridCenterY + tickSpacing * ringIdx}
+              fill="#f00"
+              pointerEvents="none"
+            >
+              {v}
+            </motion.text>
+          );
+        })} */}
+
+        {/** Tick labels (Slant) */}
+        {radialTicks2.map((v, i) => {
+          const ringIdx = radialTicks2.length - i;
+          const tickSpacing = dimMax / 2 / (radialTicks2.length + 1);
           const gridCenterX = (width * 0.6) / 2;
           const gridCenterY = height / 2;
           return (
