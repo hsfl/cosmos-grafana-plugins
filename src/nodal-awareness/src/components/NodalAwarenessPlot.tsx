@@ -15,7 +15,6 @@ import { PanelData } from '@grafana/data';
 //   { theta: 67.5, r: 45 },
 // ];
 // const angleTicks: number[] = [0, 1, 2, 3, 4, 5, 6, 7].map((v) => v * 45);
-const radialTicks: number[] = [0, 22.5, 45.0, 67.5];
 
 //const radialTicksSlant: number[] = [1000, 750, 500, 250]
 // accessors
@@ -32,7 +31,9 @@ export const NodalAwarenessPlot = (props: {
   height: number;
   data: PanelData;
   radialArray: number[];
+  dotRadius: number;
 }) => {
+  const radialTicks = props.radialArray;
   const { width, height } = props;
   const dimMax = Math.min(width, height);
   const padding = Math.min(dimMax / 2 / (radialTicks.length + 1), 100000);
@@ -45,8 +46,6 @@ export const NodalAwarenessPlot = (props: {
   //     }),
   //   []
   // );
-
-  const radialTicks2 = props.radialArray;
 
   const dataArray = [];
   for (let i = 0; i < props.data.series.length; i++) {
@@ -89,18 +88,20 @@ export const NodalAwarenessPlot = (props: {
   const tickSpacing = dimMax / 2 / (radialTicks.length + 1);
   const concentricR = tickSpacing * ringIdx;
   //distance from center of concentric rings to indicator dot using elevation
-  const nodeR = ((90 - Math.abs(dataArray[1].fields[3].values.get(0)) * (180 / Math.PI)) / 90) * concentricR;
+  //const nodeR = ((90 - Math.abs(dataArray[1].fields[3].values.get(0)) * (180 / Math.PI)) / 90) * concentricR;
+  //distance from center of concentric rings to indicator dot using slant range
+  //const nodeRSlant = ((1000 - Math.abs(dataArray[1].fields[4].values.get(0)))/1000) * concentricR;
   //x and y position of indicator dot using azimuth
   const nodeY =
     height -
     concentricR -
     (height - 2 * concentricR) / 2 -
-    nodeR * Math.sin(dataArray[1].fields[1].values.get(0) + 90 * (Math.PI / 180));
+    props.dotRadius * Math.sin(dataArray[1].fields[1].values.get(0) + 90 * (Math.PI / 180));
   const nodeX =
     width * 0.6 -
     concentricR -
     (width * 0.6 - 2 * concentricR) / 2 -
-    nodeR * Math.cos(dataArray[1].fields[1].values.get(0) + 90 * (Math.PI / 180));
+    props.dotRadius * Math.cos(dataArray[1].fields[1].values.get(0) + 90 * (Math.PI / 180));
 
   console.log(nodeX, nodeY);
 
@@ -165,9 +166,9 @@ export const NodalAwarenessPlot = (props: {
         })} */}
 
         {/** Tick labels (Slant) */}
-        {radialTicks2.map((v, i) => {
-          const ringIdx = radialTicks2.length - i;
-          const tickSpacing = dimMax / 2 / (radialTicks2.length + 1);
+        {radialTicks.map((v, i) => {
+          const ringIdx = radialTicks.length - i;
+          const tickSpacing = dimMax / 2 / (radialTicks.length + 1);
           const gridCenterX = (width * 0.6) / 2;
           const gridCenterY = height / 2;
           return (
