@@ -46,6 +46,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
       setDotRadius(nodeR);
     }
   };
+
   const plotWidth = Math.min((width * 2) / 3, height * 1.5);
   return (
     // TODO: fix plot/table relative spacing

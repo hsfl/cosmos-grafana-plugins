@@ -225,7 +225,7 @@ export const MissionEventsDisplay = (props: {
                 </Text>
                 {/* Countdown Timer (Work in Progress) */}
 
-                <Text
+                {/* <Text
                   x={colOffsetEnd + 275}
                   y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
                   fontSize={12}
@@ -233,7 +233,7 @@ export const MissionEventsDisplay = (props: {
                   fill={'#fff'}
                 >
                   {Math.floor(((Date.parse(utcData[i].utcStart) - startTime) / (1000 * 60)) % 60)}
-                </Text>
+                </Text> */}
               </Group>
             );
             return a;
