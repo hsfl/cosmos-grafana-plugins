@@ -34,12 +34,12 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
   //distance from center of concentric rings to indicator dot using elevation
   const nodeR = ((90 - Math.abs(dataArray[1].fields[3].values.get(0)) * (180 / Math.PI)) / 90) * concentricR;
   //distance from center of concentric rings to indicator dot using slant range
-  const nodeRSlant = ((1000 - Math.abs(dataArray[1].fields[4].values.get(0))) / 1000) * concentricR;
+  const nodeRSlant = ((1000 - Math.abs(dataArray[1].fields[4].values.get(0))) / 2000) * concentricR;
   const [dotRadius, setDotRadius] = useState<number>(nodeR);
 
   const handleRadioButtonChange = (value: string) => {
     if (value === 'Az/Slant') {
-      setRadialArray([1000, 750, 500, 250]);
+      setRadialArray([2000, 1500, 1000, 500]);
       setDotRadius(nodeRSlant);
     } else {
       setRadialArray([0, 22.5, 45.0, 67.5]);
