@@ -4,13 +4,19 @@ import { RefDict, TimeEvent, TimeEventCallback } from '../types';
 
 // Hook to listen to eventBus for cosmos timeevents, running animation callback when event fires
 export const useCosmosTimeline = (data: PanelData, eventBus: EventBus, callback: TimeEventCallback) => {
+  console.log('enter Cosmos Timeline');
+  // const [entity, setEntity] = useState<TimeEvent>();
   // ---------------------------------------------------
   // Imperative animation controller
   // Unix seconds timestamp that denotes current time, obtained from cosmos-timeline event publisher
   useEffect(() => {
-    const subscriber = eventBus.getStream(TimeEvent).subscribe((event) => {
-      if (event.payload.time !== undefined) {
-        callback(data, event);
+    console.log('useEffect Cosmos Timeline ');
+    const subscriber = eventBus.getStream(TimeEvent).subscribe({
+      next: (event: TimeEvent) => {
+        console.log('subscribe Cosmos Timeline');
+        if (event.payload.time !== undefined) {
+          callback(data, event);
+        }
       }
     });
     return () => {
@@ -28,6 +34,7 @@ type DomUpdateReturn = [
   refInputs: React.MutableRefObject<RefDict>,
   callback: (data: PanelData, event: TimeEvent) => void
 ];
+
 // Imperative animation manager
 export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
   //const refId = useRef<number>(0);
@@ -40,7 +47,8 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
   const refInputs = useRef<RefDict>({});
   // The index into the data array
   const refIdxs = useRef<number[]>([]);
-
+  console.log("useDomUpdate");
+  console.log("update DOM refInputs.current: ", refInputs.current);
   useEffect(() => {
     // Clean up renderer on unmount
     return () => {
@@ -53,11 +61,14 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
 
   // Update refIdxs
   useEffect(() => {
+    console.log('Update refIdxs');
+
     // Array of references
     // Number of columns is the total -1 to exclude the time column
+    // - 2 for node name, node type
     let numColumns = 0;
     for (let i = 0; i < data.series.length; i++) {
-      numColumns += data.series[i].fields.length - 1;
+      numColumns += data.series[i].fields.length - 3;
     }
     // Array of indices
     if (refIdxs.current.length < numColumns) {
@@ -69,83 +80,181 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     }
   }, [data]);
 
+
   // ---------------------------------------------------
   // Imperative animation update call
   const updateDOMRefs = useCallback((data: PanelData, event: TimeEvent) => {
+    console.log('updateDOMRefs use callback function in hooks');
+
     if (
       !data.series.length || // Check if there is valid query result
       data.series[0].fields.length < 2 // || // Check if there are time and value columns in query
       //refIdx.current >= data.series[0].fields[0].values.length // Check if there are values in those columns
     ) {
+      console.log('no data updateDOMRefs in hooks');
       //refIdx.current = 0;
       return;
     }
+    console.log('start of updateDOMRefs in hooks');
+
     let yaw = 0;
     let pitch = 0;
     let roll = 0;
 
+    console.log("update DOM refInputs.current: ", refInputs.current);
+
+    let last_time: number = 0;
+    if (refInputs.current.TIME) {
+      last_time = parseFloat(refInputs.current.TIME.value);
+    }
+    console.log('last time', last_time);
+
     // Update field values
     Object.entries(refInputs.current).forEach(([key, ref], i) => {
+      console.log('object refInputs.current iterator: key, ref', key, ref);
+      console.log('data series view in iterator: ', data.series);
+
       if (ref !== null) {
         // Check that there are query results
-        if (!data.series.length) {
+        //  should be checking if greater than default length [0] so not  (!data.series.length) as it was instead  (data.series.length <=1)
+        if (data.series.length <= 1) {
+          console.log('EMPTY QUERY');
           return;
         }
         // 0th, 1st, and 2nd derivatives have been separated into separate series
+        // for first data element always
         let seriesIdx = 0;
-        switch (key) {
-          case 'VYAW':
-          case 'VPITCH':
-          case 'VROLL':
-            seriesIdx = 1;
-            break;
-          case 'AYAW':
-          case 'APITCH':
-          case 'AROLL':
-            seriesIdx = 2;
-            break;
-          default:
-            break;
-        }
+        // TODO remove archaic data reference
+        // switch (key) {
+        //   case 'VYAW':
+        //   case 'VPITCH':
+        //   case 'VROLL':
+        //     seriesIdx = 1;
+        //     break;
+        //   case 'AYAW':
+        //   case 'APITCH':
+        //   case 'AROLL':
+        //     seriesIdx = 2;
+        //     break;
+        //   default:
+        //     break;
+        // }
         // setState takes one rerender cycle to be reset to the correct value
         // TODO: make this a better check?
         const boundCheck = (i % 3) + 1;
-        if (boundCheck >= data.series[seriesIdx].fields.length) {
-          return;
-        }
-        // Query must have returned some values
+        // why is this looping over a different node row return from the query for each iteration of location part X derivative level ? 
+        // should this be instead looping over every node row, data.series[node_row] , then selecting the appropriate location part X derivative level i.e. AYAW
+        console.log('bound check function, data series for idX [0]: ', seriesIdx, data.series[seriesIdx]);
+        console.log('event time check: event payload ', event.payload);
+
+        // console.log('bound check function, data series fields[0] values for first row: ', seriesIdx, data.series[seriesIdx].fields[3].values);
+        // for (let i = 0; i < data.series[0].fields.length; i++) {
+        //   console.log('iterator data series[0] field[i] value[0]: ', data.series[seriesIdx].fields[i].name, ': ', data.series[seriesIdx].fields[i].values.get(0));
+
+        // }
+
+        // TODO redefine bound check for new data series type
+        // if (boundCheck >= data.series[seriesIdx].fields.length) {
+        //   return;
+        // }
+        // Query must have returned some values; select array of beacon time stamps
         const timeValues = data.series[seriesIdx].fields[0].values;
+        console.log('timeValues: ', timeValues);
+        console.log('i; refIdxs.current[i] ', i, '; ', refIdxs.current[i]);
+
         if (timeValues.length === 0) {
           return;
         }
-        // If index is out of bounds, set it back to the start
-        if (refIdxs.current[i] >= timeValues.length - 1) {
-          refIdxs.current[i] = 0;
-        }
+
+        // // If index is out of bounds, set it back to the start
+        // if (refIdxs.current[i] >= timeValues.length - 1) {
+        //   refIdxs.current[i] = 0;
+        // }
+
         // If new timestamp is less than our current timestamp, then search from start
         // TODO: depending on circumstances, we could perhaps just search backwards, eg: if scrubbing is in event?
-        let time = timeValues.get(refIdxs.current[i]);
-        if (time > event.payload.time!) {
-          refIdxs.current[i] = 0;
-        }
-        // Search through timestamps, and get the timestamp that is one before we go over the event timestamp
-        for (; refIdxs.current[i] < timeValues.length - 1; refIdxs.current[i]++) {
-          time = timeValues.get(refIdxs.current[i]);
-          if (time === event.payload.time!) {
+
+        let time = timeValues.get(0);
+        console.log('timeValues get first row time', time);
+
+        // if (time > event.payload.time!) {
+        //   refIdxs.current[i] = 0;
+        // }
+
+        // // Search through timestamps, and get the timestamp that is one before we go over the event timestamp
+        // for (; refIdxs.current[i] < timeValues.length - 1; refIdxs.current[i]++) {
+        //   time = timeValues.get(refIdxs.current[i]);
+        //   if (time === event.payload.time!) {
+        //     break;
+        //   }
+        //   if (time > event.payload.time!) {
+        //     refIdxs.current[i] += 1;
+        //     break;
+        //   }
+        // }
+
+        // add clause here to check   && (time > last_time)
+        let array_pos: number = -1;
+        for (let i = 0; i < timeValues.length; i++) {
+          time = timeValues.get(i);
+          console.log('this time i ', time);
+          if ((time === event.payload.time!) && (time > last_time || Number.isNaN(last_time))) {
+            array_pos = i;
+            if (key == 'TIME') {
+              ref.value = time.toString();
+              break;
+            }
             break;
           }
-          if (time > event.payload.time!) {
-            refIdxs.current[i] -= 1;
+          if ((time < event.payload.time!) && (time > last_time || Number.isNaN(last_time))) {
+            array_pos = i;
+            if (key == 'TIME') {
+              ref.value = time.toString();
+              break;
+            }
             break;
           }
         }
+        if (array_pos == -1) {
+          return;
+        }
+
+        // TODO remove log of data series:
+        for (let i = 0; i < data.series[0].fields.length; i++) {
+          console.log('iterator data series[0] field[i] value[array_pos]: ', data.series[seriesIdx].fields[i].name, ': ', data.series[seriesIdx].fields[i].values.get(array_pos));
+        }
+
         // Grab appropriate column
-        const field = data.series[seriesIdx].fields.find((field) => field.name === key);
+        // redefine new column names as map
+        const keyMap: Object = {
+          "YAW": "s_x",
+          "PITCH": "s_y",
+          "ROLL": "s_z",
+          "VYAW": "v_x",
+          "VPITCH": "v_y",
+          "VROLL": "v_z",
+          "AYAW": "a_x",
+          "APITCH": "a_y",
+          "AROLL": "a_z"
+        }
+        let thisField: string;
+        for (const [KMkey, KMvalue] of Object.entries(keyMap)) {
+          if (KMkey == key) {
+            thisField = KMvalue;
+          }
+        }
+        const field = data.series[seriesIdx].fields.find((field) => field.name === thisField);
         if (field === undefined) {
           return;
         }
         // Finally, update display with most up-to-date values
-        const currentValue: number = field.values.get(refIdxs.current[i]) ?? 0;
+        console.log("update display latest value: refIdxs: ", refIdxs);
+
+        // const currentValue: number = field.values.get(refIdxs.current[i]) ?? 0;
+        console.log('refIdxs.current[i] ', refIdxs.current[i]);
+
+        // define index based on timestamp map to time column
+        const currentValue: number = field.values.get(array_pos) ?? 0;
         ref.value = currentValue.toString();
         switch (key) {
           case 'YAW':
@@ -159,6 +268,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             break;
         }
       }
+      return
     });
 
     // Update threejs model rotation

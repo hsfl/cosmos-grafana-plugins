@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { PanelProps } from '@grafana/data';
-import { InlineFieldRow, Input, Select } from '@grafana/ui';
+import { FadeTransition, InlineFieldRow, Input, Select } from '@grafana/ui';
 import { useCosmosTimeline, useDomUpdate } from './helpers/hooks';
 import { SimpleOptions } from 'types';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-interface Props extends PanelProps<SimpleOptions> {}
+
+interface Props extends PanelProps<SimpleOptions> { }
 
 // Load in a glb/gltf model
 const loadModel = (scene: THREE.Scene): Promise<THREE.Group> => {
@@ -44,7 +45,11 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   // The index into the data array
   //const refIdxs = useRef<number[]>([]);
   const [refRenderer, refScene, refCamera, refModel, refInputs, updateDOMRefs] = useDomUpdate(data);
+  console.log('sim pan eventBus: ', eventBus);
   useCosmosTimeline(data, eventBus, updateDOMRefs);
+  console.log('adcs data: ', data);
+  console.log('data select, state ', data.state);
+
 
   // Setup the scene
   useEffect(() => {
@@ -54,6 +59,8 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       return;
     }
     if (refRenderer.current === undefined || refRenderer.current === null) {
+      console.log('undefined refRenderer');
+
       const renderer = new THREE.WebGLRenderer();
       // Insert into div
       document.body.appendChild(renderer.domElement);
@@ -108,6 +115,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     });
     // Note: refs are stable, will not trigger effect, but calms the exhaustive-deps lint rule
   }, [width, height, refRenderer, refScene, refCamera, refModel, refInputs]);
+  console.log('REF inputs adcs simple panel: ', refInputs);
 
   return (
     <div style={{ width: width, height: height, overflow: 'auto' }}>
@@ -116,7 +124,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
         <Select
           value={{ label: 'LVLH' }}
           options={[{ label: 'LVLH' }, { label: 'ICRF' }]}
-          onChange={() => {}}
+          onChange={() => { }}
           width="auto"
         />
       </InlineFieldRow>
@@ -167,6 +175,12 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
         </div>
         <div style={{ gridRow: 4, gridColumn: 4 }}>
           <Input ref={(ref) => (refInputs.current['AROLL'] = ref)} type="text" />
+        </div>
+      </div>
+      <div>
+        <div style={{ gridRow: 1, gridColumn: 1, marginInlineEnd: '1em' }}> Time: </div>
+        <div style={{ gridRow: 1, gridColumn: 2 }}>
+          <Input ref={(ref) => (refInputs.current['TIME'] = ref)} type="text" readOnly />
         </div>
       </div>
     </div>
