@@ -50,12 +50,14 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, fie
         let label = labels.name;
         // Index of first character of numeric suffix (eg: for 'asdf1', return 4)
         let suffixIdx = label.search(/\d/);
-        // // Check if character before that is non-alphabetic (eg: for 'asdf_1'), if so, remove that too
-        if (suffixIdx > 1 && /^[^a-z0-9]$/i.test(label[suffixIdx - 1])) {
-          suffixIdx -= 1;
+        if (suffixIdx > 1) {
+          // Check if character before that is non-alphabetic (eg: for 'asdf_1'), if so, remove that too
+          if (suffixIdx > 1 && /^[^a-z0-9]$/i.test(label[suffixIdx - 1])) {
+            suffixIdx -= 1;
+          }
+          // Truncate suffix
+          label = label.slice(0, suffixIdx);
         }
-        // // Truncate suffix
-        label = label.slice(0, suffixIdx);
         // Push the column index to the label
         // All columns with the same label (ie: the name without the suffix) will be together
         if (newLabels[label] === undefined) {
@@ -87,12 +89,14 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, fie
         let label = labels.name;
         // Index of first character of numeric suffix (eg: for 'asdf1', return 4)
         let suffixIdx = label.search(/\d/);
-        // // Check if character before that is non-alphabetic (eg: for 'asdf_1'), if so, remove that too
-        if (suffixIdx > 1 && /^[^a-z0-9]$/i.test(label[suffixIdx - 1])) {
-          suffixIdx -= 1;
+        if (suffixIdx > 1) {
+          // Check if character before that is non-alphabetic (eg: for 'asdf_1'), if so, remove that too
+          if (suffixIdx > 1 && /^[^a-z0-9]$/i.test(label[suffixIdx - 1])) {
+            suffixIdx -= 1;
+          }
+          // Truncate suffix
+          label = label.slice(0, suffixIdx);
         }
-        // // Truncate suffix
-        label = label.slice(0, suffixIdx);
         // Push the column index to the label
         // All columns with the same label (ie: the name without the suffix) will be together
         if (newLabels[label] === undefined) {
