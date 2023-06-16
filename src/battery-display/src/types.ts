@@ -10,9 +10,9 @@ export interface SimpleOptions {
 
 export interface TimeEventPayload {
   // The starting time, positive unix timestamp
-  time?: number,
+  time?: number;
   // Time progression rate, in seconds. Event fires sparsely
-  rate?: number,
+  rate?: number;
 }
 
 export class TimeEvent extends BusEventWithPayload<Partial<TimeEventPayload>> {
@@ -21,30 +21,30 @@ export class TimeEvent extends BusEventWithPayload<Partial<TimeEventPayload>> {
 
 export enum BarOrientation {
   vertical,
-  horizontal
+  horizontal,
 }
 
 export interface BarGaugeRowProps {
-  time?: any,
-  solars?: any,
+  time?: any;
+  solars?: any;
   /** Array of field indices into data for desired label */
-  filteredLabels: number[],
+  filteredLabels: number[];
   /** Reference to query data */
-  data: PanelData,
+  data: PanelData;
   /** Width of one little bar gauge */
-  width: number,
+  width: number;
   /** Height of one little bar gauge */
-  height: number,
+  height: number;
   /** Horizontal or Vertical */
-  orientation: BarOrientation,
+  orientation: BarOrientation;
   /** Index for the query series in data to refer to. BCREG and BATT in separate series at the moment. See assumptions at the bottom of the file */
-  bidx: number | undefined,
+  bidx: number | undefined;
   /** The grafana eventbus */
-  eventBus: EventBus,
+  eventBus: EventBus;
 }
 
 // Interface for a dict of arrays
 // Key will be the label name, which points to an array of indices into the data.series[].fields array which share the same label
 export interface Labels {
-  [key: string]: number[]
+  [key: string]: number[];
 }

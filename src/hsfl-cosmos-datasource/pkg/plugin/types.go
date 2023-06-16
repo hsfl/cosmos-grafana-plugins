@@ -93,17 +93,28 @@ type eci struct {
 }
 
 type batt struct {
-	Time  float64
-	Node  string  `json:"node"`
-	Amp   float64 `json:"amp"`
-	Power float64 `json:"power"`
+	Time       float64
+	Node_name  string  `json:"node_name"`
+	Name       string  `json:"name"`
+	Amp        float64 `json:"amp,omitempty"`
+	Volt       float64 `json:"volt,omitempty"`
+	Power      float64 `json:"power,omitempty"`
+	Temp       float64 `json:"temp,omitempty"`
+	Percentage float64 `json:"percentage,omitempty"`
 }
 
 type bcreg struct {
-	Time  float64
-	Node  string  `json:"node"`
-	Amp   float64 `json:"amp"`
-	Power float64 `json:"power"`
+	Time         float64
+	Node_name    string  `json:"node_name"`
+	Name         string  `json:"name"`
+	Amp          float64 `json:"amp,omitempty"`
+	Volt         float64 `json:"volt,omitempty"`
+	Power        float64 `json:"power,omitempty"`
+	Temp         float64 `json:"temp,omitempty"`
+	Mpptin_amp   float64 `json:"mpptin_amp,omitempty"`
+	Mpptin_volt  float64 `json:"mpptin_volt,omitempty"`
+	Mpptout_amp  float64 `json:"mpptout_amp,omitempty"`
+	Mpptout_volt float64 `json:"mpptout_volt,omitempty"`
 }
 
 type tsen struct {
