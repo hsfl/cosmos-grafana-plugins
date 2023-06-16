@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { PanelProps } from '@grafana/data';
-import { FadeTransition, InlineFieldRow, Input, Select } from '@grafana/ui';
+import { InlineFieldRow, Input, Select } from '@grafana/ui';
 import { useCosmosTimeline, useDomUpdate } from './helpers/hooks';
 import { SimpleOptions } from 'types';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
-interface Props extends PanelProps<SimpleOptions> { }
+interface Props extends PanelProps<SimpleOptions> {}
 
 // Load in a glb/gltf model
 const loadModel = (scene: THREE.Scene): Promise<THREE.Group> => {
@@ -49,7 +49,6 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   useCosmosTimeline(data, eventBus, updateDOMRefs);
   console.log('adcs data: ', data);
   console.log('data select, state ', data.state);
-
 
   // Setup the scene
   useEffect(() => {
@@ -124,7 +123,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
         <Select
           value={{ label: 'LVLH' }}
           options={[{ label: 'LVLH' }, { label: 'ICRF' }]}
-          onChange={() => { }}
+          onChange={() => {}}
           width="auto"
         />
       </InlineFieldRow>

@@ -17,7 +17,7 @@ export const useCosmosTimeline = (data: PanelData, eventBus: EventBus, callback:
         if (event.payload.time !== undefined) {
           callback(data, event);
         }
-      }
+      },
     });
     return () => {
       subscriber.unsubscribe();
@@ -47,8 +47,8 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
   const refInputs = useRef<RefDict>({});
   // The index into the data array
   const refIdxs = useRef<number[]>([]);
-  console.log("useDomUpdate");
-  console.log("update DOM refInputs.current: ", refInputs.current);
+  console.log('useDomUpdate');
+  console.log('update DOM refInputs.current: ', refInputs.current);
   useEffect(() => {
     // Clean up renderer on unmount
     return () => {
@@ -80,7 +80,6 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     }
   }, [data]);
 
-
   // ---------------------------------------------------
   // Imperative animation update call
   const updateDOMRefs = useCallback((data: PanelData, event: TimeEvent) => {
@@ -101,9 +100,9 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     let pitch = 0;
     let roll = 0;
 
-    console.log("update DOM refInputs.current: ", refInputs.current);
+    console.log('update DOM refInputs.current: ', refInputs.current);
 
-    let last_time: number = 0;
+    let last_time = 0;
     if (refInputs.current.TIME) {
       last_time = parseFloat(refInputs.current.TIME.value);
     }
@@ -145,8 +144,8 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         // }
         // setState takes one rerender cycle to be reset to the correct value
         // TODO: make this a better check?
-        const boundCheck = (i % 3) + 1;
-        // why is this looping over a different node row return from the query for each iteration of location part X derivative level ? 
+        // const boundCheck = (i % 3) + 1;
+        // why is this looping over a different node row return from the query for each iteration of location part X derivative level ?
         // should this be instead looping over every node row, data.series[node_row] , then selecting the appropriate location part X derivative level i.e. AYAW
         console.log('bound check function, data series for idX [0]: ', seriesIdx, data.series[seriesIdx]);
         console.log('event time check: event payload ', event.payload);
@@ -198,7 +197,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         // }
 
         // add clause here to check   && (time > last_time)
-        let array_pos: number = -1;
+        let array_pos = -1;
         for (let i = 0; i < timeValues.length; i++) {
           time = timeValues.get(i);
           // console.log('this time i ', time);
@@ -207,7 +206,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             const pltime = event.payload.time!;
 
             array_pos = i;
-            if (key == 'TIME') {
+            if (key === 'TIME') {
               ref.value = time.toString();
               break;
             }
@@ -221,7 +220,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             console.log('INCREMENT Last time: ', last_time, '; time: ', time, '; payload time: ', event.payload.time);
             const pltime = event.payload.time!;
             array_pos = i;
-            if (key == 'TIME') {
+            if (key === 'TIME') {
               ref.value = time.toString();
               break;
             }
@@ -257,7 +256,12 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
 
         // TODO remove log of data series:
         for (let i = 0; i < data.series[0].fields.length; i++) {
-          console.log('iterator data series[0] field[i] value[array_pos]: ', data.series[seriesIdx].fields[i].name, ': ', data.series[seriesIdx].fields[i].values.get(array_pos));
+          console.log(
+            'iterator data series[0] field[i] value[array_pos]: ',
+            data.series[seriesIdx].fields[i].name,
+            ': ',
+            data.series[seriesIdx].fields[i].values.get(array_pos)
+          );
         }
 
         // Grab appropriate column
@@ -275,7 +279,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         }
         let thisField: string;
         for (const [KMkey, KMvalue] of Object.entries(keyMap)) {
-          if (KMkey == key) {
+          if (KMkey === key) {
             thisField = KMvalue;
           }
         }
@@ -284,7 +288,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           return;
         }
         // Finally, update display with most up-to-date values
-        console.log("update display latest value: refIdxs: ", refIdxs);
+        console.log('update display latest value: refIdxs: ', refIdxs);
 
         // const currentValue: number = field.values.get(refIdxs.current[i]) ?? 0;
         console.log('refIdxs.current[i] ', refIdxs.current[i]);
@@ -304,7 +308,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             break;
         }
       }
-      return
+      return;
     });
 
     // Update threejs model rotation
