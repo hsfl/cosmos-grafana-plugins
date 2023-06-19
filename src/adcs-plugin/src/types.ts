@@ -11,7 +11,7 @@ export interface SimpleOptions {
 //
 export type RefDict = { [key in adcs_field]?: HTMLInputElement | null };
 
-export type adcs_field = 'YAW' | 'VYAW' | 'AYAW' | 'PITCH' | 'VPITCH' | 'APITCH' | 'ROLL' | 'VROLL' | 'AROLL' | 'TIME';
+export type adcs_field = 'YAW' | 'VYAW' | 'AYAW' | 'PITCH' | 'VPITCH' | 'APITCH' | 'ROLL' | 'VROLL' | 'AROLL' | 'TIME' | 'PLTIME';
 
 export interface TimeEventPayload {
   // The starting time, positive unix timestamp

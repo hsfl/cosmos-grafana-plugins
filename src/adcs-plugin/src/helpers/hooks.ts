@@ -108,6 +108,10 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
       last_time = parseFloat(refInputs.current.TIME.value);
     }
     console.log('last time', last_time);
+    let pl_time: number = 0;
+    if (refInputs.current.PLTIME) {
+      pl_time = parseFloat(refInputs.current.PLTIME.value);
+    }
 
     // Update field values
     Object.entries(refInputs.current).forEach(([key, ref], i) => {
@@ -197,25 +201,57 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         let array_pos: number = -1;
         for (let i = 0; i < timeValues.length; i++) {
           time = timeValues.get(i);
-          console.log('this time i ', time);
+          // console.log('this time i ', time);
           if ((time === event.payload.time!) && (time > last_time || Number.isNaN(last_time))) {
+            console.log('EXACT Last time: ', last_time, '; time: ', time);
+            const pltime = event.payload.time!;
+
             array_pos = i;
             if (key == 'TIME') {
               ref.value = time.toString();
               break;
             }
+            if (key == 'PLTIME') {
+              ref.value = pltime.toString();
+              break;
+            }
             break;
           }
-          if ((time < event.payload.time!) && (time > last_time || Number.isNaN(last_time))) {
+          if ((time < event.payload.time!) && (time > last_time || Number.isNaN(last_time)) && (event.payload.time! > pl_time || Number.isNaN(pl_time))) {
+            console.log('INCREMENT Last time: ', last_time, '; time: ', time, '; payload time: ', event.payload.time);
+            const pltime = event.payload.time!;
             array_pos = i;
             if (key == 'TIME') {
               ref.value = time.toString();
+              break;
+            }
+            if (key == 'PLTIME') {
+              ref.value = pltime.toString();
+              break;
+            }
+            break;
+          }
+          console.log('last time - time', (last_time - time), 'last time - event time', (last_time - event.payload.time!));
+
+          if (((last_time - time) == 1000) && ((pl_time > event.payload.time!))) {
+            //&& (last_time > time) && (time > event.payload.time!)
+            array_pos = i;
+            console.log('DECREMENT Last time: ', last_time, '; time: ', time);
+            const pltime = event.payload.time!;
+
+            if (key == 'TIME') {
+              ref.value = time.toString();
+              break;
+            }
+            if (key == 'PLTIME') {
+              ref.value = pltime.toString();
               break;
             }
             break;
           }
         }
         if (array_pos == -1) {
+          console.log('SKIP Last time: ', last_time, '; time: ', time);
           return;
         }
 
@@ -227,15 +263,15 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         // Grab appropriate column
         // redefine new column names as map
         const keyMap: Object = {
-          "YAW": "s_x",
+          "YAW": "s_z",
           "PITCH": "s_y",
-          "ROLL": "s_z",
-          "VYAW": "v_x",
+          "ROLL": "s_x",
+          "VYAW": "v_z",
           "VPITCH": "v_y",
-          "VROLL": "v_z",
-          "AYAW": "a_x",
+          "VROLL": "v_x",
+          "AYAW": "a_z",
           "APITCH": "a_y",
-          "AROLL": "a_z"
+          "AROLL": "a_x"
         }
         let thisField: string;
         for (const [KMkey, KMvalue] of Object.entries(keyMap)) {

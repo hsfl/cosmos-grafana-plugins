@@ -182,6 +182,9 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
         <div style={{ gridRow: 1, gridColumn: 2 }}>
           <Input ref={(ref) => (refInputs.current['TIME'] = ref)} type="text" readOnly />
         </div>
+        <div style={{ gridRow: 1, gridColumn: 2 }}>
+          <Input ref={(ref) => (refInputs.current['PLTIME'] = ref)} type="text" hidden />
+        </div>
       </div>
     </div>
   );
