@@ -8,7 +8,6 @@ import { Group } from '@visx/group';
 const barDimensions = (
   values: Vector<any>,
   valueIdx: number,
-  labelIdx: number,
   orientation: number,
   xMax: number,
   yMax: number,
@@ -44,7 +43,7 @@ const barDimensions = (
 
 // Row of solar panel values
 export const BarGauge = (props: BarGaugeProps) => {
-  const { width, height, data, orientation, bidx, eventBus } = props;
+  const { width, height, cpu, data, orientation, bidx, eventBus } = props;
   // An array of references to the bar gauges in this row
   const refGauge = useRef<SVGRectElement | null>(null);
   // An array of idxs into the field value array, where we expect the next timestamp to be after
@@ -55,8 +54,8 @@ export const BarGauge = (props: BarGaugeProps) => {
   const yMax = height + verticalMargin;
   // TODO: adjust maxBarSize horizontal width?
   const maxBarSize = orientation === BarOrientation.horizontal ? width : yMax;
-  // TODO: fix max value, current using 5
-  const maxValue = 5;
+  // TODO: fix max value, current using 1
+  const maxValue = 1;
   // Scale between 0 and end of bar's maximum value, in the direction of the orientation (i.e., barSize)
   const barScale = useMemo(
     () =>
@@ -83,13 +82,15 @@ export const BarGauge = (props: BarGaugeProps) => {
           return;
         }
         // setState takes one rerender cycle to be reset to the correct value
-        if (1 >= data.series[bidx].fields.length) {
+        const series = data.series[bidx];
+        if (series === undefined) {
           return;
         }
-        // Query must have returned some values
-        if (data.series[bidx].fields[0].values.length === 0) {
+        const field = series.fields.find((f) => f.name === 'load' && f?.labels?.name === cpu?.label);
+        if (field === undefined) {
           return;
         }
+        const values = field.values;
         // If index is out of bounds, set it back to the start
         if (refIdx.current >= data.series[bidx].fields[0].values.length - 1) {
           refIdx.current = 0;
@@ -112,15 +113,7 @@ export const BarGauge = (props: BarGaugeProps) => {
             break;
           }
         }
-        const { x, y, barWidth, barHeight } = barDimensions(
-          data.series[bidx].fields[1].values,
-          refIdx.current,
-          1,
-          orientation,
-          xMax,
-          yMax,
-          barScale
-        );
+        const { x, y, barWidth, barHeight } = barDimensions(values, refIdx.current, orientation, xMax, yMax, barScale);
         refGauge.current!.setAttribute('x', (x ?? 0).toString());
         refGauge.current!.setAttribute('y', y.toString());
         refGauge.current!.setAttribute('width', barWidth.toString());
@@ -131,7 +124,7 @@ export const BarGauge = (props: BarGaugeProps) => {
     return () => {
       subscriber.unsubscribe();
     };
-  }, [eventBus, barScale, bidx, data.series, orientation, xMax, yMax]);
+  }, [eventBus, barScale, bidx, cpu, data.series, orientation, xMax, yMax]);
   //console.log(filteredLabels, numGraphs, filteredLabels.map(i=>`thing${i}`), xScale(`thing7`));
   if (bidx === undefined || bidx > data.series.length) {
     return null;
@@ -139,22 +132,27 @@ export const BarGauge = (props: BarGaugeProps) => {
   return (
     <svg width={xMax} height={yMax}>
       <Group>
-        {[1].map((val: number, i: number) => {
+        {[1].map(() => {
           // setState takes one rerender cycle to be reset to the correct value
-          if (val >= data.series[bidx].fields.length) {
-            return null;
+          const series = data.series[bidx];
+          if (series === undefined) {
+            return;
           }
+          const field = series.fields.find((f) => f.name === 'load');
+          if (field === undefined) {
+            return;
+          }
+          const values = field.values;
           const { x, y, barWidth, barHeight, graphWidth, graphHeight } = barDimensions(
-            data.series[bidx].fields[val].values,
-            data.series[bidx].fields[val].values.length - 1,
-            val,
+            values,
+            values.length - 1,
             orientation,
             xMax,
             yMax,
             barScale
           );
           return (
-            <Group key={`bar-${val}`}>
+            <Group key={`bar-obcs`}>
               <rect x={x} y={0} width={graphWidth} height={graphHeight} fill="rgba(0, 0, 0, 0.9)" />
               <Bar innerRef={refGauge} x={x} y={y} width={barWidth} height={barHeight} fill="rgba(0, 255, 0, 0.9)" />
             </Group>
@@ -164,3 +162,7 @@ export const BarGauge = (props: BarGaugeProps) => {
     </svg>
   );
 };
+
+// TODO:
+// Update bar graph when CPU is changed (currently only triggers on event bus).
+// Perhaps consolidate the DOM updates into one eventbus instead of having two.

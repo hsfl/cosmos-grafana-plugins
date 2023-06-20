@@ -1,4 +1,4 @@
-import { BusEventWithPayload, EventBus, PanelData } from '@grafana/data';
+import { BusEventWithPayload, EventBus, PanelData, SelectableValue } from '@grafana/data';
 
 type SeriesSize = 'sm' | 'md' | 'lg';
 
@@ -34,6 +34,8 @@ export enum BarOrientation {
 export interface BarGaugeProps {
   time?: any;
   solars?: any;
+  /** Selected CPU to display data for */
+  cpu: SelectableValue<string> | undefined;
   /** Reference to query data */
   data: PanelData;
   /** Width of one little bar gauge */

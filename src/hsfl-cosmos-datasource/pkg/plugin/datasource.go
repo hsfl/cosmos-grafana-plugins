@@ -199,10 +199,6 @@ func CreateFields(names []string) data.Fields {
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableTime, 0)
 		case "name":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
-		case "node":
-			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
-		case "node:device":
-			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
 		case "node_name":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
 		case "Node_name":
@@ -271,9 +267,9 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 	case bcreg:
 		names = []string{"time", "node_name", "name", "amp", "volt", "power", "temp", "mpptin_amp", "mpptin_volt", "mpptout_amp", "mpptout_volt"}
 	case tsen:
-		names = []string{"time", "node:device", "temp"}
+		names = []string{"time", "node_name", "name", "temp"}
 	case cpu:
-		names = []string{"time", "node", "load", "gib", "storage"}
+		names = []string{"time", "node_name", "name", "temp", "uptime", "load", "gib", "boot_count", "storage"}
 	case event:
 		names = []string{"time", "node_name", "duration", "event_id", "event_name"}
 	case mag:
@@ -391,18 +387,23 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
-			row[1] = &j.Node_Device
-			row[2] = j.Temp
-			AppendRowtoMap(frame_map, j.Node_Device, row, names, "tsen")
+			row[1] = &j.Node_name
+			row[2] = &j.Name
+			row[3] = j.Temp
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "tsen")
 		case cpu:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
-			row[1] = &j.Node
-			row[2] = j.Load
-			row[3] = j.Gib
-			row[4] = j.Storage
-			AppendRowtoMap(frame_map, j.Node, row, names, "cpu")
+			row[1] = &j.Node_name
+			row[2] = &j.Name
+			row[3] = j.Temp
+			row[4] = j.Uptime
+			row[5] = j.Load
+			row[6] = j.Gib
+			row[7] = j.Boot_count
+			row[8] = j.Storage
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "cpu")
 		case event:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)

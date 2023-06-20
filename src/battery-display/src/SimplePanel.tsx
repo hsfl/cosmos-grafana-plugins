@@ -30,7 +30,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, fie
     }
 
     // This sets up the bcregLabel for the solar panel components to use
-    if (refBcregSeriesIdx.current !== undefined) {
+    if (refBcregSeriesIdx.current !== undefined && data.series[refBcregSeriesIdx.current] !== undefined) {
       const bidx = refBcregSeriesIdx.current;
       const newLabels: Labels = {};
 
@@ -70,7 +70,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, fie
     }
 
     // This sets up for the battery component to use
-    if (refBattSeriesIdx.current !== undefined) {
+    if (refBattSeriesIdx.current !== undefined && data.series[refBattSeriesIdx.current] !== undefined) {
       const bidx = refBattSeriesIdx.current;
       const newLabels: Labels = {};
       // Iterate over every column

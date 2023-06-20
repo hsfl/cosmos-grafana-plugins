@@ -117,18 +117,23 @@ type bcreg struct {
 	Mpptout_volt float64 `json:"mpptout_volt,omitempty"`
 }
 
-type tsen struct {
-	Time        float64
-	Node_Device string  `json:"node:device,omitempty"`
-	Temp        float64 `json:"temp,omitempty"`
+type cpu struct {
+	Time       float64
+	Node_name  string  `json:"node_name"`
+	Name       string  `json:"name"`
+	Temp       float64 `json:"temp"`
+	Uptime     float64 `json:"uptime"`
+	Load       float64 `json:"load"`
+	Gib        float64 `json:"gib"`
+	Boot_count float64 `json:"boot_count"`
+	Storage    float64 `json:"storage"`
 }
 
-type cpu struct {
-	Time    float64
-	Node    string  `json:"node"`
-	Load    float64 `json:"load"`
-	Gib     float64 `json:"gib"`
-	Storage float64 `json:"storage"`
+type tsen struct {
+	Time      float64
+	Node_name string  `json:"node_name"`
+	Name      string  `json:"name"`
+	Temp      float64 `json:"temp,omitempty"`
 }
 
 type event struct {
