@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { PanelProps } from '@grafana/data';
-import { FadeTransition, InlineFieldRow, Input, Select } from '@grafana/ui';
+import { InlineFieldRow, Input, Select } from '@grafana/ui';
 import { useCosmosTimeline, useDomUpdate } from './helpers/hooks';
 import { SimpleOptions } from 'types';
 import * as THREE from 'three';
@@ -44,12 +44,12 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   // const refInputs = useRef<RefDict>({});
   // The index into the data array
   //const refIdxs = useRef<number[]>([]);
-  const [refRenderer, refScene, refCamera, refModel, refInputs, updateDOMRefs] = useDomUpdate(data);
+  const [refRenderer, refScene, refCamera, refModel, refInputs, refDS, updateDOMRefs] = useDomUpdate(data);
   console.log('sim pan eventBus: ', eventBus);
   useCosmosTimeline(data, eventBus, updateDOMRefs);
   console.log('adcs data: ', data);
   console.log('data select, state ', data.state);
-
+  console.log('ref data state . current ', refDS.current);
 
   // Setup the scene
   useEffect(() => {
@@ -122,9 +122,14 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       <div ref={refWebGLContainer} />
       <InlineFieldRow>
         <Select
-          value={{ label: 'LVLH' }}
+          // ref = {(ref) => (refInputs.current['VROLL'] = ref)}
+          value={refDS.current}
           options={[{ label: 'LVLH' }, { label: 'ICRF' }]}
-          onChange={() => { }}
+          onChange={(e) => {
+            console.log(e);
+            refDS.current = e.label
+            console.log(refDS.current);
+          }}
           width="auto"
         />
       </InlineFieldRow>
