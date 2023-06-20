@@ -228,132 +228,132 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             const pltime = event.payload.time!;
 
             array_pos = i;
-            if (key ==== 'TIME') {
-      ref.value = time.toString();
-      break;
-    }
-    if (key === 'PLTIME') {
-      ref.value = pltime.toString();
-      break;
-    }
-    break;
-  }
+            if (key === 'TIME') {
+              ref.value = time.toString();
+              break;
+            }
+            if (key === 'PLTIME') {
+              ref.value = pltime.toString();
+              break;
+            }
+            break;
+          }
           if ((time < event.payload.time!) && (time > last_time || Number.isNaN(last_time)) && (event.payload.time! > pl_time || Number.isNaN(pl_time))) {
-    console.log('INCREMENT Last time: ', last_time, '; time: ', time, '; payload time: ', event.payload.time);
-    const pltime = event.payload.time!;
-    array_pos = i;
-    if (key ==== 'TIME') {
-      ref.value = time.toString();
-      break;
-    }
-    if (key === 'PLTIME') {
-      ref.value = pltime.toString();
-      break;
-    }
-    break;
-  }
-  console.log('last time - time', (last_time - time), 'last time - event time', (last_time - event.payload.time!));
-  // TODO need to update to account for instances where there was a gap in beacons greater than 1000... for rewind function
-  if (((last_time - time) === 1000) && ((pl_time > event.payload.time!))) {
-    //&& (last_time > time) && (time > event.payload.time!)
-    array_pos = i;
-    console.log('DECREMENT Last time: ', last_time, '; time: ', time);
-    const pltime = event.payload.time!;
+            console.log('INCREMENT Last time: ', last_time, '; time: ', time, '; payload time: ', event.payload.time);
+            const pltime = event.payload.time!;
+            array_pos = i;
+            if (key === 'TIME') {
+              ref.value = time.toString();
+              break;
+            }
+            if (key === 'PLTIME') {
+              ref.value = pltime.toString();
+              break;
+            }
+            break;
+          }
+          console.log('last time - time', (last_time - time), 'last time - event time', (last_time - event.payload.time!));
+          // TODO need to update to account for instances where there was a gap in beacons greater than 1000... for rewind function
+          if (((last_time - time) === 1000) && ((pl_time > event.payload.time!))) {
+            //&& (last_time > time) && (time > event.payload.time!)
+            array_pos = i;
+            console.log('DECREMENT Last time: ', last_time, '; time: ', time);
+            const pltime = event.payload.time!;
 
-    if (key === 'TIME') {
-      ref.value = time.toString();
-      break;
-    }
-    if (key === 'PLTIME') {
-      ref.value = pltime.toString();
-      break;
-    }
-    break;
-  }
-}
-if (array_pos === -1) {
-  console.log('SKIP Last time: ', last_time, '; time: ', time);
-  return;
-}
+            if (key === 'TIME') {
+              ref.value = time.toString();
+              break;
+            }
+            if (key === 'PLTIME') {
+              ref.value = pltime.toString();
+              break;
+            }
+            break;
+          }
+        }
+        if (array_pos === -1) {
+          console.log('SKIP Last time: ', last_time, '; time: ', time);
+          return;
+        }
 
-// TODO remove log of data series:
-for (let i = 0; i < live_data[0].fields.length; i++) {
-  console.log('iterator data series[0] field[i] value[array_pos]: ', live_data[seriesIdx].fields[i].name, ': ', live_data[seriesIdx].fields[i].values.get(array_pos));
-}
+        // TODO remove log of data series:
+        for (let i = 0; i < live_data[0].fields.length; i++) {
+          console.log('iterator data series[0] field[i] value[array_pos]: ', live_data[seriesIdx].fields[i].name, ': ', live_data[seriesIdx].fields[i].values.get(array_pos));
+        }
 
-// Grab appropriate column
-// redefine new column names as map
-const keyMap: Object = {
-  "ICRF": {
-    "YAW": "s_z",
-    "PITCH": "s_y",
-    "ROLL": "s_x",
-    "VYAW": "v_z",
-    "VPITCH": "v_y",
-    "VROLL": "v_x",
-    "AYAW": "a_z",
-    "APITCH": "a_y",
-    "AROLL": "a_x"
-  },
-  "LVLH": {
-    "YAW": "s_d_z",
-    "PITCH": "s_d_y",
-    "ROLL": "s_d_x",
-    "VYAW": "v_z",
-    "VPITCH": "v_y",
-    "VROLL": "v_x",
-    "AYAW": "a_z",
-    "APITCH": "a_y",
-    "AROLL": "a_x"
-  }
-}
-let thisField: string;
-for (const [KMkey, KMvalue] of Object.entries(keyMap[refDS.current as keyof Object])) {
-  if (KMkey == key) {
-    thisField = KMvalue;
-  }
-}
-const field = live_data[seriesIdx].fields.find((field) => field.name === thisField);
-if (field === undefined) {
-  return;
-}
-// Finally, update display with most up-to-date values
-console.log('update display latest value: refIdxs: ', refIdxs);
+        // Grab appropriate column
+        // redefine new column names as map
+        const keyMap: Object = {
+          "ICRF": {
+            "YAW": "s_z",
+            "PITCH": "s_y",
+            "ROLL": "s_x",
+            "VYAW": "v_z",
+            "VPITCH": "v_y",
+            "VROLL": "v_x",
+            "AYAW": "a_z",
+            "APITCH": "a_y",
+            "AROLL": "a_x"
+          },
+          "LVLH": {
+            "YAW": "s_d_z",
+            "PITCH": "s_d_y",
+            "ROLL": "s_d_x",
+            "VYAW": "v_z",
+            "VPITCH": "v_y",
+            "VROLL": "v_x",
+            "AYAW": "a_z",
+            "APITCH": "a_y",
+            "AROLL": "a_x"
+          }
+        }
+        let thisField: string;
+        for (const [KMkey, KMvalue] of Object.entries(keyMap[refDS.current as keyof Object])) {
+          if (KMkey == key) {
+            thisField = KMvalue;
+          }
+        }
+        const field = live_data[seriesIdx].fields.find((field) => field.name === thisField);
+        if (field === undefined) {
+          return;
+        }
+        // Finally, update display with most up-to-date values
+        console.log('update display latest value: refIdxs: ', refIdxs);
 
-// const currentValue: number = field.values.get(refIdxs.current[i]) ?? 0;
-console.log('refIdxs.current[i] ', refIdxs.current[i]);
+        // const currentValue: number = field.values.get(refIdxs.current[i]) ?? 0;
+        console.log('refIdxs.current[i] ', refIdxs.current[i]);
 
-// define index based on timestamp map to time column
-const currentValue: number = field.values.get(array_pos) ?? 0;
-ref.value = currentValue.toString();
-switch (key) {
-  case 'YAW':
-    yaw = currentValue;
-    break;
-  case 'PITCH':
-    pitch = currentValue;
-    break;
-  case 'ROLL':
-    roll = currentValue;
-    break;
-}
+        // define index based on timestamp map to time column
+        const currentValue: number = field.values.get(array_pos) ?? 0;
+        ref.value = currentValue.toString();
+        switch (key) {
+          case 'YAW':
+            yaw = currentValue;
+            break;
+          case 'PITCH':
+            pitch = currentValue;
+            break;
+          case 'ROLL':
+            roll = currentValue;
+            break;
+        }
       }
-return;
+      return;
     });
 
-// Update threejs model rotation
-requestAnimationFrame(() => {
-  if (
-    refModel.current !== undefined &&
-    refRenderer.current !== undefined &&
-    refScene.current !== undefined &&
-    refCamera.current !== undefined
-  ) {
-    refModel.current.rotation.set(yaw, pitch, roll);
-    refRenderer.current.render(refScene.current, refCamera.current);
-  }
-});
+    // Update threejs model rotation
+    requestAnimationFrame(() => {
+      if (
+        refModel.current !== undefined &&
+        refRenderer.current !== undefined &&
+        refScene.current !== undefined &&
+        refCamera.current !== undefined
+      ) {
+        refModel.current.rotation.set(yaw, pitch, roll);
+        refRenderer.current.render(refScene.current, refCamera.current);
+      }
+    });
   }, []);
 
-return [refRenderer, refScene, refCamera, refModel, refInputs, refDS, updateDOMRefs];
+  return [refRenderer, refScene, refCamera, refModel, refInputs, refDS, updateDOMRefs];
 };
