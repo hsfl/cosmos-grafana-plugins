@@ -197,9 +197,7 @@ func CreateFields(names []string) data.Fields {
 		switch v {
 		case "time":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableTime, 0)
-		case "node":
-			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
-		case "node:device":
+		case "name":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
 		case "node_name":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeNullableString, 0)
@@ -233,7 +231,8 @@ func AppendRowtoMap(frame_map map[string]*data.Frame, frame_name string, row []i
 	_, ok := frame_map[frame_name]
 	if !ok {
 		frame_map[frame_name] = data.NewFrame(frame_name, CreateFields(names)...)
-		frame_map[frame_name].SetMeta(&data.FrameMeta{Custom: tag})
+		custom_tag := map[string]string{"type": tag}
+		frame_map[frame_name].SetMeta(&data.FrameMeta{Custom: custom_tag})
 	}
 	frame_map[frame_name].AppendRow(row...)
 }
@@ -264,13 +263,13 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 	case eci:
 		names = []string{"time", "node_name", "node_type", "s_x", "s_y", "s_z", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z"}
 	case batt:
-		names = []string{"time", "node", "amp", "power"}
+		names = []string{"time", "node_name", "name", "amp", "volt", "power", "temp", "percentage"}
 	case bcreg:
-		names = []string{"time", "node", "amp", "power"}
+		names = []string{"time", "node_name", "name", "amp", "volt", "power", "temp", "mpptin_amp", "mpptin_volt", "mpptout_amp", "mpptout_volt"}
 	case tsen:
-		names = []string{"time", "node:device", "temp"}
+		names = []string{"time", "node_name", "name", "temp"}
 	case cpu:
-		names = []string{"time", "node", "load", "gib", "storage"}
+		names = []string{"time", "node_name", "name", "temp", "uptime", "load", "gib", "boot_count", "storage"}
 	case event:
 		names = []string{"time", "node_name", "duration", "event_id", "event_name"}
 	case mag:
@@ -361,34 +360,50 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
-			row[1] = &j.Node
-			row[2] = j.Amp
-			row[3] = j.Power
-			AppendRowtoMap(frame_map, j.Node, row, names, "batt")
+			row[1] = &j.Node_name
+			row[2] = &j.Name
+			row[3] = j.Amp
+			row[4] = j.Volt
+			row[5] = j.Power
+			row[6] = j.Temp
+			row[7] = j.Percentage
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "batt")
 		case bcreg:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
-			row[1] = &j.Node
-			row[2] = j.Amp
-			row[3] = j.Power
-			AppendRowtoMap(frame_map, j.Node, row, names, "bcreg")
+			row[1] = &j.Node_name
+			row[2] = &j.Name
+			row[3] = j.Amp
+			row[4] = j.Volt
+			row[5] = j.Power
+			row[6] = j.Temp
+			row[7] = j.Mpptin_amp
+			row[8] = j.Mpptin_volt
+			row[9] = j.Mpptout_amp
+			row[10] = j.Mpptout_volt
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "bcreg")
 		case tsen:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
-			row[1] = &j.Node_Device
-			row[2] = j.Temp
-			AppendRowtoMap(frame_map, j.Node_Device, row, names, "tsen")
+			row[1] = &j.Node_name
+			row[2] = &j.Name
+			row[3] = j.Temp
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "tsen")
 		case cpu:
 			timestamp := mjd_to_time(j.Time)
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
-			row[1] = &j.Node
-			row[2] = j.Load
-			row[3] = j.Gib
-			row[4] = j.Storage
-			AppendRowtoMap(frame_map, j.Node, row, names, "cpu")
+			row[1] = &j.Node_name
+			row[2] = &j.Name
+			row[3] = j.Temp
+			row[4] = j.Uptime
+			row[5] = j.Load
+			row[6] = j.Gib
+			row[7] = j.Boot_count
+			row[8] = j.Storage
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "cpu")
 		case event:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)

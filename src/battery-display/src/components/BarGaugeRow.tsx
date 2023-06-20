@@ -1,11 +1,19 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { BarOrientation, BarGaugeRowProps, TimeEvent } from 'types';
+import { BarOrientation, BarGaugeRowProps, TimeEvent } from '../types';
 import { Vector } from '@grafana/data';
 import { scaleBand, scaleLinear } from '@visx/scale';
 import { Bar } from '@visx/shape';
 import { Group } from '@visx/group';
 
-const barDimensions = (values: Vector<any>, valueIdx: number, labelIdx: number, orientation: number, yMax: number, xScale: any, barScale: any) => {
+const barDimensions = (
+  values: Vector<any>,
+  valueIdx: number,
+  labelIdx: number,
+  orientation: number,
+  yMax: number,
+  xScale: any,
+  barScale: any
+) => {
   // If we couldn't find one (i.e., the 0th timestamp was already higher),
   // then refIdxs.current[i] will be -1, and the .get() below for barSize will return undefined,
   // which then gets null coalesced to 0. I.e., show value 0 if time is way before we have anything for
@@ -22,23 +30,30 @@ const barDimensions = (values: Vector<any>, valueIdx: number, labelIdx: number, 
   const graphHeight = yMax;
   // The width of the scaled bar in the graph
   const barWidth = orientation === BarOrientation.horizontal ? barSize : graphWidth;
-  // The height of the scaled bar in the graph 
+  // The height of the scaled bar in the graph
   const barHeight = orientation === BarOrientation.horizontal ? yMax : barSize;
-  return {x: barX, y: barY, graphWidth: graphWidth, graphHeight: graphHeight, barWidth: barWidth, barHeight: barHeight};
-}
+  return {
+    x: barX,
+    y: barY,
+    graphWidth: graphWidth,
+    graphHeight: graphHeight,
+    barWidth: barWidth,
+    barHeight: barHeight,
+  };
+};
 
 // Row of solar panel values
 export const BarGaugeRow = (props: BarGaugeRowProps) => {
-  const {width, height, filteredLabels, data, orientation, bidx, eventBus} = props;
+  const { width, height, filteredLabels, data, orientation, bidx, eventBus } = props;
   // An array of references to the bar gauges in this row
   const refGauges = useRef<Array<SVGRectElement | null>>([]);
   // An array of idxs into the field value array, where we expect the next timestamp to be after
   const refIdxs = useRef<number[]>([]);
   // Number of graphs in this row
   const numGraphs = filteredLabels.length;
-  const verticalMargin = 0;//height * .4;
+  const verticalMargin = 0; //height * .4;
   // Bounds
-  const xMax = width*numGraphs;
+  const xMax = width * numGraphs;
   const yMax = height + verticalMargin;
   // TODO: adjust maxBarSize horizontal width?
   const maxBarSize = orientation === BarOrientation.horizontal ? width : yMax;
@@ -53,7 +68,7 @@ export const BarGaugeRow = (props: BarGaugeRowProps) => {
         domain: filteredLabels,
         paddingInner: 0.1,
       }),
-    [xMax, filteredLabels],
+    [xMax, filteredLabels]
   );
   // Scale between 0 and end of bar's maximum value, in the direction of the orientation (i.e., barSize)
   const barScale = useMemo(
@@ -64,7 +79,7 @@ export const BarGaugeRow = (props: BarGaugeRowProps) => {
         domain: [0, maxValue],
         clamp: true,
       }),
-    [maxBarSize],
+    [maxBarSize]
   );
   // Set length of array of references to number of bar gauges in this row
   // Also set the length of the array of indices
@@ -85,11 +100,10 @@ export const BarGaugeRow = (props: BarGaugeRowProps) => {
     } else {
       refIdxs.current = refIdxs.current.slice(0, filteredLabels.length);
     }
-
   }, [filteredLabels]);
   // Unix seconds timestamp that denotes current time, obtained from cosmos-timeline event publisher
   useEffect(() => {
-    const subscriber = eventBus.getStream(TimeEvent).subscribe(event => {
+    const subscriber = eventBus.getStream(TimeEvent).subscribe((event) => {
       if (event.payload.time !== undefined) {
         //refUnixTime.current = event.payload.time;
         filteredLabels.forEach((val: number, i: number) => {
@@ -110,7 +124,7 @@ export const BarGaugeRow = (props: BarGaugeRowProps) => {
             return;
           }
           // If index is out of bounds, set it back to the start
-          if (refIdxs.current[i] >= data.series[bidx].fields[0].values.length-1) {
+          if (refIdxs.current[i] >= data.series[bidx].fields[0].values.length - 1) {
             refIdxs.current[i] = 0;
           }
           // If new timestamp is less than our current timestamp, then search from start
@@ -121,7 +135,7 @@ export const BarGaugeRow = (props: BarGaugeRowProps) => {
             refIdxs.current[i] = 0;
           }
           // Search through timestamps, and get the timestamp that is one before we go over the event timestamp
-          for (; refIdxs.current[i] < timeValues.length-1; refIdxs.current[i]++) {
+          for (; refIdxs.current[i] < timeValues.length - 1; refIdxs.current[i]++) {
             time = timeValues.get(refIdxs.current[i]);
             if (time === event.payload.time!) {
               break;
@@ -131,18 +145,26 @@ export const BarGaugeRow = (props: BarGaugeRowProps) => {
               break;
             }
           }
-          const {x, y, barWidth, barHeight} = barDimensions(data.series[bidx].fields[val].values, refIdxs.current[i], val, orientation, yMax, xScale, barScale);
-          refGauges.current[i]!.setAttribute("x", (x ?? 0).toString());
-          refGauges.current[i]!.setAttribute("y", y.toString());
-          refGauges.current[i]!.setAttribute("width", barWidth.toString());
-          refGauges.current[i]!.setAttribute("height", barHeight.toString());
+          const { x, y, barWidth, barHeight } = barDimensions(
+            data.series[bidx].fields[val].values,
+            refIdxs.current[i],
+            val,
+            orientation,
+            yMax,
+            xScale,
+            barScale
+          );
+          refGauges.current[i]!.setAttribute('x', (x ?? 0).toString());
+          refGauges.current[i]!.setAttribute('y', y.toString());
+          refGauges.current[i]!.setAttribute('width', barWidth.toString());
+          refGauges.current[i]!.setAttribute('height', barHeight.toString());
         });
       }
     });
 
     return () => {
       subscriber.unsubscribe();
-    }
+    };
   }, [eventBus, barScale, bidx, data.series, filteredLabels, numGraphs, orientation, xScale, yMax]);
   //console.log(filteredLabels, numGraphs, filteredLabels.map(i=>`thing${i}`), xScale(`thing7`));
   if (numGraphs === 0 || bidx === undefined || bidx > data.series.length) {
@@ -156,18 +178,20 @@ export const BarGaugeRow = (props: BarGaugeRowProps) => {
           if (val >= data.series[bidx].fields.length) {
             return null;
           }
-          const {x, y, barWidth, barHeight, graphWidth, graphHeight} = barDimensions(data.series[bidx].fields[val].values, data.series[bidx].fields[val].values.length-1, val, orientation, yMax, xScale, barScale);
+          const { x, y, barWidth, barHeight, graphWidth, graphHeight } = barDimensions(
+            data.series[bidx].fields[val].values,
+            data.series[bidx].fields[val].values.length - 1,
+            val,
+            orientation,
+            yMax,
+            xScale,
+            barScale
+          );
           return (
             <Group key={`bar-${val}`}>
-              <rect
-                x={x}
-                y={0}
-                width={graphWidth}
-                height={graphHeight}
-                fill="rgba(200, 200, 200, 0.9)"
-              />
+              <rect x={x} y={0} width={graphWidth} height={graphHeight} fill="rgba(200, 200, 200, 0.9)" />
               <Bar
-                innerRef={(el) => refGauges.current[i] = el}
+                innerRef={(el) => (refGauges.current[i] = el)}
                 x={x}
                 y={y}
                 width={barWidth}
