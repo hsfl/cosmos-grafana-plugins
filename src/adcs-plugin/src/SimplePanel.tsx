@@ -6,7 +6,7 @@ import { SimpleOptions } from 'types';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
-interface Props extends PanelProps<SimpleOptions> { }
+interface Props extends PanelProps<SimpleOptions> {}
 
 // Load in a glb/gltf model
 const loadModel = (scene: THREE.Scene): Promise<THREE.Group> => {
@@ -45,11 +45,11 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   // The index into the data array
   //const refIdxs = useRef<number[]>([]);
   const [refRenderer, refScene, refCamera, refModel, refInputs, refDS, updateDOMRefs] = useDomUpdate(data);
-  console.log('sim pan eventBus: ', eventBus);
+  // console.log('sim pan eventBus: ', eventBus);
   useCosmosTimeline(data, eventBus, updateDOMRefs);
-  console.log('adcs data: ', data);
-  console.log('data select, state ', data.state);
-  console.log('ref data state . current ', refDS.current);
+  // console.log('adcs data: ', data);
+  // console.log('data select, state ', data.state);
+  // console.log('ref data state . current ', refDS.current);
 
   // Setup the scene
   useEffect(() => {
@@ -59,8 +59,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       return;
     }
     if (refRenderer.current === undefined || refRenderer.current === null) {
-      console.log('undefined refRenderer');
-
+      // console.log('undefined refRenderer');
       const renderer = new THREE.WebGLRenderer();
       // Insert into div
       document.body.appendChild(renderer.domElement);
@@ -115,7 +114,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     });
     // Note: refs are stable, will not trigger effect, but calms the exhaustive-deps lint rule
   }, [width, height, refRenderer, refScene, refCamera, refModel, refInputs]);
-  console.log('REF inputs adcs simple panel: ', refInputs);
+  // console.log('REF inputs adcs simple panel: ', refInputs);
 
   return (
     <div style={{ width: width, height: height, overflow: 'auto' }}>
@@ -126,9 +125,9 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
           value={refDS.current}
           options={[{ label: 'LVLH' }, { label: 'ICRF' }]}
           onChange={(e) => {
-            console.log(e);
-            refDS.current = e.label
-            console.log(refDS.current);
+            // console.log(e);
+            refDS.current = e.label;
+            // console.log(refDS.current);
           }}
           width="auto"
         />
@@ -149,10 +148,12 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
         <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 4 }}>
           Angular Accel (rad/s<sup>2</sup>)
         </div>
-
-        <div style={{ gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' }}>Yaw</div>
-        <div style={{ gridRow: 3, gridColumn: 1, marginInlineEnd: '1em' }}>Pitch</div>
-        <div style={{ gridRow: 4, gridColumn: 1, marginInlineEnd: '1em' }}>Roll</div>
+        {/* Heading: z axis: Yaw
+            Elevation: y axis: Pitch
+            Bank: x axis: Roll */}
+        <div style={{ gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' }}>Z: Heading</div>
+        <div style={{ gridRow: 3, gridColumn: 1, marginInlineEnd: '1em' }}>Y: Elevation</div>
+        <div style={{ gridRow: 4, gridColumn: 1, marginInlineEnd: '1em' }}>X: Bank</div>
 
         <div style={{ gridRow: 2, gridColumn: 2 }}>
           <Input ref={(ref) => (refInputs.current['YAW'] = ref)} type="text" />
