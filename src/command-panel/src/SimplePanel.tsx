@@ -3,7 +3,8 @@ import { PanelProps } from '@grafana/data';
 import { InlineFieldRow, InlineLabel, Button, HorizontalGroup } from '@grafana/ui';
 import { SimpleOptions /*currentMJD*/ } from './types';
 //import { currentMJD } from 'utils/utilFunctions';
-import { useInputSuggest } from './helpers/InputWithSuggest';
+// import { useInputSuggest } from './helpers/InputWithSuggest';
+import { useInputSuggest_mui } from './helpers/InputWithSuggest_mui';
 
 interface Props extends PanelProps<SimpleOptions> {}
 
@@ -28,7 +29,7 @@ const useCommand = () => {
       <InlineFieldRow>
         <InlineLabel width={'auto'}>
           CMD {'>'}
-          {useInputSuggest()}
+          {useInputSuggest_mui()}
         </InlineLabel>
       </InlineFieldRow>
       <HorizontalGroup spacing="xs">
