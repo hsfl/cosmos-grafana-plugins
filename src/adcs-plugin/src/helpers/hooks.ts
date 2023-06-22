@@ -105,7 +105,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     // live data .... where data.meta.custom = eci || qatt for map to refDS.current = LVLH || ICRF ....  TODO
     // let live_data = data.series.map(filter: )
     const DataMap: Object = {
-      ICRF: 'eci',
+      ICRF: 'aattstruc',
       LVLH: 'qatt',
     };
     // let data_type: string;
@@ -114,8 +114,8 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     //   // data_type = DataMap[key];
     //   DataMap[key as keyof DataMap]
     // }
-    let live_data = data.series.filter((row) => row.meta?.custom === DataMap[refDS.current as keyof Object]);
-    // console.log('Live filtered data: ', live_data);
+    let live_data = data.series.filter((row) => row.meta?.custom?.type === DataMap[refDS.current as keyof Object]);
+    console.log('Live filtered data: ', live_data);
 
     let yaw = 0;
     let pitch = 0;
@@ -293,15 +293,15 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         // redefine new column names as map
         const keyMap: Object = {
           ICRF: {
-            YAW: 's_z',
-            PITCH: 's_y',
-            ROLL: 's_x',
-            VYAW: 'v_z',
-            VPITCH: 'v_y',
-            VROLL: 'v_x',
-            AYAW: 'a_z',
-            APITCH: 'a_y',
-            AROLL: 'a_x',
+            YAW: 's_h',
+            PITCH: 's_e',
+            ROLL: 's_b',
+            VYAW: 'v_h',
+            VPITCH: 'v_e',
+            VROLL: 'v_b',
+            AYAW: 'a_h',
+            APITCH: 'a_e',
+            AROLL: 'a_b',
           },
           LVLH: {
             YAW: 's_d_z',

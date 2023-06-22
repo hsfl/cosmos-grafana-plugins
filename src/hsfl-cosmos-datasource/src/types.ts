@@ -23,6 +23,7 @@ export const posTypeOptions: Array<SelectOption<string>> = [
   { label: 'Geospheric', value: 'geos', description: '' },
   { label: 'Geodetic', value: 'geod', description: 'Lat/Lon/Alt' },
   { label: 'LVLH', value: 'lvlh', description: 'Local Vertical Local Horizontal' },
+  { label: 'ICRF', value: 'icrf', description: 'icrf for H E B in ADCS' },
 ];
 
 // Origin point node options for Nodal Awareness query type, todo: async-ify

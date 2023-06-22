@@ -186,6 +186,7 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 	ConvertToFrame(&response.Frames, &j.Payload.Spherposs)
 	ConvertToFrame(&response.Frames, &j.Payload.Svectors)
 	ConvertToFrame(&response.Frames, &j.Payload.Qatts)
+	ConvertToFrame(&response.Frames, &j.Payload.Aattstrucs)
 
 	return response
 }
@@ -288,6 +289,8 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 		names = []string{"time", "s_d_x", "s_d_y", "s_d_z", "s_w", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z"}
 	case qatt:
 		names = []string{"time", "node_name", "node_type", "s_d_x", "s_d_y", "s_d_z", "s_w", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z"}
+	case aattstruc:
+		names = []string{"time", "node_name", "node_type", "s_h", "s_e", "s_b", "v_h", "v_e", "v_b", "a_h", "a_e", "a_b"}
 	default:
 		return nil
 	}
@@ -320,9 +323,9 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[0] = &timestamp
 			row[1] = &j.Node_name
 			row[2] = j.Node_type
-			row[3] = j.B
+			row[3] = j.H
 			row[4] = j.E
-			row[5] = j.H
+			row[5] = j.B
 			AppendRowtoMap(frame_map, j.Node_name, row, names, "avector")
 		case qvatt:
 			timestamp := mjd_to_time(j.Time)
@@ -533,6 +536,23 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[11] = j.A.Col[1]
 			row[12] = j.A.Col[2]
 			AppendRowtoMap(frame_map, j.Node_name, row, names, "qatt")
+		case aattstruc:
+			transform_to_timeseries = false
+			timestamp := mjd_to_time(j.Time)
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = &j.Node_name
+			row[2] = j.Node_type
+			row[3] = j.S.H
+			row[4] = j.S.E
+			row[5] = j.S.B
+			row[6] = j.V.H
+			row[7] = j.V.E
+			row[8] = j.V.B
+			row[9] = j.A.H
+			row[10] = j.A.E
+			row[11] = j.A.B
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "aattstruc")
 		}
 	}
 	if !transform_to_timeseries {

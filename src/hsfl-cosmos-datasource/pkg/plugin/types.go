@@ -36,6 +36,7 @@ type jsonResponse struct {
 
 type Cosmosresponse struct {
 	Avectors  []avector  `json:"avectors,omitempty"`
+	Aattstrucs  []aattstruc  `json:"aattstrucs,omitempty"`
 	Qvatts    []qvatt    `json:"qvatts,omitempty"`
 	Qaatts    []qaatt    `json:"qaatts,omitempty"`
 	Ecis      []eci      `json:"ecis,omitempty"`
@@ -53,7 +54,7 @@ type Cosmosresponse struct {
 	Svectors  []svector  `json:"svectors,omitempty"`
 	Qatts     []qatt     `json:"qatts,omitempty"`
 }
-
+// TODO delete this type, determine all panels that use it, update to real struc
 type avector struct {
 	Time      float64
 	Node_name string
@@ -61,6 +62,21 @@ type avector struct {
 	H         float64 `json:"h,omitempty"`
 	E         float64 `json:"e,omitempty"`
 	B         float64 `json:"b,omitempty"`
+}
+
+type real_avector struct {
+	H         float64 `json:"h,omitempty"`
+	E         float64 `json:"e,omitempty"`
+	B         float64 `json:"b,omitempty"`
+}
+
+type aattstruc struct {
+	Time      float64
+	Node_name string
+	Node_type float64
+	S         real_avector `json:"s,omitempty"`
+	V         real_avector `json:"v,omitempty"`
+	A         real_avector `json:"a,omitempty"`
 }
 
 type qvatt struct {
@@ -251,7 +267,7 @@ type qatt struct {
 }
 
 type cosmostype interface {
-	avector | qvatt | qaatt | eci | batt | bcreg | tsen | cpu | event | mag | geod | geos | lvlh | gvector | geoidpos | svector | spherpos | rvector | cvector | quaternion | qatt
+	avector | real_avector| aattstruc | qvatt | qaatt | eci | batt | bcreg | tsen | cpu | event | mag | geod | geos | lvlh | gvector | geoidpos | svector | spherpos | rvector | cvector | quaternion | qatt
 }
 
 // Datasource is an example datasource which can respond to data queries, reports
