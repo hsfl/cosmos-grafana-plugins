@@ -47,7 +47,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   const [refRenderer, refScene, refCamera, refModel, refInputs, refDS, updateDOMRefs] = useDomUpdate(data);
   // console.log('sim pan eventBus: ', eventBus);
   useCosmosTimeline(data, eventBus, updateDOMRefs);
-  console.log('adcs data: ', data);
+  // console.log('adcs data: ', data);
   // console.log('data select, state ', data.state);
   // console.log('ref data state . current ', refDS.current);
 
@@ -156,37 +156,41 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
         <div style={{ gridRow: 4, gridColumn: 1, marginInlineEnd: '1em' }}>X: Bank</div>
 
         <div style={{ gridRow: 2, gridColumn: 2 }}>
-          <Input ref={(ref) => (refInputs.current['YAW'] = ref)} type="text" />
+          <Input ref={(ref) => (refInputs.current['YAW'] = ref)} type="text" readOnly />
         </div>
         <div style={{ gridRow: 2, gridColumn: 3 }}>
-          <Input ref={(ref) => (refInputs.current['VYAW'] = ref)} type="text" />
+          <Input ref={(ref) => (refInputs.current['VYAW'] = ref)} type="text" readOnly />
         </div>
         <div style={{ gridRow: 2, gridColumn: 4 }}>
-          <Input ref={(ref) => (refInputs.current['AYAW'] = ref)} type="text" />
+          <Input ref={(ref) => (refInputs.current['AYAW'] = ref)} type="text" readOnly />
         </div>
         <div style={{ gridRow: 3, gridColumn: 2 }}>
-          <Input ref={(ref) => (refInputs.current['PITCH'] = ref)} type="text" />
+          <Input ref={(ref) => (refInputs.current['PITCH'] = ref)} type="text" readOnly />
         </div>
         <div style={{ gridRow: 3, gridColumn: 3 }}>
-          <Input ref={(ref) => (refInputs.current['VPITCH'] = ref)} type="text" />
+          <Input ref={(ref) => (refInputs.current['VPITCH'] = ref)} type="text" readOnly />
         </div>
         <div style={{ gridRow: 3, gridColumn: 4 }}>
-          <Input ref={(ref) => (refInputs.current['APITCH'] = ref)} type="text" />
+          <Input ref={(ref) => (refInputs.current['APITCH'] = ref)} type="text" readOnly />
         </div>
         <div style={{ gridRow: 4, gridColumn: 2 }}>
-          <Input ref={(ref) => (refInputs.current['ROLL'] = ref)} type="text" />
+          <Input ref={(ref) => (refInputs.current['ROLL'] = ref)} type="text" readOnly />
         </div>
         <div style={{ gridRow: 4, gridColumn: 3 }}>
-          <Input ref={(ref) => (refInputs.current['VROLL'] = ref)} type="text" />
+          <Input ref={(ref) => (refInputs.current['VROLL'] = ref)} type="text" readOnly />
         </div>
         <div style={{ gridRow: 4, gridColumn: 4 }}>
-          <Input ref={(ref) => (refInputs.current['AROLL'] = ref)} type="text" />
+          <Input ref={(ref) => (refInputs.current['AROLL'] = ref)} type="text" readOnly />
         </div>
       </div>
       <div>
         <div style={{ gridRow: 1, gridColumn: 1, marginInlineEnd: '1em' }}> Time: </div>
         <div style={{ gridRow: 1, gridColumn: 2 }}>
           <Input ref={(ref) => (refInputs.current['TIME'] = ref)} type="text" readOnly />
+        </div>
+        <div style={{ gridRow: 1, gridColumn: 1, marginInlineEnd: '1em' }}> Node: </div>
+        <div style={{ gridRow: 1, gridColumn: 2 }}>
+          <Input ref={(ref) => (refInputs.current['NODE'] = ref)} type="text" readOnly />
         </div>
         <div style={{ gridRow: 1, gridColumn: 2 }}>
           <Input ref={(ref) => (refInputs.current['PLTIME'] = ref)} type="text" hidden />

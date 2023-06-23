@@ -115,7 +115,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     //   DataMap[key as keyof DataMap]
     // }
     let live_data = data.series.filter((row) => row.meta?.custom?.type === DataMap[refDS.current as keyof Object]);
-    console.log('Live filtered data: ', live_data);
+    // console.log('Live filtered data: ', live_data);
 
     let yaw = 0;
     let pitch = 0;
@@ -293,6 +293,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         // redefine new column names as map
         const keyMap: Object = {
           ICRF: {
+            NODE: 'node_name',
             YAW: 's_h',
             PITCH: 's_e',
             ROLL: 's_b',
@@ -304,6 +305,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             AROLL: 'a_b',
           },
           LVLH: {
+            NODE: 'node_name',
             YAW: 's_d_z',
             PITCH: 's_d_y',
             ROLL: 's_d_x',

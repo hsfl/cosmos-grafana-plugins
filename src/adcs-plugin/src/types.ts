@@ -22,6 +22,7 @@ export type adcs_field =
   | 'VROLL'
   | 'AROLL'
   | 'TIME'
+  | 'NODE'
   | 'PLTIME';
 
 export interface TimeEventPayload {
