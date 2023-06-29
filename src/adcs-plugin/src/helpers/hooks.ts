@@ -107,6 +107,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     const DataMap: Object = {
       ICRF: 'aattstruc',
       LVLH: 'qatt',
+      // LVLH: 'aattstruc',
     };
     // let data_type: string;
     // if (refDS.current) {
@@ -141,7 +142,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
       if (ref !== null) {
         // Check that there are query results
         //  should be checking if greater than default length [0] so not  (!data.series.length) as it was instead  (data.series.length <=1)
-        if (live_data.length <= 1) {
+        if (live_data.length < 1) {
           console.log('EMPTY QUERY');
           return;
         }
