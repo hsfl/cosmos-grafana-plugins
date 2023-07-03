@@ -8,6 +8,10 @@ import { TargetChart } from './components/TargetChart';
 interface Props extends PanelProps<SimpleOptions> {}
 
 export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) => {
+  if (data.series === undefined || data.series.length === 0 || data.series[0].fields === undefined) {
+    return null;
+  }
+  console.log(data);
   const dataArray = [];
   for (let i = 0; i < data.series.length; i++) {
     dataArray.push(data.series[i]);
