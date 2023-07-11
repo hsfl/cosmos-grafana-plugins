@@ -8,8 +8,6 @@ const green = '#0b0';
 const yellow = '#ea3';
 const red = '#e00'
 
-
-
 const SubsystemHealth = () => {
     const buttonStyle = {
         display: 'flex',

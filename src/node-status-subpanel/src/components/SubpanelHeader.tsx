@@ -16,10 +16,10 @@ interface ColoredRectangleProps {
   };
 
   const buttonStyle = {
-    width: '35px',
+    width: '40px',
     height: '30px', 
     fontSize: '11px', 
-    padding: '0px',
+    padding: '2px',
     lineHeight: '8px',
   };
   

@@ -4,6 +4,7 @@ import Header from './components/SubpanelHeader';
 import OrbitDisplay from 'components/SubpanelOrbitDisplay';
 import SubsystemHealth from 'components/SubsystemHealth';
 import { HorizontalGroup } from '@grafana/ui';
+import Footer from 'components/OrbitalInformation';
 
 
 export const SimplePanel: React.FC<PanelProps> = ({ options }) => {
@@ -16,6 +17,7 @@ export const SimplePanel: React.FC<PanelProps> = ({ options }) => {
         <OrbitDisplay color="black" width={50} height={50}/>
         <SubsystemHealth/>
       </HorizontalGroup>
+      <Footer/>
     </div>
   );
 };
