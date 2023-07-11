@@ -105,9 +105,8 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     // live data .... where data.meta.custom = eci || qatt for map to refDS.current = LVLH || ICRF ....  TODO
     // let live_data = data.series.map(filter: )
     const DataMap: Object = {
-      ICRF: 'aattstruc',
-      LVLH: 'qatt',
-      // LVLH: 'aattstruc',
+      ICRF: 'adcsstruc',
+      LVLH: 'ladcsstruc',
     };
     // let data_type: string;
     // if (refDS.current) {
@@ -298,18 +297,18 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             YAW: 's_h',
             PITCH: 's_e',
             ROLL: 's_b',
-            VYAW: 'v_h',
-            VPITCH: 'v_e',
-            VROLL: 'v_b',
-            AYAW: 'a_h',
-            APITCH: 'a_e',
-            AROLL: 'a_b',
+            VYAW: 'v_z',
+            VPITCH: 'v_y',
+            VROLL: 'v_x',
+            AYAW: 'a_z',
+            APITCH: 'a_y',
+            AROLL: 'a_x',
           },
           LVLH: {
             NODE: 'node_name',
-            YAW: 's_d_z',
-            PITCH: 's_d_y',
-            ROLL: 's_d_x',
+            YAW: 's_h',
+            PITCH: 's_e',
+            ROLL: 's_b',
             VYAW: 'v_z',
             VPITCH: 'v_y',
             VROLL: 'v_x',
