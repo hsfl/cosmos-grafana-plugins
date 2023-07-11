@@ -1,6 +1,14 @@
 .smaller-button {
     font-size: 8px;
     line-height: 8px;
-    height: 16px;
-    width: 80px;
+    height: 12px;
+    width: 50px;
   }
+
+.custom-select {
+    height: 20px !important;
+    font-size: 10px;
+    min-height: 30px !important;
+    max-height: 30px !important;
+    overflow: hidden;
+}

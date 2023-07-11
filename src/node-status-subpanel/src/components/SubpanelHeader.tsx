@@ -9,10 +9,18 @@ interface ColoredRectangleProps {
     height: number;
   }
 
-  const inputStyle = {
+  const nameStyle = {
     width: '70px',
-    height: '20px', 
+    height: '30px', 
     fontSize: '11px', 
+  };
+
+  const buttonStyle = {
+    width: '35px',
+    height: '30px', 
+    fontSize: '11px', 
+    padding: '0px',
+    lineHeight: '8px',
   };
   
   const ColoredRectangle: React.FC<ColoredRectangleProps> = ({ color, width, height }) => {
@@ -25,11 +33,11 @@ interface ColoredRectangleProps {
   };
 
   const NodeName = () => {
-    return <input style={inputStyle} type="text" value="mothership" />;
+    return <input style={nameStyle} type="text" value="mothership" />;
   };
 
   const MOSTButton = () => {
-    return <Button size={'xs'}>
+    return <Button style={buttonStyle} size={'xs'}>
       MOST
       </Button>;
   };
@@ -39,11 +47,12 @@ interface ColoredRectangleProps {
   const Header: React.FC<ColoredRectangleProps> = ({}) => {
     const [, setValue] = useState<SelectableValue<string>>();
     return (
-      <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto auto', gridGap: '10px' }}>
-        <ColoredRectangle color="red" width={10} height={15}/>
+      <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto auto'}}>
+        <ColoredRectangle color="green" width={10} height={30}/>
         <NodeName/>
         <MOSTButton/>
         <Select
+          className="custom-select"
           value={{ label: 'Nadir View' }}
           options={[{ label: 'Nadir View' }, { label: 'View 2' }, { label: 'View 3' }, { label: 'View 4' }, { label: 'View 5' }]}
           onChange={(v) => {
