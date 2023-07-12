@@ -55,8 +55,8 @@ const orbitStyle = {
         </HorizontalGroup>
         {/*Misc Info*/}
         <HorizontalGroup>
-            <text className='even-smaller-font'>UTC<br></br>Loc</text>
-            <textarea style={eventStyle} value={"00:09:00 \n????"}/>
+            <text className='even-smaller-font'>UTC<br></br>LocT</text>
+            <textarea style={eventStyle} value={"09:00:00 (+1) \n22:00:00"}/>
             <text className='even-smaller-font'>State<br></br>ADCS</text>
             <textarea style={eventStyle} value={"Normal \nLVLH"}/>
         </HorizontalGroup>

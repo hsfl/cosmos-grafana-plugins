@@ -6,7 +6,7 @@ import '../NodeStatusSubpanel.css';
 
 const green = '#0b0';
 const yellow = '#ea3';
-const red = '#e00'
+const red = '#c00'
 
 const SubsystemHealth = () => {
     const buttonStyle = {
@@ -14,42 +14,38 @@ const SubsystemHealth = () => {
         justifyContent: 'center',
         alignItems: 'center',
       };
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column'}}>
-        <VerticalGroup spacing="xs">
-            {/* <Button className="smaller-button" style={{ ...buttonStyle, backgroundColor: green }}>
-            Flight Dynamics
-            </Button> */}
-            <Button className="smaller-button" style={{ ...buttonStyle, backgroundColor: green }}>
-            GS
-            </Button>
-            <Button className="smaller-button" style={{ ...buttonStyle, backgroundColor: green }}>
-            FSW
-            </Button>
-            <Button className="smaller-button" style={{ ...buttonStyle, backgroundColor: red }}>
-            Payloads
-            </Button>
-            <Button className="smaller-button" style={{ ...buttonStyle, backgroundColor: green }}>
-            TCS
-            </Button>
-            <Button className="smaller-button" style={{ ...buttonStyle, backgroundColor: green }}>
-            ADCS
-            </Button>
-            <Button className="smaller-button" style={{ ...buttonStyle, backgroundColor: green }}>
-            Telecom
-            </Button>
-            <Button className="smaller-button" style={{ ...buttonStyle, backgroundColor: green }}>
-            EPS
-            </Button>
-            <Button className="smaller-button" style={{ ...buttonStyle, backgroundColor: yellow }}>
-            Propulsion
-            </Button>
-            <Button className="smaller-button" style={{ ...buttonStyle, backgroundColor: green }}>
-            OBCS
-            </Button>
-        </VerticalGroup>
-        </div>
-  );
+
+{/*Temporary until we get real data*/}
+const SubsystemData = [
+  { label: 'GS', color: green },
+  { label: 'FSW', color: green },
+  { label: 'Payloads', color: red },
+  { label: 'TCS', color: green },
+  { label: 'ADCS', color: green },
+  { label: 'Telecom', color: green },
+  { label: 'EPS', color: green },
+  { label: 'Propulsion', color: yellow },
+  { label: 'OBCS', color: green },
+];
+return (
+  <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <VerticalGroup spacing="xs">
+      {SubsystemData.map((subsystem, index) => (
+        <Button
+          key={index}
+          className="smaller-button"
+          style={{
+            ...buttonStyle,
+            backgroundColor: subsystem.color,
+            color: 'black', 
+          }}
+        >
+          {subsystem.label}
+        </Button>
+      ))}
+    </VerticalGroup>
+  </div>
+);
 };
 
 export default SubsystemHealth;

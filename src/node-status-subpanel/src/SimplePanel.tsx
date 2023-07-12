@@ -7,7 +7,7 @@ import { HorizontalGroup } from '@grafana/ui';
 import Footer from 'components/OrbitalInformation';
 
 
-export const SimplePanel: React.FC<PanelProps> = ({ options }) => {
+export const SimplePanel: React.FC<PanelProps> = () => {
   //const { text1, text2, text3, text4, text5, text6 } = options;
 
   return (

@@ -25,7 +25,7 @@ interface ColoredRectangleProps {
   
   const Header: React.FC<ColoredRectangleProps> = () => {
     const names: string[] = ["Mothership", "ChildSat_01", "ChildSat_02", "ChildSat_03", "ChildSat_04", "ChildSat_05", "UAV_01", "UAV_02", "Ship_01", "surreysc", "kauaicc", "uafairbanks"];
-    const colors: string[] = ["green", "green", "yellow", "green", "green", "red", "green", "green", "green", "green", "orange", "green"];
+    const colors: string[] = ["green", "green", "yellow", "green", "green", "red", "green", "green", "green", "green", "orange", "green","green", "green", "yellow", "green", "green", "red", "green", "green", "green", "green", "orange", "green","green", "green", "yellow", "green", "green", "red", "green", "green", "green", "green", "orange", "green"];
   
     const commsTable = () => {
       const groups = [];
@@ -33,7 +33,13 @@ interface ColoredRectangleProps {
         const horizontalGroups = names.slice(i, i + 3).map((name, index) => (
           <HorizontalGroup key={index}>
             <input style={nameStyle} type="text" value={name} />
-            <ColoredRectangle color={colors[i + index]} width={20} height={20} />
+            <VerticalGroup spacing="xs">
+                <ColoredRectangle color={colors[3*(i + index)]} width={24} height={10} />
+                <HorizontalGroup spacing="xs">
+                    <ColoredRectangle color={colors[3*(i + index)+1]} width={10} height={10} />
+                    <ColoredRectangle color={colors[3*(i + index)+2]} width={10} height={10} />
+                </HorizontalGroup>
+            </VerticalGroup>
           </HorizontalGroup>
         ));
         groups.push(
