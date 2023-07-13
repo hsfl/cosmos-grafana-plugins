@@ -29,7 +29,7 @@ const orbitStyle = {
     return <div style={rectangleStyle}></div>;
   };
 
-  const Footer = ({}) => {
+  const Footer = () => {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
         {/*Latitude, Longitude, Altitude*/}
