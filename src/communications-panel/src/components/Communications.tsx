@@ -8,7 +8,7 @@ interface ColoredRectangleProps {
   }
 
   const nameStyle = {
-    width: '70px',
+    width: '67px',
     height: '30px', 
     fontSize: '11px', 
   };
