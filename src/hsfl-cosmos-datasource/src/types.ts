@@ -24,6 +24,7 @@ export const posTypeOptions: Array<SelectOption<string>> = [
   { label: 'Geodetic', value: 'geod', description: 'Lat/Lon/Alt' },
   { label: 'LVLH', value: 'lvlh', description: 'Local Vertical Local Horizontal' },
   { label: 'ICRF', value: 'icrf', description: 'icrf for H E B in ADCS' },
+  { label: 'GEOC', value: 'geoc', description: 'goec for H E B in ADCS' },
   { label: 'EUL_LVLH', value: 'eul_lvlh', description: 'Euler Angle and LVLH for H E B in ADCS' },
 ];
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { PanelProps } from '@grafana/data';
-import { InlineFieldRow, Input, Select } from '@grafana/ui';
+import { InlineFieldRow, InlineField, Input, Select } from '@grafana/ui';
 import { useCosmosTimeline, useDomUpdate } from './helpers/hooks';
 import { SimpleOptions } from 'types';
 import * as THREE from 'three';
@@ -24,6 +24,19 @@ const loadModel = (scene: THREE.Scene): Promise<THREE.Group> => {
         // obj.rotation.y = 0.5;
         // obj.receiveShadow = true;
         // obj.castShadow = true;
+        const origin = new THREE.Vector3(0, 0, 0);
+        // const length = 0.25;
+        const length = 0.5;
+        const dir = new THREE.Vector3(1, 0, 0);
+        const x_arrow = new THREE.ArrowHelper(dir, origin, length, 0xff0000);
+        dir.set(0, 1, 0);
+        const y_arrow = new THREE.ArrowHelper(dir, origin, length, 0x00ff00);
+        dir.set(0, 0, 1);
+        // dir.normalize();
+        const z_arrow = new THREE.ArrowHelper(dir, origin, length, 0x00ffff);
+        obj.add(x_arrow);
+        obj.add(y_arrow);
+        obj.add(z_arrow);
         scene.add(obj);
         resolve(obj);
       },
@@ -44,7 +57,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   // const refInputs = useRef<RefDict>({});
   // The index into the data array
   //const refIdxs = useRef<number[]>([]);
-  const [refRenderer, refScene, refCamera, refModel, refInputs, refDS, updateDOMRefs] = useDomUpdate(data);
+  const [refRenderer, refScene, refCamera, refModel, refInputs, refDS, refUS, updateDOMRefs] = useDomUpdate(data);
   // console.log('sim pan eventBus: ', eventBus);
   useCosmosTimeline(data, eventBus, updateDOMRefs);
   // console.log('adcs data: ', data);
@@ -74,12 +87,20 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     refScene.current = scene;
     const aspectRatio = canvasWidth / canvasHeight;
     const viewSize = 2;
+    // const camera = new THREE.OrthographicCamera(
+    //   (-aspectRatio * viewSize) / 2,
+    //   (aspectRatio * viewSize) / 2,
+    //   viewSize / 2,
+    //   -viewSize / 2,
+    //   -1,
+    //   1000
+    // );
     const camera = new THREE.OrthographicCamera(
-      (-aspectRatio * viewSize) / 2,
-      (aspectRatio * viewSize) / 2,
+      ((aspectRatio * viewSize)) / - 2,
+      ((aspectRatio * viewSize)) / 2,
       viewSize / 2,
-      -viewSize / 2,
-      -1,
+      viewSize / - 2,
+      1,
       1000
     );
     camera.position.set((2 * 45 * Math.PI) / 180, 1, (2 * 45 * Math.PI) / 180);
@@ -94,18 +115,35 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     scene.background = new THREE.Color(0x050505);
 
     // Add axis arrows
-    const origin = new THREE.Vector3(0, 0, 0);
-    const length = 1;
-    const dir = new THREE.Vector3(1, 0, 0);
-    const x_arrow = new THREE.ArrowHelper(dir, origin, length, 0xff0000);
-    dir.set(0, 1, 0);
-    const y_arrow = new THREE.ArrowHelper(dir, origin, length, 0x00ff00);
-    dir.set(0, 0, 1);
-    dir.normalize();
-    const z_arrow = new THREE.ArrowHelper(dir, origin, length, 0x00ffff);
-    scene.add(x_arrow);
-    scene.add(y_arrow);
-    scene.add(z_arrow);
+    // const origin = new THREE.Vector3(0, 1.8, 3.3);
+
+    // const origin = new THREE.Vector3(0, 0, 0);
+    // // const length = 0.25;
+    // const length = 0.65;
+    // const dir = new THREE.Vector3(1, 0, 0);
+    // const x_arrow = new THREE.ArrowHelper(dir, origin, length, 0xff0000);
+    // dir.set(0, 1, 0);
+    // const y_arrow = new THREE.ArrowHelper(dir, origin, length, 0x00ff00);
+    // dir.set(0, 0, 1);
+    // dir.normalize();
+    // const z_arrow = new THREE.ArrowHelper(dir, origin, length, 0x00ffff);
+    // scene.add(x_arrow);
+    // scene.add(y_arrow);
+    // scene.add(z_arrow);
+
+    // x y z orient; tho weird that z points left, x points right, y points up in rendering.. 
+    const coord_ref = new THREE.Vector3(-1.5, height / 3000, width / 700);
+    const coord_length = .6;
+    const coord_dir = new THREE.Vector3(1, 0, 0);
+    const coord_x_arrow = new THREE.ArrowHelper(coord_dir, coord_ref, coord_length, 0xff0000);
+    coord_dir.set(0, 1, 0);
+    const coord_y_arrow = new THREE.ArrowHelper(coord_dir, coord_ref, coord_length, 0x00ff00);
+    coord_dir.set(0, 0, 1);
+    coord_dir.normalize();
+    const coord_z_arrow = new THREE.ArrowHelper(coord_dir, coord_ref, coord_length, 0x00ffff);
+    scene.add(coord_x_arrow);
+    scene.add(coord_y_arrow);
+    scene.add(coord_z_arrow);
 
     // Add the satellite model
     loadModel(scene).then((obj) => {
@@ -113,24 +151,53 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       refRenderer.current!.render(scene, camera);
     });
     // Note: refs are stable, will not trigger effect, but calms the exhaustive-deps lint rule
-  }, [width, height, refRenderer, refScene, refCamera, refModel, refInputs]);
+  }, [width, height, refRenderer, refScene, refCamera, refModel, refInputs, refUS]);
   // console.log('REF inputs adcs simple panel: ', refInputs);
+
+  // function Label({ name, isDeg }: { name: string; isDeg: string }) {
+  //   if (isDeg === 'Degrees') {
+  //     return <div>{name} (deg)</div>;
+  //   }
+  //   return <div>{name} (rad)</div>;
+  // }
+  function units(units: string) {
+    if (units === 'Degrees') {
+      return 'deg'
+    }
+    return 'rad'
+  }
+
+  let result = units(refUS.current!);
 
   return (
     <div style={{ width: width, height: height, overflow: 'auto' }}>
       <div ref={refWebGLContainer} />
       <InlineFieldRow>
-        <Select
-          // ref = {(ref) => (refInputs.current['VROLL'] = ref)}
-          value={refDS.current}
-          options={[{ label: 'LVLH' }, { label: 'ICRF' }]}
-          onChange={(e) => {
-            // console.log(e);
-            refDS.current = e.label;
-            // console.log(refDS.current);
-          }}
-          width="auto"
-        />
+        <InlineField transparent label="Data" labelWidth={6}>
+          <Select
+            defaultValue={{ label: 'ICRF' }}
+            value={refDS.current}
+            options={[{ label: 'ICRF' }, { label: 'GEOC' }, { label: 'LVLH' }]}
+            onChange={(e) => {
+              refDS.current = e.label;
+            }}
+            width="auto"
+          />
+        </InlineField>
+        <InlineField transparent label="Units" labelWidth={6}>
+          <Select
+            id='unity'
+            defaultValue={{ label: 'Radians' }}
+            value={refUS.current}
+            options={[{ label: 'Radians' }]} // , { label: 'Degrees' }
+            onChange={(e) => {
+              refUS.current = e.label;
+              // units(e.label!);
+              result = units(refUS.current!)
+            }}
+            width="auto"
+          />
+        </InlineField>
       </InlineFieldRow>
       <div
         style={{
@@ -143,7 +210,14 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
           gridTemplateColumns: 'auto auto auto auto',
         }}
       >
-        <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 2 }}>Attitude</div>
+        <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 2 }}>
+          Angle (rad)
+          {/* <Label isDeg={refUS.current!} name="Angle " /> */}
+          {/* <h6 onChange={(e) => { result = units(refUS.current!) }}>Angle (rad){result}</h6> */}
+          {/* <InlineField transparent label={units(refUS.current!)} labelWidth={6}><div></div></InlineField> */}
+          {/* <InlineLabel transparent onChange={(e) => {}} >Angle</InlineLabel> */}
+        </div>
+        {/* change units to degree; starts in si units radians */}
         <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 3 }}>Angular Vel (rad/s)</div>
         <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 4 }}>
           Angular Accel (rad/s<sup>2</sup>)
@@ -151,9 +225,9 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
         {/* Heading: z axis: Yaw
             Elevation: y axis: Pitch
             Bank: x axis: Roll */}
-        <div style={{ gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' }}>Z: Heading</div>
-        <div style={{ gridRow: 3, gridColumn: 1, marginInlineEnd: '1em' }}>Y: Elevation</div>
-        <div style={{ gridRow: 4, gridColumn: 1, marginInlineEnd: '1em' }}>X: Bank</div>
+        <div style={{ gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' }}><h6 style={{ color: 'aqua' }}>Z: Yaw</h6></div>
+        <div style={{ gridRow: 3, gridColumn: 1, marginInlineEnd: '1em' }}><h6 style={{ color: 'lime' }}>Y: Pitch</h6></div>
+        <div style={{ gridRow: 4, gridColumn: 1, marginInlineEnd: '1em' }}><h6 style={{ color: 'red' }}>X: Roll</h6></div>
 
         <div style={{ gridRow: 2, gridColumn: 2 }}>
           <Input ref={(ref) => (refInputs.current['YAW'] = ref)} type="text" readOnly />
@@ -188,11 +262,11 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
         <div style={{ gridRow: 1, gridColumn: 2 }}>
           <Input ref={(ref) => (refInputs.current['TIME'] = ref)} type="text" readOnly />
         </div>
-        <div style={{ gridRow: 1, gridColumn: 1, marginInlineEnd: '1em' }}> Node: </div>
-        <div style={{ gridRow: 1, gridColumn: 2 }}>
+        <div style={{ gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' }}> Node: </div>
+        <div style={{ gridRow: 2, gridColumn: 2 }}>
           <Input ref={(ref) => (refInputs.current['NODE'] = ref)} type="text" readOnly />
         </div>
-        <div style={{ gridRow: 1, gridColumn: 2 }}>
+        <div style={{ gridRow: 3, gridColumn: 1 }}>
           <Input ref={(ref) => (refInputs.current['PLTIME'] = ref)} type="text" hidden />
         </div>
       </div>

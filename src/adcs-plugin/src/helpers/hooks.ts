@@ -33,6 +33,7 @@ type DomUpdateReturn = [
   refModel: React.MutableRefObject<THREE.Group | undefined>,
   refInputs: React.MutableRefObject<RefDict>,
   refDS: React.MutableRefObject<string | undefined>,
+  refUS: React.MutableRefObject<string | undefined>,
   callback: (data: PanelData, event: TimeEvent) => void
 ];
 
@@ -51,6 +52,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
   // the data state from selection: {LVLH: qatt, ICRF: eci}
   // to reference & filter query data.meta.custom == qatt || eci
   const refDS = useRef<string>();
+  const refUS = useRef<string>();
   // console.log('useDomUpdate');
   // console.log('update DOM refInputs.current: ', refInputs.current);
   useEffect(() => {
@@ -117,6 +119,13 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     let live_data = data.series.filter((row) => row.meta?.custom?.type === DataMap[refDS.current as keyof Object]);
     // console.log('Live filtered data: ', live_data);
 
+    // converts radians to degrees: 1rad x (180/PI) = DEGREE
+    const rad2deg: number = 180 / Math.PI;
+    // console.log('rad 2 deg: ', rad2deg);
+    // result: rad 2 deg:  57.29577951308232
+    // let units: string = 'radians'; // radians // degrees
+    let units: string = refUS.current!; // radians // degrees
+
     let yaw = 0;
     let pitch = 0;
     let roll = 0;
@@ -141,13 +150,14 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
       if (ref !== null) {
         // Check that there are query results
         //  should be checking if greater than default length [0] so not  (!data.series.length) as it was instead  (data.series.length <=1)
+
         if (live_data.length < 1) {
           console.log('EMPTY QUERY');
           return;
         }
         // 0th, 1st, and 2nd derivatives have been separated into separate series
         // for first data element always
-        let seriesIdx = 0;
+        // let seriesIdx = 0;
         // TODO remove archaic data reference
         // switch (key) {
         //   case 'VYAW':
@@ -182,7 +192,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         //   return;
         // }
         // Query must have returned some values; select array of beacon time stamps
-        const timeValues = live_data[seriesIdx].fields[0].values;
+        const timeValues = live_data[0].fields[0].values;
         // console.log('timeValues: ', timeValues);
         // console.log('i; refIdxs.current[i] ', i, '; ', refIdxs.current[i]);
 
@@ -238,6 +248,24 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             break;
           }
           if (
+            time > event.payload.time! &&
+            (time > last_time || Number.isNaN(last_time)) &&
+            (event.payload.time! > pl_time || Number.isNaN(pl_time))
+          ) {
+            // console.log('INCREMENT Last time: ', last_time, '; time: ', time, '; payload time: ', event.payload.time);
+            const pltime = event.payload.time!;
+            array_pos = i;
+            if (key === 'TIME') {
+              ref.value = time.toString();
+              break;
+            }
+            if (key === 'PLTIME') {
+              ref.value = pltime.toString();
+              break;
+            }
+            break;
+          }
+          if (
             time < event.payload.time! &&
             (time > last_time || Number.isNaN(last_time)) &&
             (event.payload.time! > pl_time || Number.isNaN(pl_time))
@@ -257,7 +285,10 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           }
           // console.log('last time - time', last_time - time, 'last time - event time', last_time - event.payload.time!);
           // TODO need to update to account for instances where there was a gap in beacons greater than 1000... for rewind function
-          if (last_time - time === 1000 && pl_time > event.payload.time!) {
+          if (
+            (last_time - time === 1000 || last_time - time >= pl_time - event.payload.time!) &&
+            pl_time > event.payload.time!
+          ) {
             //&& (last_time > time) && (time > event.payload.time!)
             array_pos = i;
             // console.log('DECREMENT Last time: ', last_time, '; time: ', time);
@@ -323,7 +354,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             thisField = KMvalue;
           }
         }
-        const field = live_data[seriesIdx].fields.find((field) => field.name === thisField);
+        const field = live_data[0].fields.find((field) => field.name === thisField);
         if (field === undefined) {
           return;
         }
@@ -334,8 +365,8 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         // console.log('refIdxs.current[i] ', refIdxs.current[i]);
 
         // define index based on timestamp map to time column
-        const currentValue: number = field.values.get(array_pos) ?? 0;
-        ref.value = currentValue.toString();
+        let currentValue: number = field.values.get(array_pos) ?? 0;
+        //
         switch (key) {
           case 'YAW':
             // z axis || Heading || Yaw
@@ -350,6 +381,19 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             roll = currentValue;
             break;
         }
+        // round the 9 telem data points to sci notation 5 places
+        // translate display units to Degrees when set; 3D display always in radians
+        if (['YAW', 'VYAW', 'AYAW', 'PITCH', 'VPITCH', 'APITCH', 'ROLL', 'VROLL', 'AROLL'].some((x) => x === key)) {
+          if (units === 'Degrees') {
+            currentValue = currentValue * rad2deg;
+            // console.log('translated rad 2 deg: ', currentValue);
+          }
+          ref.value = currentValue.toExponential(5).toString();
+        } else {
+          ref.value = currentValue.toString();
+        }
+        // currentValue.toExponential(4);
+        // ref.value = currentValue.toString();
       }
       return;
     });
@@ -363,10 +407,12 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         refCamera.current !== undefined
       ) {
         refModel.current.rotation.set(yaw, pitch, roll, 'ZYX');
+        // refScene.current.rotation.set(yaw, pitch, roll, 'ZYX');
+        // load model origin coords as unique object to pair and shift with model...
         refRenderer.current.render(refScene.current, refCamera.current);
       }
     });
   }, []);
 
-  return [refRenderer, refScene, refCamera, refModel, refInputs, refDS, updateDOMRefs];
+  return [refRenderer, refScene, refCamera, refModel, refInputs, refDS, refUS, updateDOMRefs];
 };
