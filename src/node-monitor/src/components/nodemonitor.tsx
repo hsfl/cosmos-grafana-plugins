@@ -1,4 +1,4 @@
-import { Button, HorizontalGroup, VerticalGroup } from '@grafana/ui';
+import { Button, HorizontalGroup, Icon, VerticalGroup } from '@grafana/ui';
 import React from 'react';
 //import { PanelProps } from '@grafana/data';
 
@@ -23,7 +23,7 @@ import React from 'react';
 
   const buttonStyle = {
     width: '85px',
-    height: '20px', 
+    height: '15px', 
     fontSize: '10px', 
     padding: '2px',
     lineHeight: '8px',
@@ -32,14 +32,22 @@ import React from 'react';
   const Formation: React.FC<ColoredRectangleProps> = ({}) => {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '2px' }}>
+        <HorizontalGroup>
+        <div style={{ justifySelf: 'start', alignSelf: 'start' }}>
+            <text>Node Monitor</text> 
+        </div>
+        <div style={{ justifySelf: 'end', alignSelf: 'end' }}>
+            <Icon name="expand-arrows" size="xs" />
+        </div>
+        </HorizontalGroup>
         <VerticalGroup>
-        <ColoredRectangle color="black" width={275} height={100}/>
+        <ColoredRectangle color="black" width={275} height={80}/>
         <HorizontalGroup>
             <VerticalGroup>
                 <div style={smallerFontSize}>
                     <text>Nodes Being Monitored</text>
                 </div>
-                <textarea style={{width: '100px', height: '40px', fontSize: '7px'}} value={"01 \tsurreysc \tGS \n02\tkauaicc\tGS \n03\tuafairbanks\tGS \n04\tChildSat_3\tSAT\n05\tChildSat_4\tSAT"}/>
+                <textarea style={{width: '100px', height: '35px', fontSize: '7px'}} value={"01 \tsurreysc \tGS \n02\tkauaicc\tGS \n03\tuafairbanks\tGS \n04\tChildSat_3\tSAT\n05\tChildSat_4\tSAT"}/>
             </VerticalGroup>
             <VerticalGroup>
                 <Button style={buttonStyle} size={'xs'}>

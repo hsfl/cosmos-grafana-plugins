@@ -14,21 +14,6 @@ const orbitStyle = {
     fontSize: '7px', 
   };
 
-  interface ColoredRectangleProps {
-    color: string;
-    width: number;
-    height: number;
-  }
-  
-  const ColoredRectangle: React.FC<ColoredRectangleProps> = ({ color, width, height }) => {
-    const rectangleStyle = {
-      width: `${width}px`,
-      height: `${height}px`,
-      backgroundColor: color,
-    };
-    return <div style={rectangleStyle}></div>;
-  };
-
   const Footer = () => {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
@@ -49,9 +34,80 @@ const orbitStyle = {
         </HorizontalGroup>
         {/*Orbital Event Timeline Display*/}
         <HorizontalGroup>
-            <ColoredRectangle color="yellow" width={65} height={10}/>
-            <ColoredRectangle color="black" width={65} height={10}/>
-            <ColoredRectangle color="black" width={65} height={10}/>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+      {/*Daylight Timeline*/}
+      <div
+        style={{
+          width: `65px`,
+          height: `10px`,
+          backgroundColor: "yellow",
+        }}
+      />
+      {/*Daylight Timeline Bar*/}
+      <div
+        style={{
+          width: '2px',
+          height: '10px',
+          backgroundColor: 'black',
+          position: 'absolute', 
+          top: '0', 
+          left: '30%', 
+        }}
+      />
+    </div>
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      {/*Target Timeline*/}
+      <div
+        style={{
+          width: `65px`,
+          height: `10px`,
+          backgroundColor: "black",
+        }}
+      />
+      {/*Target Timeline Bar 1*/}
+      <div
+        style={{
+          width: '2px',
+          height: '10px',
+          backgroundColor: 'red',
+          position: 'absolute', 
+          top: '0', 
+          left: '50%',  
+        }}
+      />
+      {/*Target Timeline Bar 2*/}
+      <div
+        style={{
+          width: '2px',
+          height: '10px',
+          backgroundColor: 'blue',
+          position: 'absolute', 
+          top: '0', 
+          left: '70%',  
+        }}
+      />
+    </div>
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      {/*AOS/LOS Timeline*/}
+      <div
+        style={{
+          width: `65px`,
+          height: `10px`,
+          backgroundColor: "black",
+        }}
+      />
+      {/*AOS/LOS Timeline Bar*/}
+      <div
+        style={{
+          width: '2px',
+          height: '10px',
+          backgroundColor: 'yellow',
+          position: 'absolute',
+          top: '0',
+          left: '20%', 
+        }}
+      />
+    </div>
         </HorizontalGroup>
         {/*Misc Info*/}
         <HorizontalGroup>

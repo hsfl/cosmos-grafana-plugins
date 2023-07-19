@@ -1,4 +1,4 @@
-import { Button, HorizontalGroup, VerticalGroup } from '@grafana/ui';
+import { Button, HorizontalGroup, Icon, VerticalGroup } from '@grafana/ui';
 import React from 'react';
 //import { PanelProps } from '@grafana/data';
 
@@ -29,7 +29,7 @@ import React from 'react';
 
   const buttonStyle = {
     width: '95px',
-    height: '20px', 
+    height: '15px', 
     fontSize: '10px', 
     padding: '2px',
     lineHeight: '8px',
@@ -38,8 +38,16 @@ import React from 'react';
   const Formation: React.FC<ColoredRectangleProps> = () => {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '2px' }}>
+        <HorizontalGroup>
+                <div style={{ justifySelf: 'start', alignSelf: 'start' }}>
+            <text>Formation Display</text> 
+        </div>
+        <div style={{ justifySelf: 'end', alignSelf: 'end' }}>
+            <Icon name="expand-arrows" size="xs" />
+        </div>
+        </HorizontalGroup>
         <VerticalGroup>
-        <ColoredRectangle color="black" width={225} height={120}/>
+        <ColoredRectangle color="black" width={220} height={100}/>
         <HorizontalGroup>
             <div style={smallerFontSize}>
                 <text>Formation</text>

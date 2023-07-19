@@ -1,5 +1,5 @@
 import React from 'react';
-import { HorizontalGroup, VerticalGroup } from '@grafana/ui';
+import { HorizontalGroup, Icon, VerticalGroup } from '@grafana/ui';
 
 interface ColoredRectangleProps {
     color: string;
@@ -8,10 +8,16 @@ interface ColoredRectangleProps {
   }
 
   const nameStyle = {
-    width: '67px',
+    width: '60px',
     height: '30px', 
-    fontSize: '11px', 
+    fontSize: '10px', 
   };
+
+  const inputStyle = {
+    width: '50px',
+    height: '20px',
+    fontSize: '10px',
+  }
 
   const ColoredRectangle: React.FC<ColoredRectangleProps> = ({ color, width, height }) => {
     const rectangleStyle = {
@@ -54,7 +60,42 @@ interface ColoredRectangleProps {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
         <HorizontalGroup>
+          <div style={{ justifySelf: 'start', alignSelf: 'start' }}>
+            <text>Communications Display</text> 
+          </div>
+          <div style={{ justifySelf: 'end', alignSelf: 'end' }}>
+            <Icon name="expand-arrows" size="xs" />
+          </div>
+        </HorizontalGroup>
+        <HorizontalGroup>
           {commsTable()}
+        </HorizontalGroup>
+        <HorizontalGroup>
+            <text>Legend:</text>
+            <input style={inputStyle} type="text" value={"_________"} />
+            <VerticalGroup spacing="xs">
+                <ColoredRectangle color={"green"} width={24} height={10} />
+                <HorizontalGroup spacing="xs">
+                    <ColoredRectangle color={"black"} width={10} height={10} />
+                    <ColoredRectangle color={"black"} width={10} height={10} />
+                </HorizontalGroup>
+            </VerticalGroup>
+            <input style={inputStyle} type="text" value={"_________"} />
+            <VerticalGroup spacing="xs">
+                <ColoredRectangle color={"black"} width={24} height={10} />
+                <HorizontalGroup spacing="xs">
+                    <ColoredRectangle color={"green"} width={10} height={10} />
+                    <ColoredRectangle color={"black"} width={10} height={10} />
+                </HorizontalGroup>
+            </VerticalGroup>
+            <input style={inputStyle} type="text" value={"_________"} />
+            <VerticalGroup spacing="xs">
+                <ColoredRectangle color={"black"} width={24} height={10} />
+                <HorizontalGroup spacing="xs">
+                    <ColoredRectangle color={"black"} width={10} height={10} />
+                    <ColoredRectangle color={"green"} width={10} height={10} />
+                </HorizontalGroup>
+            </VerticalGroup>
         </HorizontalGroup>
       </div>
     );

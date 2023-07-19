@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 //import { PanelProps } from '@grafana/data';
-import { Button, Select} from '@grafana/ui';
+import { Button, Icon, Select} from '@grafana/ui';
 import { SelectableValue } from '@grafana/data';
+//import { css } from '@emotion/css';
 
 interface ColoredRectangleProps {
     color: string;
@@ -10,9 +11,9 @@ interface ColoredRectangleProps {
   }
 
   const nameStyle = {
-    width: '70px',
+    width: '60px',
     height: '30px', 
-    fontSize: '11px', 
+    fontSize: '10px', 
   };
 
   const buttonStyle = {
@@ -31,26 +32,16 @@ interface ColoredRectangleProps {
     };
     return <div style={rectangleStyle}></div>;
   };
-
-  const NodeName = () => {
-    return <input style={nameStyle} type="text" value="mothership" />;
-  };
-
-  const MOSTButton = () => {
-    return <Button style={buttonStyle} size={'xs'}>
-      MOST
-      </Button>;
-  };
-
-  
   
   const Header: React.FC<ColoredRectangleProps> = ({}) => {
     const [, setValue] = useState<SelectableValue<string>>();
     return (
-      <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto auto'}}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto auto auto'}}>
         <ColoredRectangle color="green" width={10} height={30}/>
-        <NodeName/>
-        <MOSTButton/>
+        <input style={nameStyle} type="text" value="mothership" />
+        <Button style={buttonStyle} size={'xs'}>
+          MOST
+        </Button>
         <Select
           className="custom-select"
           value={{ label: 'Nadir View' }}
@@ -60,6 +51,7 @@ interface ColoredRectangleProps {
           }}
           width="auto"
         />
+        <Icon name="expand-arrows" size="sm" />
       </div>
     );
   };

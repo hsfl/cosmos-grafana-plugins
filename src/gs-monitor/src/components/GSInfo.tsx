@@ -1,17 +1,17 @@
-import { Button, HorizontalGroup, VerticalGroup } from '@grafana/ui';
+import { Button, HorizontalGroup, Icon, VerticalGroup } from '@grafana/ui';
 import React from 'react';
 //import { PanelProps } from '@grafana/data';
 
 const inputStyle = {
-    width: '60px',
-    height: '20px', 
-    fontSize: '10px', 
+    width: '55px',
+    height: '15px', 
+    fontSize: '9px', 
   };
 
   const textBoxStyle = {
-    width: '50px',
-    height: '50px', 
-    fontSize: '7px', 
+    width: '100px',
+    height: '40px', 
+    fontSize: '6px', 
   };
 
   interface ColoredRectangleProps {
@@ -31,7 +31,7 @@ const inputStyle = {
 
   const buttonStyle = {
     width: '40px',
-    height: '20px', 
+    height: '15px', 
     fontSize: '8px', 
     padding: '2px',
     lineHeight: '8px',
@@ -41,11 +41,19 @@ const inputStyle = {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
         <HorizontalGroup>
+        <div style={{ justifySelf: 'start', alignSelf: 'start' }}>
+            <text>Ground Station Monitor</text> 
+        </div>
+        <div style={{ justifySelf: 'end', alignSelf: 'end' }}>
+            <Icon name="expand-arrows" size="xs" />
+        </div>
+        </HorizontalGroup>
+        <HorizontalGroup>
             <VerticalGroup>
                 <VerticalGroup>
                     <HorizontalGroup>
                         <ColoredRectangle color="cyan" width={10} height={10}/>
-                        <text className='smaller-font'>Name</text>
+                        <text className='even-smaller-font'>Name</text>
                         <input style={inputStyle} type="text" value="surreysc" />
                     </HorizontalGroup>
                     <HorizontalGroup>
@@ -60,7 +68,7 @@ const inputStyle = {
                 <VerticalGroup>
                     <HorizontalGroup>
                         <ColoredRectangle color="purple" width={10} height={10}/>
-                        <text className='smaller-font'>Name</text>
+                        <text className='even-smaller-font'>Name</text>
                         <input style={inputStyle} type="text" value="kauaicc" />
                     </HorizontalGroup>
                     <HorizontalGroup>
@@ -75,7 +83,7 @@ const inputStyle = {
                 <VerticalGroup>
                     <HorizontalGroup>
                         <ColoredRectangle color="magenta" width={10} height={10}/>
-                        <text className='smaller-font'>Name</text>
+                        <text className='even-smaller-font'>Name</text>
                         <input style={inputStyle} type="text" value="uafairbanks" />
                     </HorizontalGroup>
                     <HorizontalGroup>
@@ -89,14 +97,9 @@ const inputStyle = {
                 </VerticalGroup>
             </VerticalGroup>
             <VerticalGroup>
-            <text className='even-smaller-font'>UTC Time:<br></br>Local Time:<br></br>Azimuth:<br></br>Elevation:</text>
-            <text className='even-smaller-font'>UTC Time:<br></br>Local Time:<br></br>Azimuth:<br></br>Elevation:</text>
-            <text className='even-smaller-font'>UTC Time:<br></br>Local Time:<br></br>Azimuth:<br></br>Elevation:</text>
-            </VerticalGroup>
-            <VerticalGroup>
-                <textarea style={textBoxStyle} value={"20:24:20 \n20:24:20 \n0. \n90."}/>
-                <textarea style={textBoxStyle} value={"20:24:20 \n20:24:20 \n0. \n90."}/>
-                <textarea style={textBoxStyle} value={"20:24:20 \n20:24:20 \n0. \n90."}/>
+                <textarea style={textBoxStyle} value={"UTC Time:\t20:24:20 \nLocal Time:\t20:24:20 \nAzimuth:\t\t0. \nElevation:\t90."}/>
+                <textarea style={textBoxStyle} value={"UTC Time:\t20:24:20 \nLocal Time:\t20:24:20 \nAzimuth:\t\t0. \nElevation:\t90."}/>
+                <textarea style={textBoxStyle} value={"UTC Time:\t20:24:20 \nLocal Time:\t20:24:20 \nAzimuth:\t\t0. \nElevation:\t90."}/>
             </VerticalGroup>
         </HorizontalGroup>
       </div>
