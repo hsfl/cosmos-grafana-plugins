@@ -24,7 +24,8 @@ import React from 'react';
   const nameStyle = {
     width: '60px',
     height: '30px', 
-    fontSize: '11px', 
+    fontSize: '11px',
+    color: '#32CD32' 
   };
 
   const buttonStyle = {
@@ -50,7 +51,7 @@ import React from 'react';
         <ColoredRectangle color="black" width={220} height={100}/>
         <HorizontalGroup>
             <div style={smallerFontSize}>
-                <text>Formation</text>
+                <text style={{color: 'cyan'}}>Formation</text>
             </div>
             <input style={nameStyle} type="text" value="Diamond"/>
             <Button style={buttonStyle} size={'xs'}>

@@ -11,12 +11,14 @@ interface ColoredRectangleProps {
     width: '60px',
     height: '30px', 
     fontSize: '10px', 
+    //color: '#32CD32',
   };
 
   const inputStyle = {
-    width: '50px',
+    width: '76px',
     height: '20px',
     fontSize: '10px',
+    //color: '#32CD32',
   }
 
   const ColoredRectangle: React.FC<ColoredRectangleProps> = ({ color, width, height }) => {
@@ -71,8 +73,8 @@ interface ColoredRectangleProps {
           {commsTable()}
         </HorizontalGroup>
         <HorizontalGroup>
-            <text>Legend:</text>
-            <input style={inputStyle} type="text" value={"_________"} />
+            <text style={{fontSize: '10px', color: 'cyan'}}>Legend:</text>
+            <input style={inputStyle} type="text" value={"high (downlink)"} />
             <VerticalGroup spacing="xs">
                 <ColoredRectangle color={"green"} width={24} height={10} />
                 <HorizontalGroup spacing="xs">
@@ -80,7 +82,7 @@ interface ColoredRectangleProps {
                     <ColoredRectangle color={"black"} width={10} height={10} />
                 </HorizontalGroup>
             </VerticalGroup>
-            <input style={inputStyle} type="text" value={"_________"} />
+            <input style={inputStyle} type="text" value={"low (uplink)"} />
             <VerticalGroup spacing="xs">
                 <ColoredRectangle color={"black"} width={24} height={10} />
                 <HorizontalGroup spacing="xs">
@@ -88,7 +90,7 @@ interface ColoredRectangleProps {
                     <ColoredRectangle color={"black"} width={10} height={10} />
                 </HorizontalGroup>
             </VerticalGroup>
-            <input style={inputStyle} type="text" value={"_________"} />
+            <input style={inputStyle} type="text" value={"low (downlink)"} />
             <VerticalGroup spacing="xs">
                 <ColoredRectangle color={"black"} width={24} height={10} />
                 <HorizontalGroup spacing="xs">

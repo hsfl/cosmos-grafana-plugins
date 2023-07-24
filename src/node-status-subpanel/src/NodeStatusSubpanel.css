@@ -1,7 +1,7 @@
 .smaller-button {
     font-size: 8px;
     line-height: 8px;
-    height: 10px;
+    height: 9px;
     width: 50px;
   }
 
@@ -15,8 +15,20 @@
 
 .smaller-font {
   font-size:10px;
+  color: cyan;
 }
 
 .even-smaller-font {
   font-size:8px;
+  color: cyan;
+}
+
+.blue-text {
+  font-size: 6px;
+  color: cyan;
+}
+
+.green-text {
+  font-size: 6px;
+  color: rgb(9, 216, 9);
 }

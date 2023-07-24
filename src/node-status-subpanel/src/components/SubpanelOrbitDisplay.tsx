@@ -19,7 +19,7 @@ interface ColoredRectangleProps {
   const OrbitDisplay: React.FC<ColoredRectangleProps> = ({}) => {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: 'auto'}}>
-        <ColoredRectangle color="black" width={150} height={120}/>
+        <ColoredRectangle color="black" width={150} height={110}/>
       </div>
     );
   };

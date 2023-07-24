@@ -7,39 +7,40 @@ interface Props extends PanelProps<SimpleOptions> {}
 
 const green = '#0b0';
 const yellow = '#ea3';
+const red = '#f00';
 
 const useCautionAndWarning = () => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'row', width: "100%"}}>
+    <div style={{ display: 'flex', flexDirection: 'row', width: "100%", alignItems: 'flex-start'}}>
       <HorizontalGroup spacing="xs">
-        <Button size="xs" style={{ background:green }}>
+        <Button style={{ fontSize: '10px', width: '80px', height: '25px', background:green, color: 'black', justifyContent: 'center', alignItems: 'center', marginBottom: 'auto' }}>
           Flight Dynamics
         </Button>
-        <Button size="xs" style={{ background:green }}>
+        <Button style={{ fontSize: '10px', width: '15px', height: '25px', background:red, color: 'black', justifyContent: 'center', alignItems: 'center', marginBottom: 'auto' }}>
           GS
         </Button>
-        <Button size="xs" style={{ background:green }}>
+        <Button style={{ fontSize: '10px', width: '20px', height: '25px', background:green, color: 'black', justifyContent: 'center', alignItems: 'center', marginBottom: 'auto' }}>
           FSW
         </Button>
-        <Button size="xs" style={{ background:green }}>
+        <Button style={{ fontSize: '10px', width: '50px', height: '25px', background:green, color: 'black', justifyContent: 'center', alignItems: 'center', marginBottom: 'auto' }}>
           Payloads
         </Button>
-        <Button size="xs" style={{ background:green }}>
+        <Button style={{ fontSize: '10px', width: '30px', height: '25px', background:green, color: 'black', justifyContent: 'center', alignItems: 'center', marginBottom: 'auto' }}>
           TCS
         </Button>
-        <Button size="xs" style={{ background:green }}>
+        <Button style={{ fontSize: '10px', width: '30px', height: '25px', background:green, color: 'black', justifyContent: 'center', alignItems: 'center', marginBottom: 'auto' }}>
           ADCS
         </Button>
-        <Button size="xs" style={{ background:green }}>
+        <Button style={{ fontSize: '10px', width: '50px', height: '25px', background:green, color: 'black', justifyContent: 'center', alignItems: 'center', marginBottom: 'auto' }}>
           Telecom
         </Button>
-        <Button size="xs" style={{ background:green }}>
+        <Button style={{ fontSize: '10px', width: '30px', height: '25px', background:green, color: 'black', justifyContent: 'center', alignItems: 'center', marginBottom: 'auto' }}>
           EPS
         </Button>
-        <Button size="xs" style={{ background:yellow }}>
+        <Button style={{ fontSize: '10px', width: '60px', height: '25px', background:yellow, color: 'black', justifyContent: 'center', alignItems: 'center', marginBottom: 'auto' }}>
           Propulsion
         </Button>
-        <Button size="xs" style={{ background:green }}>
+        <Button style={{ fontSize: '10px', width: '30px', height: '25px', background:green, color: 'black', justifyContent: 'center', alignItems: 'center', marginBottom: 'auto' }}>
           OBCS
         </Button>
       </HorizontalGroup>

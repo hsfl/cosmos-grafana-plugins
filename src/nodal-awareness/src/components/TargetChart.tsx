@@ -27,20 +27,20 @@ export const TargetChart = (props: {
   }
 
   dataArray.sort((a, b) => {
-    const nameA = a.name!.toUpperCase(); // Convert names to uppercase for case-insensitive sorting
+    const nameA = a.name!.toUpperCase();
     const nameB = b.name!.toUpperCase();
 
     if (nameA < nameB) {
-      return -1; // a comes before b
+      return -1; 
     }
     if (nameA > nameB) {
-      return 1; // a comes after b
+      return 1; 
     }
-    return 0; // a and b have the same order
+    return 0; 
   });
 
   console.log(dataArray);
-  // const sortedNames = names.sort();
+ 
 
   return (
     <div
@@ -64,7 +64,7 @@ export const TargetChart = (props: {
           onChange={(v) => {
             setValue(v.value);
           }}
-          width="auto"
+          width={10}
         />
       </div>
       {/** Column labels */}

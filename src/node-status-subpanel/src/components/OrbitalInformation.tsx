@@ -4,14 +4,16 @@ import React from 'react';
 
 const orbitStyle = {
     width: '45px',
-    height: '20px', 
+    height: '15px', 
     fontSize: '10px', 
+    color: '#32CD32',
   };
 
   const eventStyle = {
     width: '68px',
-    height: '30px', 
-    fontSize: '7px', 
+    height: '25px', 
+    fontSize: '6px', 
+    color: '#32CD32',
   };
 
   const Footer = () => {

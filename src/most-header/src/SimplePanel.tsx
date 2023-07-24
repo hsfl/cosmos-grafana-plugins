@@ -88,7 +88,7 @@ const useBasicSelectAsync = () => {
 
 const useTimeMode = (refUTCTimeDiv: React.Ref<HTMLInputElement>, refMJDTimeDiv: React.Ref<HTMLInputElement>, refMETTimeDiv: React.Ref<HTMLInputElement>, refMOCTimeDiv: React.Ref<HTMLInputElement>) => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'row', width: "100%"}}>
+    <div style={{ display: 'flex', flexDirection: 'row', width: "100%", height: '50%',}}>
       <InlineFieldRow>
         <InlineField
           label="UTC"
