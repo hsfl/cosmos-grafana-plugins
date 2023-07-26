@@ -47,25 +47,6 @@ const inputStyle = {
     data: PanelData;
   }) => {
 
-    //Alphabetizing data since it comes in in random orders currently
-    const dataArray = [];
-    for (let i = 0; i < props.data.series.length; i++) {
-      dataArray.push(props.data.series[i]);
-    }
-  
-    dataArray.sort((a, b) => {
-      const nameA = a.name!.toUpperCase();
-      const nameB = b.name!.toUpperCase();
-  
-      if (nameA < nameB) {
-        return -1; 
-      }
-      if (nameA > nameB) {
-        return 1; 
-      }
-      return 0; 
-    });
-
     //Unix to HH:MM:SS converter
     const convertUnixToHHMMSS = (timestamp: number) => {
         const date = new Date(timestamp * 1000); // Convert to milliseconds
@@ -78,24 +59,54 @@ const inputStyle = {
     
     //Establishing local time (should probably get from data table eventually?). Currently HST.  
     const localTime = -11
-    //Grabbing and converting data for data table
-    const unixTimeStampsUTC = [dataArray[1].fields[0].values.get(0), dataArray[3].fields[0].values.get(0), dataArray[5].fields[0].values.get(0)]
-    const UTCTimeValues = unixTimeStampsUTC.map((unixTimeStampUTC) => (
-        convertUnixToHHMMSS(unixTimeStampUTC)
-    ));
-    const unixTimeStampsLocal = unixTimeStampsUTC.map(
-        (unixTimeStampUTC) => unixTimeStampUTC + 3600 * localTime
-    );
-    console.log(unixTimeStampsLocal);
-    const localTimeValues = unixTimeStampsLocal.map((unixTimeStampLocal) =>
-        convertUnixToHHMMSS(unixTimeStampLocal)
-    );
-  
-    const azimuthValues = [dataArray[1].fields[1].values.get(0).toFixed(6), dataArray[3].fields[1].values.get(0).toFixed(6), dataArray[5].fields[1].values.get(0).toFixed(6)]
-    const elevationValues = [dataArray[1].fields[3].values.get(0).toFixed(6), dataArray[3].fields[3].values.get(0).toFixed(6), dataArray[5].fields[3].values.get(0).toFixed(6)]
-    const valueStrings = azimuthValues.map((azimuthValue, index) => (
-        `UTC Time:\t${UTCTimeValues[index]} \nLocal Time:\t${localTimeValues[index]} \nAzimuth:\t\t${azimuthValue} \nElevation:\t${elevationValues[index]}`
-    ));
+
+    let valueStrings;
+    let names;
+
+    if (props.data.series === undefined || props.data.series.length === 0 || props.data.series[0].fields === undefined) {
+        valueStrings = [`UTC Time:\t \nLocal Time:\t \nAzimuth:\t\t \nElevation:\t`, `UTC Time:\t \nLocal Time:\t \nAzimuth:\t\t \nElevation:\t`, `UTC Time:\t \nLocal Time:\t \nAzimuth:\t\t \nElevation:\t`]
+        names = ["", "", ""]
+      }
+    else{
+        //Alphabetizing data since it comes in in random orders currently
+            const dataArray = [];
+            for (let i = 0; i < props.data.series.length; i++) {
+            dataArray.push(props.data.series[i]);
+            }
+        
+            dataArray.sort((a, b) => {
+            const nameA = a.name!.toUpperCase();
+            const nameB = b.name!.toUpperCase();
+        
+            if (nameA < nameB) {
+                return -1; 
+            }
+            if (nameA > nameB) {
+                return 1; 
+            }
+            return 0; 
+            });
+        //Grabbing and converting data for data table (currently using ChildSat data but will switch when GS data is available)
+            const unixTimeStampsUTC = [dataArray[1].fields[0].values.get(0), dataArray[3].fields[0].values.get(0), dataArray[5].fields[0].values.get(0)]
+            const UTCTimeValues = unixTimeStampsUTC.map((unixTimeStampUTC) => (
+                convertUnixToHHMMSS(unixTimeStampUTC)
+            ));
+            const unixTimeStampsLocal = unixTimeStampsUTC.map(
+                (unixTimeStampUTC) => unixTimeStampUTC + 3600 * localTime
+            );
+            console.log(unixTimeStampsLocal);
+            const localTimeValues = unixTimeStampsLocal.map((unixTimeStampLocal) =>
+                convertUnixToHHMMSS(unixTimeStampLocal)
+            );
+        
+            const azimuthValues = [dataArray[1].fields[1].values.get(0).toFixed(6), dataArray[3].fields[1].values.get(0).toFixed(6), dataArray[5].fields[1].values.get(0).toFixed(6)]
+            const elevationValues = [dataArray[1].fields[3].values.get(0).toFixed(6), dataArray[3].fields[3].values.get(0).toFixed(6), dataArray[5].fields[3].values.get(0).toFixed(6)]
+
+                valueStrings = azimuthValues.map((azimuthValue, index) => (
+                    `UTC Time:\t${UTCTimeValues[index]} \nLocal Time:\t${localTimeValues[index]} \nAzimuth:\t\t${azimuthValue} \nElevation:\t${elevationValues[index]}`
+                ));
+            names = [dataArray[0].name, dataArray[2].name, dataArray[4].name]
+    }
 
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
@@ -113,7 +124,7 @@ const inputStyle = {
                     <HorizontalGroup>
                         <ColoredRectangle color="cyan" width={10} height={10}/>
                         <text className='even-smaller-font'>Name</text>
-                        <input style={inputStyle} type="text" value={dataArray[0].name} />
+                        <input style={inputStyle} type="text" value={names[0]} />
                     </HorizontalGroup>
                     <HorizontalGroup>
                         <Button style={buttonStyle} size={'xs'}>
@@ -128,7 +139,7 @@ const inputStyle = {
                     <HorizontalGroup>
                         <ColoredRectangle color="purple" width={10} height={10}/>
                         <text className='even-smaller-font'>Name</text>
-                        <input style={inputStyle} type="text" value={dataArray[2].name} />
+                        <input style={inputStyle} type="text" value={names[1]} />
                     </HorizontalGroup>
                     <HorizontalGroup>
                         <Button style={buttonStyle} size={'xs'}>
@@ -143,7 +154,7 @@ const inputStyle = {
                     <HorizontalGroup>
                         <ColoredRectangle color="magenta" width={10} height={10}/>
                         <text className='even-smaller-font'>Name</text>
-                    <input style={inputStyle} type="text" value={dataArray[4].name} />
+                    <input style={inputStyle} type="text" value={names[2]} />
                     </HorizontalGroup>
                     <HorizontalGroup>
                         <Button style={buttonStyle} size={'xs'}>

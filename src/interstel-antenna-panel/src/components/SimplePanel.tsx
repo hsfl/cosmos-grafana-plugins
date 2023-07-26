@@ -7,12 +7,12 @@ import GroundStation from './GroundStation';
 
 interface Props extends PanelProps<SimpleOptions> {}
 
-export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) => {
+export const SimplePanel: React.FC<Props> = ({ data, width, height }) => {
   return (
     <div>
       <Header />
       <AntennaPlot width={width} height={height} />
-      <GroundStation />
+      <GroundStation data={data} />
     </div>
   );
 };
