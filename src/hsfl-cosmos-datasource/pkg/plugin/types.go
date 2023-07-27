@@ -35,26 +35,28 @@ type jsonResponse struct {
 }
 
 type Cosmosresponse struct {
-	Avectors  []avector  `json:"avectors,omitempty"`
-	Adcsstrucs  []adcsstruc  `json:"adcsstrucs,omitempty"`
-	Ladcsstrucs  []ladcsstruc  `json:"lvlhadcsstrucs,omitempty"`
-	Qvatts    []qvatt    `json:"qvatts,omitempty"`
-	Qaatts    []qaatt    `json:"qaatts,omitempty"`
-	Ecis      []eci      `json:"ecis,omitempty"`
-	Batts     []batt     `json:"batts,omitempty"`
-	Bcregs    []bcreg    `json:"bcregs,omitempty"`
-	Tsens     []tsen     `json:"tsens,omitempty"`
-	Cpus      []cpu      `json:"cpus,omitempty"`
-	Events    []event    `json:"events,omitempty"`
-	Mags      []mag      `json:"mags,omitempty"`
-	Geods     []geod     `json:"geods,omitempty"`
-	Geoss     []geos     `json:"geoss,omitempty"`
-	Lvlhs     []lvlh     `json:"lvlhs,omitempty"`
-	Geoidposs []geoidpos `json:"geoidposs,omitempty"`
-	Spherposs []spherpos `json:"spherposs,omitempty"`
-	Svectors  []svector  `json:"svectors,omitempty"`
-	Qatts     []qatt     `json:"qatts,omitempty"`
+	Avectors       []avector         `json:"avectors,omitempty"`
+	Adcsstrucs     []adcsstruc       `json:"adcsstrucs,omitempty"`
+	Ladcsstrucs    []ladcsstruc      `json:"lvlhadcsstrucs,omitempty"`
+	Qvatts         []qvatt           `json:"qvatts,omitempty"`
+	Qaatts         []qaatt           `json:"qaatts,omitempty"`
+	Ecis           []eci             `json:"ecis,omitempty"`
+	Batts          []batt            `json:"batts,omitempty"`
+	Bcregs         []bcreg           `json:"bcregs,omitempty"`
+	Tsens          []tsen            `json:"tsens,omitempty"`
+	Cpus           []cpu             `json:"cpus,omitempty"`
+	Events         []event           `json:"events,omitempty"`
+	Mags           []mag             `json:"mags,omitempty"`
+	Geods          []geod            `json:"geods,omitempty"`
+	Geoss          []geos            `json:"geoss,omitempty"`
+	Lvlhs          []lvlh            `json:"lvlhs,omitempty"`
+	Geoidposs      []geoidpos        `json:"geoidposs,omitempty"`
+	Spherposs      []spherpos        `json:"spherposs,omitempty"`
+	Svectors       []svector         `json:"svectors,omitempty"`
+	Qatts          []qatt            `json:"qatts,omitempty"`
+	CommandHistory []command_history `json:"command_history,omitempty"`
 }
+
 // TODO delete this type, determine all panels that use it, update to real struc
 type avector struct {
 	Time      float64
@@ -66,9 +68,9 @@ type avector struct {
 }
 
 type real_avector struct {
-	H         float64 `json:"h,omitempty"`
-	E         float64 `json:"e,omitempty"`
-	B         float64 `json:"b,omitempty"`
+	H float64 `json:"h,omitempty"`
+	E float64 `json:"e,omitempty"`
+	B float64 `json:"b,omitempty"`
 }
 
 type adcsstruc struct {
@@ -76,8 +78,8 @@ type adcsstruc struct {
 	Node_name string
 	Node_type float64
 	S         real_avector `json:"s,omitempty"`
-	V         rvector `json:"v,omitempty"`
-	A         rvector `json:"a,omitempty"`
+	V         rvector      `json:"v,omitempty"`
+	A         rvector      `json:"a,omitempty"`
 }
 
 type ladcsstruc struct {
@@ -85,8 +87,8 @@ type ladcsstruc struct {
 	Node_name string
 	Node_type float64
 	S         real_avector `json:"s,omitempty"`
-	V         rvector `json:"v,omitempty"`
-	A         rvector `json:"a,omitempty"`
+	V         rvector      `json:"v,omitempty"`
+	A         rvector      `json:"a,omitempty"`
 }
 
 type qvatt struct {
@@ -277,12 +279,29 @@ type qatt struct {
 	A         rvector    `json:"a,omitempty"`
 }
 
+type command_history struct {
+	Time    float64
+	Id      uint32 `json:"id"`
+	Command string `json:"command,omitempty"`
+}
+
 type cosmostype interface {
-	avector | real_avector| adcsstruc | ladcsstruc | qvatt | qaatt | eci | batt | bcreg | tsen | cpu | event | mag | geod | geos | lvlh | gvector | geoidpos | svector | spherpos | rvector | cvector | quaternion | qatt
+	avector | real_avector | adcsstruc | ladcsstruc | qvatt | qaatt | eci | batt | bcreg | tsen | cpu | event | mag | geod | geos | lvlh | gvector | geoidpos | svector | spherpos | rvector | cvector | quaternion | qatt | command_history
 }
 
 // Datasource is an example datasource which can respond to data queries, reports
 // its health and has streaming skills.
 type Datasource struct {
 	url string
+}
+
+// JSON response from Cosmos Backend call
+type AgentRequestPayload struct {
+	Request string `json:"request"`
+	Node    string `json:"node"`
+	Agent   string `json:"agent"`
+}
+
+type BackendAPIResponse struct {
+	Message string `json:"message"`
 }
