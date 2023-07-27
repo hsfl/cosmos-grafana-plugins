@@ -273,7 +273,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 	case cpu:
 		names = []string{"time", "node_name", "name", "temp", "uptime", "load", "gib", "boot_count", "storage"}
 	case event:
-		names = []string{"time", "node_name", "duration", "event_id", "event_name"}
+		names = []string{"time", "node_name", "duration", "event_id", "type", "event_name"}
 	case mag:
 		names = []string{"time", "node_name", "didx", "mag_x", "mag_y", "mag_z"}
 	case geod:
@@ -418,7 +418,8 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[1] = &j.Node_name
 			row[2] = j.Duration
 			row[3] = j.Event_id
-			row[4] = &j.Event_name
+			row[4] = j.Type
+			row[5] = &j.Event_name
 			AppendRowtoMap(frame_map, j.Node_name, row, names, "event")
 		case mag:
 			transform_to_timeseries = false
