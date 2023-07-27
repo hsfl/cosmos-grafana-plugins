@@ -211,7 +211,7 @@ func CreateFields(names []string) data.Fields {
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeUint8, 0)
 		case "didx":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeUint8, 0)
-		case "duration":
+		case "type":
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeUint32, 0)
 		default:
 			fields[i] = data.NewFieldFromFieldType(data.FieldTypeFloat64, 0)

@@ -167,9 +167,9 @@ type tsen struct {
 type event struct {
 	Time       float64
 	Node_name  string `json:"node_name,omitempty"`
-	Duration   uint32 `json:"duration,omitempty"`
+	Duration   float64 `json:"duration,omitempty"`
 	Event_id   uint8  `json:"event_id,omitempty"`
-	Type       string `json:"type,omitempty"`
+	Type       uint32 `json:"type,omitempty"`
 	Event_name string `json:"event_name,omitempty"`
 }
 
