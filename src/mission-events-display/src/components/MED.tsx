@@ -10,6 +10,7 @@ import { animate, motion, useMotionValue } from 'framer-motion';
 
 interface UTCEvent {
   utcStart: string;
+  localStart: string;
 }
 
 const tickHeight = 30;
@@ -31,16 +32,30 @@ export const MissionEventsDisplay = (props: {
   const [scale /*, setScale */] = useState<number>(1);
   const [graphHeight, setGraphHeight] = useState<number>(height);
   const [divElement, setDivElement] = useState<HTMLDivElement>();
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
+  const [currentTime, setCurrentTime] = useState<number>(timeRange.from.unix() * 1000);
   //const scrollPercentage = useRef<number>(0);
   const [tickVals, setTickVals] = useState<number[]>([]);
   //const [lineHeight, setLineHeight] = useState<number>()
 
-  const utcData: UTCEvent[] = data.series[0].fields[0].values.toArray().map((v, i) => ({
-    utcStart: new Date(data.series[0].fields[0].values.get(i)).toUTCString().slice(4, -4),
-  }));
+  const utcData: UTCEvent[] = [];
+  const dataArray = data.series[0].fields[0].values.toArray();
+
+  dataArray.map((v, i) => {
+    const utcStart = new Date(dataArray[i]);
+    const localStart = new Date(utcStart.getTime() - 10 * 60 * 60 * 1000);
+
+    utcData.push({
+      utcStart: utcStart.toUTCString().slice(4, -4),
+      localStart: localStart.toUTCString().slice(4, -4),
+    });
+  });
+  function unixToDateTime(unixTimestamp: number): Date {
+    return new Date(unixTimestamp);
+  }
   const startTime = timeRange.from.unix() * 1000;
   const timeSpan = timeRange.to.unix() * 1000 - timeRange.from.unix() * 1000;
-
+  console.log(unixToDateTime(startTime));
   // Update various parameters of the graph: height, ticks, etc.
   useEffect(() => {
     const newGraphHeight = tickHeight * (timeSpan / (60000 * scale));
@@ -56,8 +71,6 @@ export const MissionEventsDisplay = (props: {
 
   const pixPerMin = tickHeight / scale;
 
-  console.log(utcData[0]);
-
   //Updates scrollbar and display position
   const barPosition = useMotionValue(topPartOffset);
   const updateScrollBar = useCallback(
@@ -72,7 +85,6 @@ export const MissionEventsDisplay = (props: {
               top: ((event.payload.time / 1000 - timeRange.from.unix()) / 60) * pixPerMin - 5 * pixPerMin,
               behavior: 'smooth',
             });
-            //scrollPercentage.current += (topPartOffset+((event.payload.time/1000-timeRange.from.unix())/60)*pixPerMin);
           }
         }
       });
@@ -81,8 +93,43 @@ export const MissionEventsDisplay = (props: {
   );
   useCosmosTimeline(eventBus, updateScrollBar);
 
-  console.log(Math.abs(timeRange.from.unix() - startTime));
+  const incrementElapsedTime = useCallback(
+    (event: TimeEvent) => {
+      if (event.payload.time !== undefined) {
+        const presentTime = event.payload.time / 1000;
+        const timeFrom = timeRange.from.unix();
+        const newElapsedTimeInMinutes = (presentTime - timeFrom) / 60;
+        setElapsedTime(newElapsedTimeInMinutes * 60000);
+        setCurrentTime(startTime + newElapsedTimeInMinutes * 60000);
+      }
+    },
+    [timeRange.from, startTime]
+  );
+  useCosmosTimeline(eventBus, incrementElapsedTime);
+  console.log(unixToDateTime(currentTime), elapsedTime);
 
+  const countdownStrings: string[] = [];
+  for (let i = 0; i < utcData.length; i++) {
+    if (Date.parse(utcData[i].localStart) - currentTime >= 0) {
+      const currentString = `${Math.floor((Date.parse(utcData[i].localStart) - currentTime) / (1000 * 60 * 60))
+        .toString()
+        .padStart(2, '0')}:${Math.floor(((Date.parse(utcData[i].localStart) - currentTime) / (1000 * 60)) % 60)
+        .toString()
+        .padStart(2, '0')}:${Math.floor(((Date.parse(utcData[i].localStart) - currentTime) / 1000) % 60)
+        .toString()
+        .padStart(2, '0')}`;
+      countdownStrings.push(`- ${currentString}`);
+    } else {
+      const currentString = `${Math.floor(Math.abs(Date.parse(utcData[i].localStart) - currentTime) / (1000 * 60 * 60))
+        .toString()
+        .padStart(2, '0')}:${Math.floor((Math.abs(Date.parse(utcData[i].localStart) - currentTime) / (1000 * 60)) % 60)
+        .toString()
+        .padStart(2, '0')}:${Math.floor((Math.abs(Date.parse(utcData[i].localStart) - currentTime) / 1000) % 60)
+        .toString()
+        .padStart(2, '0')}`;
+      countdownStrings.push(`+ ${currentString}`);
+    }
+  }
   // Callback for div reference acquisition
   const refDiv = useCallback((ref: HTMLDivElement | null) => {
     if (ref !== null) {
@@ -107,7 +154,7 @@ export const MissionEventsDisplay = (props: {
                 y: 0,
                 fill: '#000000',
                 opacity: 50,
-                width: width,
+                width: width - 10,
                 height: topPartOffset,
                 position: 'fixed',
                 borderRadius: '5%',
@@ -116,19 +163,19 @@ export const MissionEventsDisplay = (props: {
             />
             {/* Header Labels */}
             <Group>
-              <Text x={0} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#03fcf0'}>
+              <Text x={0} y={topPartOffset} fontSize={10} verticalAnchor="end" fill={'#03fcf0'}>
                 Orbital Events
               </Text>
-              <Text x={colOffsetEnd + 5} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#fff'}>
+              <Text x={colOffsetEnd + 5} y={topPartOffset} fontSize={10} verticalAnchor="end" fill={'#fff'}>
                 UTC
               </Text>
-              <Text x={colOffsetEnd + 140} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
+              <Text x={colOffsetEnd + 75} y={topPartOffset} fontSize={10} verticalAnchor="end" fill={'#ff0'}>
                 Spacecraft Events
               </Text>
-              <Text x={colOffsetEnd + 275} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#f0f'}>
+              <Text x={colOffsetEnd + 200} y={topPartOffset} fontSize={10} verticalAnchor="end" fill={'#fff'}>
                 Countdown Timer
               </Text>
-              {/* <Text x={colOffsetEnd + 120} y={topPartOffset} fontSize={12} verticalAnchor="end" fill={'#ff0'}>
+              {/* <Text x={colOffsetEnd + 120} y={topPartOffset} fontSize={10} verticalAnchor="end" fill={'#ff0'}>
               Executed
             </Text> */}
             </Group>
@@ -197,7 +244,7 @@ export const MissionEventsDisplay = (props: {
                   x={colOffset + 15 * data.series[0].fields[3].values.get(i)}
                   y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
                   width={15}
-                  height={(data.series[0].fields[2].values.get(i) / 60) * tickHeight}
+                  height={((data.series[0].fields[2].values.get(i) * 86400) / 60) * tickHeight}
                   fill={'#f0f'}
                   fillOpacity={0.7}
                   strokeWidth={1}
@@ -207,7 +254,7 @@ export const MissionEventsDisplay = (props: {
                 <Text
                   x={0}
                   y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
-                  fontSize={12}
+                  fontSize={10}
                   verticalAnchor="end"
                   fill={'#f0f'}
                 >
@@ -217,23 +264,22 @@ export const MissionEventsDisplay = (props: {
                 <Text
                   x={colOffsetEnd + 5}
                   y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
-                  fontSize={12}
+                  fontSize={10}
                   verticalAnchor="end"
                   fill={'#fff'}
                 >
-                  {utcData[i].utcStart}
+                  {utcData[i].utcStart.toString().slice(12)}
                 </Text>
                 {/* Countdown Timer (Work in Progress) */}
-
-                {/* <Text
-                  x={colOffsetEnd + 275}
+                <Text
+                  x={colOffsetEnd + 200}
                   y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
-                  fontSize={12}
+                  fontSize={10}
                   verticalAnchor="end"
                   fill={'#fff'}
                 >
-                  {Math.floor(((Date.parse(utcData[i].utcStart) - startTime) / (1000 * 60)) % 60)}
-                </Text> */}
+                  {countdownStrings[i]}
+                </Text>
               </Group>
             );
             return a;
@@ -254,16 +300,16 @@ export const MissionEventsDisplay = (props: {
                   x={colOffset + 15 * data.series[0].fields[3].values.get(i)}
                   y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
                   width={15}
-                  height={(data.series[0].fields[2].values.get(i) / 60) * tickHeight}
+                  height={((data.series[0].fields[2].values.get(i) * 86400) / 60) * tickHeight}
                   fill={'#0df'}
                   fillOpacity={0.7}
                   strokeWidth={1}
                   stroke={'#fff'}
                 />
                 <Text
-                  x={colOffsetEnd + 140}
+                  x={colOffsetEnd + 75}
                   y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
-                  fontSize={12}
+                  fontSize={10}
                   verticalAnchor="end"
                   fill={'#0df'}
                 >
@@ -272,11 +318,11 @@ export const MissionEventsDisplay = (props: {
                 <Text
                   x={colOffsetEnd + 5}
                   y={((data.series[0].fields[0].values.get(i) - startTime) / 60000) * tickHeight}
-                  fontSize={12}
+                  fontSize={10}
                   verticalAnchor="end"
                   fill={'#fff'}
                 >
-                  {utcData[i].utcStart}
+                  {utcData[i].utcStart.toString().slice(12)}
                 </Text>
               </Group>
             );
