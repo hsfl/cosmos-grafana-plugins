@@ -35,25 +35,26 @@ type jsonResponse struct {
 }
 
 type Cosmosresponse struct {
-	Avectors       []avector         `json:"avectors,omitempty"`
-	Adcsstrucs     []adcsstruc       `json:"adcsstrucs,omitempty"`
-	Ladcsstrucs    []ladcsstruc      `json:"lvlhadcsstrucs,omitempty"`
-	Qvatts         []qvatt           `json:"qvatts,omitempty"`
-	Qaatts         []qaatt           `json:"qaatts,omitempty"`
-	Ecis           []eci             `json:"ecis,omitempty"`
-	Batts          []batt            `json:"batts,omitempty"`
-	Bcregs         []bcreg           `json:"bcregs,omitempty"`
-	Tsens          []tsen            `json:"tsens,omitempty"`
-	Cpus           []cpu             `json:"cpus,omitempty"`
-	Events         []event           `json:"events,omitempty"`
-	Mags           []mag             `json:"mags,omitempty"`
-	Geods          []geod            `json:"geods,omitempty"`
-	Geoss          []geos            `json:"geoss,omitempty"`
-	Lvlhs          []lvlh            `json:"lvlhs,omitempty"`
-	Geoidposs      []geoidpos        `json:"geoidposs,omitempty"`
-	Spherposs      []spherpos        `json:"spherposs,omitempty"`
-	Svectors       []svector         `json:"svectors,omitempty"`
-	Qatts          []qatt            `json:"qatts,omitempty"`
+	Avectors  []avector  `json:"avectors,omitempty"`
+	Adcsstrucs  []adcsstruc  `json:"adcsstrucs,omitempty"`
+	Ladcsstrucs  []ladcsstruc  `json:"lvlhadcsstrucs,omitempty"`
+	Gadcsstrucs  []gadcsstruc  `json:"geocadcsstrucs,omitempty"`
+	Qvatts    []qvatt    `json:"qvatts,omitempty"`
+	Qaatts    []qaatt    `json:"qaatts,omitempty"`
+	Ecis      []eci      `json:"ecis,omitempty"`
+	Batts     []batt     `json:"batts,omitempty"`
+	Bcregs    []bcreg    `json:"bcregs,omitempty"`
+	Tsens     []tsen     `json:"tsens,omitempty"`
+	Cpus      []cpu      `json:"cpus,omitempty"`
+	Events    []event    `json:"events,omitempty"`
+	Mags      []mag      `json:"mags,omitempty"`
+	Geods     []geod     `json:"geods,omitempty"`
+	Geoss     []geos     `json:"geoss,omitempty"`
+	Lvlhs     []lvlh     `json:"lvlhs,omitempty"`
+	Geoidposs []geoidpos `json:"geoidposs,omitempty"`
+	Spherposs []spherpos `json:"spherposs,omitempty"`
+	Svectors  []svector  `json:"svectors,omitempty"`
+	Qatts     []qatt     `json:"qatts,omitempty"`
 	CommandHistory []command_history `json:"command_history,omitempty"`
 }
 
@@ -78,8 +79,10 @@ type adcsstruc struct {
 	Node_name string
 	Node_type float64
 	S         real_avector `json:"s,omitempty"`
-	V         rvector      `json:"v,omitempty"`
-	A         rvector      `json:"a,omitempty"`
+	V         rvector `json:"v,omitempty"`
+	A         rvector `json:"a,omitempty"`
+	Sun 	  rvector `json:"sun,omitempty"`
+	Nad 	  rvector `json:"nad,omitempty"`
 }
 
 type ladcsstruc struct {
@@ -87,8 +90,21 @@ type ladcsstruc struct {
 	Node_name string
 	Node_type float64
 	S         real_avector `json:"s,omitempty"`
-	V         rvector      `json:"v,omitempty"`
-	A         rvector      `json:"a,omitempty"`
+	V         rvector `json:"v,omitempty"`
+	A         rvector `json:"a,omitempty"`
+	Sun 	  rvector `json:"sun,omitempty"`
+	Nad 	  rvector `json:"nad,omitempty"`
+}
+
+type gadcsstruc struct {
+	Time      float64
+	Node_name string
+	Node_type float64
+	S         real_avector `json:"s,omitempty"`
+	V         rvector `json:"v,omitempty"`
+	A         rvector `json:"a,omitempty"`
+	Sun 	  rvector `json:"sun,omitempty"`
+	Nad 	  rvector `json:"nad,omitempty"`
 }
 
 type qvatt struct {
@@ -286,7 +302,7 @@ type command_history struct {
 }
 
 type cosmostype interface {
-	avector | real_avector | adcsstruc | ladcsstruc | qvatt | qaatt | eci | batt | bcreg | tsen | cpu | event | mag | geod | geos | lvlh | gvector | geoidpos | svector | spherpos | rvector | cvector | quaternion | qatt | command_history
+	avector | real_avector | adcsstruc | ladcsstruc | gadcsstruc | qvatt | qaatt | eci | batt | bcreg | tsen | cpu | event | mag | geod | geos | lvlh | gvector | geoidpos | svector | spherpos | rvector | cvector | quaternion | qatt | command_history
 }
 
 // Datasource is an example datasource which can respond to data queries, reports

@@ -22,6 +22,7 @@ const loadModel = (scene: THREE.Scene): Promise<THREE.Group> => {
         obj.position.z = 0;
         // obj.rotation.x = 0.5;
         // obj.rotation.y = 0.5;
+        // obj.rotation.z = 1;
         // obj.receiveShadow = true;
         // obj.castShadow = true;
         const origin = new THREE.Vector3(0, 0, 0);
@@ -57,9 +58,10 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   // const refInputs = useRef<RefDict>({});
   // The index into the data array
   //const refIdxs = useRef<number[]>([]);
-  const [refRenderer, refScene, refCamera, refModel, refInputs, refDS, refUS, updateDOMRefs] = useDomUpdate(data);
+  const [refRenderer, refScene, refCamera, refModel, refSun, refNad, refInputs, refDS, refUS, updateDOMRefs] = useDomUpdate(data);
   // console.log('sim pan eventBus: ', eventBus);
   useCosmosTimeline(data, eventBus, updateDOMRefs);
+  refDS.current = 'ICRF';
   // console.log('adcs data: ', data);
   // console.log('data select, state ', data.state);
   // console.log('ref data state . current ', refDS.current);
@@ -131,7 +133,20 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     // scene.add(y_arrow);
     // scene.add(z_arrow);
 
-    // x y z orient; tho weird that z points left, x points right, y points up in rendering.. 
+    // sun vector
+    const sundir = new THREE.Vector3(0, 0, 0);
+    const origin = new THREE.Vector3(0, 0, 0);
+    const length = 1;
+    const sunarrowHelper = new THREE.ArrowHelper(sundir, origin, length, 0xffffff);
+    scene.add(sunarrowHelper);
+    refSun.current = sunarrowHelper;
+    // nadir vector
+    const naddir = new THREE.Vector3(0, 0, 0);
+    const nadarrowHelper = new THREE.ArrowHelper(naddir, origin, .75, 0x0fff00);
+    scene.add(nadarrowHelper);
+    refNad.current = nadarrowHelper;
+
+    // x y z orient set upper left dynamic to frame; z points left, x points right, y points up in rendering.. 
     const coord_ref = new THREE.Vector3(-1.5, height / 3000, width / 700);
     const coord_length = .6;
     const coord_dir = new THREE.Vector3(1, 0, 0);
@@ -151,7 +166,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       refRenderer.current!.render(scene, camera);
     });
     // Note: refs are stable, will not trigger effect, but calms the exhaustive-deps lint rule
-  }, [width, height, refRenderer, refScene, refCamera, refModel, refInputs, refUS]);
+  }, [width, height, refRenderer, refScene, refCamera, refModel, refSun, refInputs, refUS]);
   // console.log('REF inputs adcs simple panel: ', refInputs);
 
   // function Label({ name, isDeg }: { name: string; isDeg: string }) {
@@ -160,14 +175,16 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   //   }
   //   return <div>{name} (rad)</div>;
   // }
-  function units(units: string) {
-    if (units === 'Degrees') {
-      return 'deg'
-    }
-    return 'rad'
-  }
 
-  let result = units(refUS.current!);
+
+  // function units(units: string) {
+  //   if (units === 'Degrees') {
+  //     return 'deg'
+  //   }
+  //   return 'rad'
+  // }
+
+  // let result = units(refUS.current!);
 
   return (
     <div style={{ width: width, height: height, overflow: 'auto' }}>
@@ -189,11 +206,11 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
             id='unity'
             defaultValue={{ label: 'Radians' }}
             value={refUS.current}
-            options={[{ label: 'Radians' }]} // , { label: 'Degrees' }
+            options={[{ label: 'Radians' }, { label: 'Degrees' }]}
             onChange={(e) => {
               refUS.current = e.label;
               // units(e.label!);
-              result = units(refUS.current!)
+              // result = units(refUS.current!)
             }}
             width="auto"
           />
@@ -211,16 +228,16 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
         }}
       >
         <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 2 }}>
-          Angle (rad)
+          Angle
           {/* <Label isDeg={refUS.current!} name="Angle " /> */}
           {/* <h6 onChange={(e) => { result = units(refUS.current!) }}>Angle (rad){result}</h6> */}
           {/* <InlineField transparent label={units(refUS.current!)} labelWidth={6}><div></div></InlineField> */}
           {/* <InlineLabel transparent onChange={(e) => {}} >Angle</InlineLabel> */}
         </div>
         {/* change units to degree; starts in si units radians */}
-        <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 3 }}>Angular Vel (rad/s)</div>
+        <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 3 }}>Angular Vel</div>
         <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 4 }}>
-          Angular Accel (rad/s<sup>2</sup>)
+          Angular Accel
         </div>
         {/* Heading: z axis: Yaw
             Elevation: y axis: Pitch

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { EventBus, PanelData } from '@grafana/data';
 import { RefDict, TimeEvent, TimeEventCallback } from '../types';
+import * as THREE from 'three';
 
 // Hook to listen to eventBus for cosmos timeevents, running animation callback when event fires
 export const useCosmosTimeline = (data: PanelData, eventBus: EventBus, callback: TimeEventCallback) => {
@@ -31,6 +32,8 @@ type DomUpdateReturn = [
   refScene: React.MutableRefObject<THREE.Scene | undefined>,
   refCamera: React.MutableRefObject<THREE.OrthographicCamera | undefined>,
   refModel: React.MutableRefObject<THREE.Group | undefined>,
+  refSun: React.MutableRefObject<THREE.ArrowHelper | undefined>,
+  refNad: React.MutableRefObject<THREE.ArrowHelper | undefined>,
   refInputs: React.MutableRefObject<RefDict>,
   refDS: React.MutableRefObject<string | undefined>,
   refUS: React.MutableRefObject<string | undefined>,
@@ -45,6 +48,8 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
   const refScene = useRef<THREE.Scene>();
   const refCamera = useRef<THREE.OrthographicCamera>();
   const refModel = useRef<THREE.Group>();
+  const refSun = useRef<THREE.ArrowHelper>();
+  const refNad = useRef<THREE.ArrowHelper>();
   // An array of references to the text boxes
   const refInputs = useRef<RefDict>({});
   // The index into the data array
@@ -109,6 +114,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     const DataMap: Object = {
       ICRF: 'adcsstruc',
       LVLH: 'ladcsstruc',
+      GEOC: 'gadcsstruc'
     };
     // let data_type: string;
     // if (refDS.current) {
@@ -129,6 +135,22 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     let yaw = 0;
     let pitch = 0;
     let roll = 0;
+    // sun vector
+    let sunx = live_data[0].fields.find((field) => field.name === "sun_x");
+    let suny = live_data[0].fields.find((field) => field.name === "sun_y");
+    let sunz = live_data[0].fields.find((field) => field.name === "sun_z");
+    let new_sundir: THREE.Vector3;
+    // nadir vector
+    let nadx = live_data[0].fields.find((field) => field.name === "nad_x");
+    let nady = live_data[0].fields.find((field) => field.name === "nad_y");
+    let nadz = live_data[0].fields.find((field) => field.name === "nad_z");
+    let new_naddir: THREE.Vector3;
+    let sunx_d = 0;
+    let suny_d = 0;
+    let sunz_d = 0;
+    let nadx_d = 0;
+    let nady_d = 0;
+    let nadz_d = 0;
 
     // console.log('update DOM refInputs.current: ', refInputs.current);
 
@@ -249,8 +271,8 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           }
           if (
             time > event.payload.time! &&
-            (time > last_time || Number.isNaN(last_time)) &&
-            (event.payload.time! > pl_time || Number.isNaN(pl_time))
+            // (time < last_time || Number.isNaN(last_time)) &&
+            (event.payload.time! < pl_time || Number.isNaN(pl_time))
           ) {
             // console.log('INCREMENT Last time: ', last_time, '; time: ', time, '; payload time: ', event.payload.time);
             const pltime = event.payload.time!;
@@ -266,7 +288,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             break;
           }
           if (
-            time < event.payload.time! &&
+            time > event.payload.time! &&
             (time > last_time || Number.isNaN(last_time)) &&
             (event.payload.time! > pl_time || Number.isNaN(pl_time))
           ) {
@@ -285,25 +307,27 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           }
           // console.log('last time - time', last_time - time, 'last time - event time', last_time - event.payload.time!);
           // TODO need to update to account for instances where there was a gap in beacons greater than 1000... for rewind function
-          if (
-            (last_time - time === 1000 || last_time - time >= pl_time - event.payload.time!) &&
-            pl_time > event.payload.time!
-          ) {
-            //&& (last_time > time) && (time > event.payload.time!)
-            array_pos = i;
-            // console.log('DECREMENT Last time: ', last_time, '; time: ', time);
-            const pltime = event.payload.time!;
 
-            if (key === 'TIME') {
-              ref.value = time.toString();
-              break;
-            }
-            if (key === 'PLTIME') {
-              ref.value = pltime.toString();
-              break;
-            }
-            break;
-          }
+          // console.log('previous event time: ', pl_time, 'event time: ', event.payload.time!, 'delta event time: ', pl_time - event.payload.time!, 'pl_time - i time', pl_time - time);
+          // if (
+          //   (last_time - time === 1000 || last_time - time <= 1800 || last_time - time >= pl_time - event.payload.time!) &&
+          //   pl_time < event.payload.time!
+          // ) {
+          //   //&& (last_time > time) && (time > event.payload.time!)
+          //   array_pos = i;
+          //   // console.log('DECREMENT Last time: ', last_time, '; time: ', time);
+          //   const pltime = event.payload.time!;
+
+          //   if (key === 'TIME') {
+          //     ref.value = time.toString();
+          //     break;
+          //   }
+          //   if (key === 'PLTIME') {
+          //     ref.value = pltime.toString();
+          //     break;
+          //   }
+          //   break;
+          // }
         }
         if (array_pos === -1) {
           // console.log('SKIP Last time: ', last_time, '; time: ', time);
@@ -319,6 +343,24 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         //     live_data[seriesIdx].fields[i].values.get(array_pos)
         //   );
         // }
+
+        sunx_d = sunx!.values.get(array_pos) ?? 0;
+        suny_d = suny!.values.get(array_pos) ?? 0;
+        sunz_d = sunz!.values.get(array_pos) ?? 0;
+        // console.log('sun v ', sunx_d, suny_d, sunz_d)
+        // new_sundir = new THREE.Vector3(sunx_d / 10000000, suny_d / 10000000, sunz_d / 10000000);
+        new_sundir = new THREE.Vector3(sunx_d, suny_d, sunz_d);
+        new_sundir.normalize();
+        // console.log('new sun vector', new_sundir)
+        // new_sundir = new THREE.Vector3(1, 20000, 0);
+        nadx_d = nadx!.values.get(array_pos) ?? 0;
+        nady_d = nady!.values.get(array_pos) ?? 0;
+        nadz_d = nadz!.values.get(array_pos) ?? 0;
+        // new_naddir = new THREE.Vector3(nadx_d / 10000000, nady_d / 10000000, nadz_d / 10000000);
+        new_naddir = new THREE.Vector3(nadx_d, nady_d, nadz_d);
+        new_naddir.normalize();
+        refSun.current!.setDirection(new_sundir)
+        refNad.current!.setDirection(new_naddir)
 
         // Grab appropriate column
         // redefine new column names as map
@@ -347,6 +389,18 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             APITCH: 'a_y',
             AROLL: 'a_x',
           },
+          GEOC: {
+            NODE: 'node_name',
+            YAW: 's_h',
+            PITCH: 's_e',
+            ROLL: 's_b',
+            VYAW: 'v_z',
+            VPITCH: 'v_y',
+            VROLL: 'v_x',
+            AYAW: 'a_z',
+            APITCH: 'a_y',
+            AROLL: 'a_x',
+          }
         };
         let thisField: string;
         for (const [KMkey, KMvalue] of Object.entries(keyMap[refDS.current as keyof Object])) {
@@ -402,11 +456,59 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     requestAnimationFrame(() => {
       if (
         refModel.current !== undefined &&
+        refSun.current !== undefined &&
+        refNad.current !== undefined &&
         refRenderer.current !== undefined &&
         refScene.current !== undefined &&
         refCamera.current !== undefined
       ) {
-        refModel.current.rotation.set(yaw, pitch, roll, 'ZYX');
+        refModel.current.rotation.set(roll, pitch, yaw);
+        // TODO
+        // rotate the nad and sun vectors by the qaternion HEB for LVLH and GEOC data frames
+        // rotate camera angle to show z up, x right, y left
+        // rotate the model and reference coord for lvlh and geoc
+        // fix time scrubbing for larger time increments ... 
+        //
+        if (refDS.current === 'GEOC') {
+          // let base = new THREE.Vector3(roll, pitch, yaw);
+          // base.normalize()
+          // // new_sundir = new THREE.Vector3((sunx_d - roll) * roll, (suny_d - pitch) * pitch, (sunz_d - yaw) * yaw);
+          // new_sundir = new THREE.Vector3((sunx_d), (suny_d), (sunz_d));
+          // // new_sundir = new THREE.Vector3(sunx_d + (roll * 1000000000000), suny_d + (pitch * 1000000000000), sunz_d + (yaw * 1000000000000));
+          // new_sundir.normalize();
+          // let adj_sundir = new_sundir.add(base)
+          // // new_naddir = new THREE.Vector3(nadx_d * roll, nady_d * pitch, nadz_d * yaw);
+          // new_naddir = new THREE.Vector3(nadx_d, nady_d, nadz_d);
+          // new_naddir.normalize();
+          // let adj_naddir = new_naddir.add(base)
+          // // adj_sundir.normalize()
+          // // adj_naddir.normalize()
+          // refSun.current!.setDirection(adj_sundir)
+          // refNad.current!.setDirection(adj_naddir)
+          refSun.current.rotateX(roll)
+          refSun.current.rotateY(pitch)
+          refSun.current.rotateZ(yaw)
+          refNad.current.rotateX(roll)
+          refNad.current.rotateY(pitch)
+          refNad.current.rotateZ(yaw)
+
+          // refNad.current.rotation.set(yaw, pitch, roll, 'ZYX');
+          // refSun.current.rotation.set(yaw, pitch, roll, 'ZYX');
+
+          // refNad.current.rotation.set(nadz_d + yaw, nady_d + pitch, nadx_d + roll, 'ZYX');
+          // refSun.current.rotation.set(sunz_d + yaw, suny_d + pitch, sunx_d + roll, 'ZYX');
+        } else if (refDS.current === 'LVLH') {
+          refSun.current.rotateX(roll)
+          refSun.current.rotateY(pitch)
+          refSun.current.rotateZ(yaw)
+          refNad.current.rotateX(roll)
+          refNad.current.rotateY(pitch)
+          refNad.current.rotateZ(yaw)
+        }
+        // refNad.current.rotation.set(yaw, pitch, roll, 'ZYX');
+        // refSun.current.rotation.set(yaw, pitch, roll, 'ZYX');
+        // refSun.current.setDirection(new_sundir)
+        // refNad.current.setDirection(new_naddir)
         // refScene.current.rotation.set(yaw, pitch, roll, 'ZYX');
         // load model origin coords as unique object to pair and shift with model...
         refRenderer.current.render(refScene.current, refCamera.current);
@@ -414,5 +516,5 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     });
   }, []);
 
-  return [refRenderer, refScene, refCamera, refModel, refInputs, refDS, refUS, updateDOMRefs];
+  return [refRenderer, refScene, refCamera, refModel, refSun, refNad, refInputs, refDS, refUS, updateDOMRefs];
 };
