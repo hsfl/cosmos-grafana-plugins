@@ -89,6 +89,7 @@ type ladcsstruc struct {
 	Time      float64
 	Node_name string
 	Node_type float64
+	ICRF_S    real_avector `json:"icrfs,omitempty"`
 	S         real_avector `json:"s,omitempty"`
 	V         rvector `json:"v,omitempty"`
 	A         rvector `json:"a,omitempty"`
@@ -100,6 +101,7 @@ type gadcsstruc struct {
 	Time      float64
 	Node_name string
 	Node_type float64
+	ICRF_S    real_avector `json:"icrfs,omitempty"`
 	S         real_avector `json:"s,omitempty"`
 	V         rvector `json:"v,omitempty"`
 	A         rvector `json:"a,omitempty"`

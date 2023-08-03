@@ -114,7 +114,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     const DataMap: Object = {
       ICRF: 'adcsstruc',
       LVLH: 'ladcsstruc',
-      GEOC: 'gadcsstruc'
+      GEOC: 'gadcsstruc',
     };
     // let data_type: string;
     // if (refDS.current) {
@@ -136,14 +136,14 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     let pitch = 0;
     let roll = 0;
     // sun vector
-    let sunx = live_data[0].fields.find((field) => field.name === "sun_x");
-    let suny = live_data[0].fields.find((field) => field.name === "sun_y");
-    let sunz = live_data[0].fields.find((field) => field.name === "sun_z");
+    let sunx = live_data[0].fields.find((field) => field.name === 'sun_x');
+    let suny = live_data[0].fields.find((field) => field.name === 'sun_y');
+    let sunz = live_data[0].fields.find((field) => field.name === 'sun_z');
     let new_sundir: THREE.Vector3;
     // nadir vector
-    let nadx = live_data[0].fields.find((field) => field.name === "nad_x");
-    let nady = live_data[0].fields.find((field) => field.name === "nad_y");
-    let nadz = live_data[0].fields.find((field) => field.name === "nad_z");
+    let nadx = live_data[0].fields.find((field) => field.name === 'nad_x');
+    let nady = live_data[0].fields.find((field) => field.name === 'nad_y');
+    let nadz = live_data[0].fields.find((field) => field.name === 'nad_z');
     let new_naddir: THREE.Vector3;
     let sunx_d = 0;
     let suny_d = 0;
@@ -151,6 +151,10 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     let nadx_d = 0;
     let nady_d = 0;
     let nadz_d = 0;
+
+    let icrf_s_h = 0;
+    let icrf_s_e = 0;
+    let icrf_s_b = 0;
 
     // console.log('update DOM refInputs.current: ', refInputs.current);
 
@@ -359,8 +363,8 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         // new_naddir = new THREE.Vector3(nadx_d / 10000000, nady_d / 10000000, nadz_d / 10000000);
         new_naddir = new THREE.Vector3(nadx_d, nady_d, nadz_d);
         new_naddir.normalize();
-        refSun.current!.setDirection(new_sundir)
-        refNad.current!.setDirection(new_naddir)
+        refSun.current!.setDirection(new_sundir);
+        refNad.current!.setDirection(new_naddir);
 
         // Grab appropriate column
         // redefine new column names as map
@@ -400,7 +404,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             AYAW: 'a_z',
             APITCH: 'a_y',
             AROLL: 'a_x',
-          }
+          },
         };
         let thisField: string;
         for (const [KMkey, KMvalue] of Object.entries(keyMap[refDS.current as keyof Object])) {
@@ -435,6 +439,22 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             roll = currentValue;
             break;
         }
+
+        // set icrf_s base rotation values for LVLH or GEOC frames
+        if (key === 'YAW' && (refDS.current === 'GEOC' || refDS.current === 'LVLH')) {
+          const icrf_h = live_data[0].fields.find((field) => field.name === 'icrf_s_h');
+          const icrf_e = live_data[0].fields.find((field) => field.name === 'icrf_s_e');
+          const icrf_b = live_data[0].fields.find((field) => field.name === 'icrf_s_b');
+          if (icrf_h === undefined || icrf_e === undefined || icrf_b === undefined) {
+            return;
+          }
+          let currentValue_icrf_h: number = icrf_h.values.get(array_pos) ?? 0;
+          let currentValue_icrf_e: number = icrf_e.values.get(array_pos) ?? 0;
+          let currentValue_icrf_b: number = icrf_b.values.get(array_pos) ?? 0;
+          icrf_s_h = currentValue_icrf_h;
+          icrf_s_e = currentValue_icrf_e;
+          icrf_s_b = currentValue_icrf_b;
+        }
         // round the 9 telem data points to sci notation 5 places
         // translate display units to Degrees when set; 3D display always in radians
         if (['YAW', 'VYAW', 'AYAW', 'PITCH', 'VPITCH', 'APITCH', 'ROLL', 'VROLL', 'AROLL'].some((x) => x === key)) {
@@ -467,8 +487,8 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         // rotate the nad and sun vectors by the qaternion HEB for LVLH and GEOC data frames
         // rotate camera angle to show z up, x right, y left
         // rotate the model and reference coord for lvlh and geoc
-        // fix time scrubbing for larger time increments ... 
-        //
+        // fix time scrubbing for larger time increments
+
         if (refDS.current === 'GEOC') {
           // let base = new THREE.Vector3(roll, pitch, yaw);
           // base.normalize()
@@ -485,12 +505,20 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           // // adj_naddir.normalize()
           // refSun.current!.setDirection(adj_sundir)
           // refNad.current!.setDirection(adj_naddir)
-          refSun.current.rotateX(roll)
-          refSun.current.rotateY(pitch)
-          refSun.current.rotateZ(yaw)
-          refNad.current.rotateX(roll)
-          refNad.current.rotateY(pitch)
-          refNad.current.rotateZ(yaw)
+          //first rotate by euler icrf
+          refSun.current.rotateX(icrf_s_b);
+          refSun.current.rotateY(icrf_s_e);
+          refSun.current.rotateZ(icrf_s_h);
+          refNad.current.rotateX(icrf_s_b);
+          refNad.current.rotateY(icrf_s_e);
+          refNad.current.rotateZ(icrf_s_h);
+          // then rotate by euler geoc'
+          refSun.current.rotateX(roll);
+          refSun.current.rotateY(pitch);
+          refSun.current.rotateZ(yaw);
+          refNad.current.rotateX(roll);
+          refNad.current.rotateY(pitch);
+          refNad.current.rotateZ(yaw);
 
           // refNad.current.rotation.set(yaw, pitch, roll, 'ZYX');
           // refSun.current.rotation.set(yaw, pitch, roll, 'ZYX');
@@ -498,12 +526,20 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           // refNad.current.rotation.set(nadz_d + yaw, nady_d + pitch, nadx_d + roll, 'ZYX');
           // refSun.current.rotation.set(sunz_d + yaw, suny_d + pitch, sunx_d + roll, 'ZYX');
         } else if (refDS.current === 'LVLH') {
-          refSun.current.rotateX(roll)
-          refSun.current.rotateY(pitch)
-          refSun.current.rotateZ(yaw)
-          refNad.current.rotateX(roll)
-          refNad.current.rotateY(pitch)
-          refNad.current.rotateZ(yaw)
+          //first rotate by euler icrf
+          refSun.current.rotateX(icrf_s_b);
+          refSun.current.rotateY(icrf_s_e);
+          refSun.current.rotateZ(icrf_s_h);
+          refNad.current.rotateX(icrf_s_b);
+          refNad.current.rotateY(icrf_s_e);
+          refNad.current.rotateZ(icrf_s_h);
+          // then rotate by euler geoc'
+          refSun.current.rotateX(roll);
+          refSun.current.rotateY(pitch);
+          refSun.current.rotateZ(yaw);
+          refNad.current.rotateX(roll);
+          refNad.current.rotateY(pitch);
+          refNad.current.rotateZ(yaw);
         }
         // refNad.current.rotation.set(yaw, pitch, roll, 'ZYX');
         // refSun.current.rotation.set(yaw, pitch, roll, 'ZYX');

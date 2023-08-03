@@ -295,9 +295,9 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 	case adcsstruc:
 		names = []string{"time", "node_name", "node_type", "s_h", "s_e", "s_b", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z", "sun_x", "sun_y", "sun_z", "nad_x", "nad_y", "nad_z"}
 	case ladcsstruc:
-		names = []string{"time", "node_name", "node_type", "s_h", "s_e", "s_b", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z", "sun_x", "sun_y", "sun_z", "nad_x", "nad_y", "nad_z"}
+		names = []string{"time", "node_name", "node_type", "icrf_s_h", "icrf_s_e", "icrf_s_b", "s_h", "s_e", "s_b", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z", "sun_x", "sun_y", "sun_z", "nad_x", "nad_y", "nad_z"}
 	case gadcsstruc:
-		names = []string{"time", "node_name", "node_type", "s_h", "s_e", "s_b", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z", "sun_x", "sun_y", "sun_z", "nad_x", "nad_y", "nad_z"}
+		names = []string{"time", "node_name", "node_type", "icrf_s_h", "icrf_s_e", "icrf_s_b", "s_h", "s_e", "s_b", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z", "sun_x", "sun_y", "sun_z", "nad_x", "nad_y", "nad_z"}
 	default:
 		return nil
 	}
@@ -574,21 +574,24 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[0] = &timestamp
 			row[1] = &j.Node_name
 			row[2] = j.Node_type
-			row[3] = j.S.H
-			row[4] = j.S.E
-			row[5] = j.S.B
-			row[6] = j.V.Col[0]
-			row[7] = j.V.Col[1]
-			row[8] = j.V.Col[2]
-			row[9] = j.A.Col[0]
-			row[10] = j.A.Col[1]
-			row[11] = j.A.Col[2]
-			row[12] = j.Sun.Col[0]
-			row[13] = j.Sun.Col[1]
-			row[14] = j.Sun.Col[2]
-			row[15] = j.Nad.Col[0]
-			row[16] = j.Nad.Col[1]
-			row[17] = j.Nad.Col[2]
+			row[3] = j.ICRF_S.H
+			row[4] = j.ICRF_S.E
+			row[5] = j.ICRF_S.B
+			row[6] = j.S.H
+			row[7] = j.S.E
+			row[8] = j.S.B
+			row[9] = j.V.Col[0]
+			row[10] = j.V.Col[1]
+			row[11] = j.V.Col[2]
+			row[12] = j.A.Col[0]
+			row[13] = j.A.Col[1]
+			row[14] = j.A.Col[2]
+			row[15] = j.Sun.Col[0]
+			row[16] = j.Sun.Col[1]
+			row[17] = j.Sun.Col[2]
+			row[18] = j.Nad.Col[0]
+			row[19] = j.Nad.Col[1]
+			row[20] = j.Nad.Col[2]
 			AppendRowtoMap(frame_map, j.Node_name, row, names, "ladcsstruc")
 		case gadcsstruc:
 			transform_to_timeseries = false
@@ -597,21 +600,24 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[0] = &timestamp
 			row[1] = &j.Node_name
 			row[2] = j.Node_type
-			row[3] = j.S.H
-			row[4] = j.S.E
-			row[5] = j.S.B
-			row[6] = j.V.Col[0]
-			row[7] = j.V.Col[1]
-			row[8] = j.V.Col[2]
-			row[9] = j.A.Col[0]
-			row[10] = j.A.Col[1]
-			row[11] = j.A.Col[2]
-			row[12] = j.Sun.Col[0]
-			row[13] = j.Sun.Col[1]
-			row[14] = j.Sun.Col[2]
-			row[15] = j.Nad.Col[0]
-			row[16] = j.Nad.Col[1]
-			row[17] = j.Nad.Col[2]
+			row[3] = j.ICRF_S.H
+			row[4] = j.ICRF_S.E
+			row[5] = j.ICRF_S.B
+			row[6] = j.S.H
+			row[7] = j.S.E
+			row[8] = j.S.B
+			row[9] = j.V.Col[0]
+			row[10] = j.V.Col[1]
+			row[11] = j.V.Col[2]
+			row[12] = j.A.Col[0]
+			row[13] = j.A.Col[1]
+			row[14] = j.A.Col[2]
+			row[15] = j.Sun.Col[0]
+			row[16] = j.Sun.Col[1]
+			row[17] = j.Sun.Col[2]
+			row[18] = j.Nad.Col[0]
+			row[19] = j.Nad.Col[1]
+			row[20] = j.Nad.Col[2]
 			AppendRowtoMap(frame_map, j.Node_name, row, names, "gadcsstruc")
 		}
 	}
