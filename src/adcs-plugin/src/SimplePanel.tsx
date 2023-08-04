@@ -62,7 +62,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   // console.log('sim pan eventBus: ', eventBus);
   useCosmosTimeline(data, eventBus, updateDOMRefs);
   refDS.current = 'ICRF';
-  console.log('adcs data: ', data);
+  // console.log('adcs data: ', data);
   // console.log('data select, state ', data.state);
   // console.log('ref data state . current ', refDS.current);
 

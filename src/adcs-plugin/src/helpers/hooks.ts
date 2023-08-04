@@ -152,9 +152,20 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     let nady_d = 0;
     let nadz_d = 0;
 
-    let icrf_s_h = 0;
-    let icrf_s_e = 0;
-    let icrf_s_b = 0;
+    // let icrf_s_h = 0;
+    // let icrf_s_e = 0;
+    // let icrf_s_b = 0;
+
+    let sqatt_x = live_data[0].fields.find((field) => field.name === 'sqatt_x');
+    let sqatt_y = live_data[0].fields.find((field) => field.name === 'sqatt_y');
+    let sqatt_z = live_data[0].fields.find((field) => field.name === 'sqatt_z');
+    let sqatt_w = live_data[0].fields.find((field) => field.name === 'sqatt_w');
+    let sqatt_x_d = 0;
+    let sqatt_y_d = 0;
+    let sqatt_z_d = 0;
+    let sqatt_w_d = 0;
+    let s_quaternion = new THREE.Quaternion();
+    let s_quaternion_inverse = new THREE.Quaternion();
 
     // console.log('update DOM refInputs.current: ', refInputs.current);
 
@@ -258,10 +269,15 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         for (let i = 0; i < timeValues.length; i++) {
           time = timeValues.get(i);
           // console.log('this time i ', time);
-          if (time === event.payload.time! && (time > last_time || Number.isNaN(last_time))) {
-            // console.log('EXACT Last time: ', last_time, '; time: ', time);
-            const pltime = event.payload.time!;
+          const delta_time = time - last_time;
+          const delta_payload_time = event.payload.time! - pl_time;
 
+          // if (time === event.payload.time! && (time > last_time || Number.isNaN(last_time))) {
+          // initial time
+          if (Number.isNaN(last_time) && Number.isNaN(pl_time) && time > event.payload.time!) {
+            // console.log('init utc delta time: ', delta_time);
+            // console.log('init payload delta time: ', delta_payload_time);
+            const pltime = event.payload.time!;
             array_pos = i;
             if (key === 'TIME') {
               ref.value = time.toString();
@@ -273,12 +289,47 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             }
             break;
           }
-          if (
+          // Increment time forwards
+          else if (2000 > delta_time && delta_time > 0 && delta_payload_time > 0) {
+            // console.log('increment utc delta time: ', delta_time);
+            // console.log('increment payload delta time: ', delta_payload_time);
+            const pltime = event.payload.time!;
+            array_pos = i;
+            if (key === 'TIME') {
+              ref.value = time.toString();
+              break;
+            }
+            if (key === 'PLTIME') {
+              ref.value = pltime.toString();
+              break;
+            }
+            break;
+          } else if (delta_payload_time > delta_time && delta_time > 0 && delta_payload_time > 0) {
+            // console.log('increment big utc delta time: ', delta_time);
+            // console.log('increment big payload delta time: ', delta_payload_time);
+            const pltime = event.payload.time!;
+            array_pos = i;
+            if (key === 'TIME') {
+              ref.value = time.toString();
+              break;
+            }
+            if (key === 'PLTIME') {
+              ref.value = pltime.toString();
+              break;
+            }
+            break;
+          }
+          // decrement time backwards
+          else if (
             time > event.payload.time! &&
             // (time < last_time || Number.isNaN(last_time)) &&
-            (event.payload.time! < pl_time || Number.isNaN(pl_time))
+            // (event.payload.time! < pl_time || Number.isNaN(pl_time)
+            event.payload.time! < pl_time
           ) {
+            // else if ((delta_time > -2000) && (delta_time < 0) && (delta_payload_time < 0)) {
             // console.log('INCREMENT Last time: ', last_time, '; time: ', time, '; payload time: ', event.payload.time);
+            // console.log('decrement utc delta time: ', delta_time);
+            // console.log('decrement payload delta time: ', delta_payload_time);
             const pltime = event.payload.time!;
             array_pos = i;
             if (key === 'TIME') {
@@ -291,12 +342,12 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             }
             break;
           }
-          if (
-            time > event.payload.time! &&
-            (time > last_time || Number.isNaN(last_time)) &&
-            (event.payload.time! > pl_time || Number.isNaN(pl_time))
-          ) {
+          // delta_payload_time > delta_time
+          // (delta_time > -61000)
+          else if (delta_payload_time < delta_time && delta_time < -2000 && delta_time < 0 && delta_payload_time < 0) {
             // console.log('INCREMENT Last time: ', last_time, '; time: ', time, '; payload time: ', event.payload.time);
+            // console.log('decrement big utc delta time: ', delta_time);
+            // console.log('decrement big payload delta time: ', delta_payload_time);
             const pltime = event.payload.time!;
             array_pos = i;
             if (key === 'TIME') {
@@ -309,6 +360,28 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             }
             break;
           }
+
+          // if (
+          //   time > event.payload.time! &&
+          //   (time > last_time || Number.isNaN(last_time)) &&
+          //   (event.payload.time! > pl_time || Number.isNaN(pl_time))
+          // ) {
+          //   // console.log('INCREMENT Last time: ', last_time, '; time: ', time, '; payload time: ', event.payload.time);
+          //   console.log('rando utc delta time: ', delta_time);
+          //   console.log('rando payload delta time: ', delta_payload_time);
+          //   const pltime = event.payload.time!;
+          //   array_pos = i;
+          //   if (key === 'TIME') {
+          //     ref.value = time.toString();
+          //     break;
+          //   }
+          //   if (key === 'PLTIME') {
+          //     ref.value = pltime.toString();
+          //     break;
+          //   }
+          //   break;
+          // }
+
           // console.log('last time - time', last_time - time, 'last time - event time', last_time - event.payload.time!);
           // TODO need to update to account for instances where there was a gap in beacons greater than 1000... for rewind function
 
@@ -351,22 +424,17 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         sunx_d = sunx!.values.get(array_pos) ?? 0;
         suny_d = suny!.values.get(array_pos) ?? 0;
         sunz_d = sunz!.values.get(array_pos) ?? 0;
-        // console.log('sun v ', sunx_d, suny_d, sunz_d)
-        // new_sundir = new THREE.Vector3(sunx_d / 10000000, suny_d / 10000000, sunz_d / 10000000);
         new_sundir = new THREE.Vector3(sunx_d, suny_d, sunz_d);
         new_sundir.normalize();
-        // console.log('new sun vector', new_sundir)
-        // new_sundir = new THREE.Vector3(1, 20000, 0);
         nadx_d = nadx!.values.get(array_pos) ?? 0;
         nady_d = nady!.values.get(array_pos) ?? 0;
         nadz_d = nadz!.values.get(array_pos) ?? 0;
-        // new_naddir = new THREE.Vector3(nadx_d / 10000000, nady_d / 10000000, nadz_d / 10000000);
         new_naddir = new THREE.Vector3(nadx_d, nady_d, nadz_d);
         new_naddir.normalize();
         refSun.current!.setDirection(new_sundir);
         refNad.current!.setDirection(new_naddir);
 
-        // Grab appropriate column
+        // Map appropriate column
         // redefine new column names as map
         const keyMap: Object = {
           ICRF: {
@@ -424,7 +492,6 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
 
         // define index based on timestamp map to time column
         let currentValue: number = field.values.get(array_pos) ?? 0;
-        //
         switch (key) {
           case 'YAW':
             // z axis || Heading || Yaw
@@ -442,32 +509,40 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
 
         // set icrf_s base rotation values for LVLH or GEOC frames
         if (key === 'YAW' && (refDS.current === 'GEOC' || refDS.current === 'LVLH')) {
-          const icrf_h = live_data[0].fields.find((field) => field.name === 'icrf_s_h');
-          const icrf_e = live_data[0].fields.find((field) => field.name === 'icrf_s_e');
-          const icrf_b = live_data[0].fields.find((field) => field.name === 'icrf_s_b');
-          if (icrf_h === undefined || icrf_e === undefined || icrf_b === undefined) {
+          // const icrf_h = live_data[0].fields.find((field) => field.name === 'icrf_s_h');
+          // const icrf_e = live_data[0].fields.find((field) => field.name === 'icrf_s_e');
+          // const icrf_b = live_data[0].fields.find((field) => field.name === 'icrf_s_b');
+          // if (icrf_h === undefined || icrf_e === undefined || icrf_b === undefined) {
+          //   return;
+          // }
+          // let currentValue_icrf_h: number = icrf_h.values.get(array_pos) ?? 0;
+          // let currentValue_icrf_e: number = icrf_e.values.get(array_pos) ?? 0;
+          // let currentValue_icrf_b: number = icrf_b.values.get(array_pos) ?? 0;
+          // icrf_s_h = currentValue_icrf_h;
+          // icrf_s_e = currentValue_icrf_e;
+          // icrf_s_b = currentValue_icrf_b;
+
+          // set the s quaternion data values
+          if (sqatt_x === undefined || sqatt_y === undefined || sqatt_z === undefined || sqatt_w === undefined) {
             return;
           }
-          let currentValue_icrf_h: number = icrf_h.values.get(array_pos) ?? 0;
-          let currentValue_icrf_e: number = icrf_e.values.get(array_pos) ?? 0;
-          let currentValue_icrf_b: number = icrf_b.values.get(array_pos) ?? 0;
-          icrf_s_h = currentValue_icrf_h;
-          icrf_s_e = currentValue_icrf_e;
-          icrf_s_b = currentValue_icrf_b;
+          sqatt_x_d = sqatt_x.values.get(array_pos) ?? 0;
+          sqatt_y_d = sqatt_y.values.get(array_pos) ?? 0;
+          sqatt_z_d = sqatt_z.values.get(array_pos) ?? 0;
+          sqatt_w_d = sqatt_w.values.get(array_pos) ?? 0;
+          s_quaternion = new THREE.Quaternion(sqatt_x_d, sqatt_y_d, sqatt_z_d, sqatt_w_d);
+          s_quaternion_inverse = new THREE.Quaternion(-sqatt_x_d, -sqatt_y_d, -sqatt_z_d, sqatt_w_d);
         }
         // round the 9 telem data points to sci notation 5 places
-        // translate display units to Degrees when set; 3D display always in radians
+        // translate display ref.value units to Degrees when set; 3D display always in radians
         if (['YAW', 'VYAW', 'AYAW', 'PITCH', 'VPITCH', 'APITCH', 'ROLL', 'VROLL', 'AROLL'].some((x) => x === key)) {
           if (units === 'Degrees') {
             currentValue = currentValue * rad2deg;
-            // console.log('translated rad 2 deg: ', currentValue);
           }
           ref.value = currentValue.toExponential(5).toString();
         } else {
           ref.value = currentValue.toString();
         }
-        // currentValue.toExponential(4);
-        // ref.value = currentValue.toString();
       }
       return;
     });
@@ -482,43 +557,48 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         refScene.current !== undefined &&
         refCamera.current !== undefined
       ) {
-        refModel.current.rotation.set(roll, pitch, yaw);
+        // refModel.current.rotation.set(roll, pitch, yaw);
+        if (refDS.current === 'ICRF') {
+          refModel.current.rotation.set(0, 0, 0);
+          if (roll !== 0 && pitch !== 0 && yaw !== 0) {
+            refModel.current.rotation.set(roll, pitch, yaw);
+          }
+        }
         // TODO
         // rotate the nad and sun vectors by the qaternion HEB for LVLH and GEOC data frames
         // rotate camera angle to show z up, x right, y left
         // rotate the model and reference coord for lvlh and geoc
         // fix time scrubbing for larger time increments
-
-        if (refDS.current === 'GEOC') {
-          // let base = new THREE.Vector3(roll, pitch, yaw);
-          // base.normalize()
-          // // new_sundir = new THREE.Vector3((sunx_d - roll) * roll, (suny_d - pitch) * pitch, (sunz_d - yaw) * yaw);
-          // new_sundir = new THREE.Vector3((sunx_d), (suny_d), (sunz_d));
-          // // new_sundir = new THREE.Vector3(sunx_d + (roll * 1000000000000), suny_d + (pitch * 1000000000000), sunz_d + (yaw * 1000000000000));
-          // new_sundir.normalize();
-          // let adj_sundir = new_sundir.add(base)
-          // // new_naddir = new THREE.Vector3(nadx_d * roll, nady_d * pitch, nadz_d * yaw);
-          // new_naddir = new THREE.Vector3(nadx_d, nady_d, nadz_d);
-          // new_naddir.normalize();
-          // let adj_naddir = new_naddir.add(base)
-          // // adj_sundir.normalize()
-          // // adj_naddir.normalize()
-          // refSun.current!.setDirection(adj_sundir)
-          // refNad.current!.setDirection(adj_naddir)
+        else if (refDS.current === 'GEOC') {
           //first rotate by euler icrf
-          refSun.current.rotateX(icrf_s_b);
-          refSun.current.rotateY(icrf_s_e);
-          refSun.current.rotateZ(icrf_s_h);
-          refNad.current.rotateX(icrf_s_b);
-          refNad.current.rotateY(icrf_s_e);
-          refNad.current.rotateZ(icrf_s_h);
-          // then rotate by euler geoc'
-          refSun.current.rotateX(roll);
-          refSun.current.rotateY(pitch);
-          refSun.current.rotateZ(yaw);
-          refNad.current.rotateX(roll);
-          refNad.current.rotateY(pitch);
-          refNad.current.rotateZ(yaw);
+          // refSun.current.rotateX(icrf_s_b);
+          // refSun.current.rotateY(icrf_s_e);
+          // refSun.current.rotateZ(icrf_s_h);
+          // refNad.current.rotateX(icrf_s_b);
+          // refNad.current.rotateY(icrf_s_e);
+          // refNad.current.rotateZ(icrf_s_h);
+
+          // apply geoc.s quaternion to model rotation
+          refModel.current.setRotationFromQuaternion(s_quaternion);
+
+          // apply inverse quaternion to fix model back to default orientation
+          refModel.current.applyQuaternion(s_quaternion_inverse);
+
+          refSun.current.applyQuaternion(s_quaternion);
+          refNad.current.applyQuaternion(s_quaternion);
+
+          // if (roll !== 0 && pitch !== 0 && yaw !== 0) {
+          //   refModel.current.rotation.set(roll, pitch, yaw);
+          //   // then rotate by euler geoc'
+          //   // refSun.current.rotation.set(roll, pitch, yaw);
+          //   refSun.current.rotateX(roll);
+          //   refSun.current.rotateY(pitch);
+          //   refSun.current.rotateZ(yaw);
+          //   // refNad.current.rotation.set(roll, pitch, yaw);
+          //   refNad.current.rotateX(roll);
+          //   refNad.current.rotateY(pitch);
+          //   refNad.current.rotateZ(yaw);
+          // }
 
           // refNad.current.rotation.set(yaw, pitch, roll, 'ZYX');
           // refSun.current.rotation.set(yaw, pitch, roll, 'ZYX');
@@ -526,20 +606,50 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           // refNad.current.rotation.set(nadz_d + yaw, nady_d + pitch, nadx_d + roll, 'ZYX');
           // refSun.current.rotation.set(sunz_d + yaw, suny_d + pitch, sunx_d + roll, 'ZYX');
         } else if (refDS.current === 'LVLH') {
+          // refModel.current.rotation.set(-2, 3, -4);
+          // refNad.current.rotation.set(-2, 3, -4);
+
+          // if (roll !== 0 && pitch !== 0 && yaw !== 0) {
+          // refModel.current.rotation.set(roll, pitch, yaw);
+          // refModel.current.applyQuaternion(s_quaternion);
+
+          // apply lvlh.s quaternion to model rotation
+          refModel.current.setRotationFromQuaternion(s_quaternion);
+
+          // apply inverse quaternion to fix model back to default orientation
+          refModel.current.applyQuaternion(s_quaternion_inverse);
+
+          refSun.current.applyQuaternion(s_quaternion);
+          refNad.current.applyQuaternion(s_quaternion);
+
           //first rotate by euler icrf
-          refSun.current.rotateX(icrf_s_b);
-          refSun.current.rotateY(icrf_s_e);
-          refSun.current.rotateZ(icrf_s_h);
-          refNad.current.rotateX(icrf_s_b);
-          refNad.current.rotateY(icrf_s_e);
-          refNad.current.rotateZ(icrf_s_h);
+          // refSun.current.rotateX(icrf_s_b);
+          // refSun.current.rotateY(icrf_s_e);
+          // refSun.current.rotateZ(icrf_s_h);
+          // refNad.current.rotateX(icrf_s_b);
+          // refNad.current.rotateY(icrf_s_e);
+          // refNad.current.rotateZ(icrf_s_h);
           // then rotate by euler geoc'
-          refSun.current.rotateX(roll);
-          refSun.current.rotateY(pitch);
-          refSun.current.rotateZ(yaw);
-          refNad.current.rotateX(roll);
-          refNad.current.rotateY(pitch);
-          refNad.current.rotateZ(yaw);
+
+          // refSun.current.rotateX(roll);
+          // refSun.current.rotateY(pitch);
+          // refSun.current.rotateZ(yaw);
+          // refNad.current.rotateX(roll);
+          // refNad.current.rotateY(pitch);
+          // refNad.current.rotateZ(yaw);
+
+          // refNad.current.rotateX(-2);
+          // refNad.current.rotateY(3);
+          // refNad.current.rotateZ(-4);
+
+          // refModel.current.rotateX(nadx_d);
+          // refModel.current.rotateY(nady_d);
+          // refModel.current.rotateZ(nadz_d);
+
+          // refModel.current.rotateX(roll);
+          // refModel.current.rotateY(pitch);
+          // refModel.current.rotateZ(yaw);
+          // }
         }
         // refNad.current.rotation.set(yaw, pitch, roll, 'ZYX');
         // refSun.current.rotation.set(yaw, pitch, roll, 'ZYX');

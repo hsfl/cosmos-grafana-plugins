@@ -295,9 +295,9 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 	case adcsstruc:
 		names = []string{"time", "node_name", "node_type", "s_h", "s_e", "s_b", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z", "sun_x", "sun_y", "sun_z", "nad_x", "nad_y", "nad_z"}
 	case ladcsstruc:
-		names = []string{"time", "node_name", "node_type", "icrf_s_h", "icrf_s_e", "icrf_s_b", "s_h", "s_e", "s_b", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z", "sun_x", "sun_y", "sun_z", "nad_x", "nad_y", "nad_z"}
+		names = []string{"time", "node_name", "node_type", "icrf_s_h", "icrf_s_e", "icrf_s_b", "s_h", "s_e", "s_b", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z", "sun_x", "sun_y", "sun_z", "nad_x", "nad_y", "nad_z", "sqatt_x", "sqatt_y", "sqatt_z", "sqatt_w"}
 	case gadcsstruc:
-		names = []string{"time", "node_name", "node_type", "icrf_s_h", "icrf_s_e", "icrf_s_b", "s_h", "s_e", "s_b", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z", "sun_x", "sun_y", "sun_z", "nad_x", "nad_y", "nad_z"}
+		names = []string{"time", "node_name", "node_type", "icrf_s_h", "icrf_s_e", "icrf_s_b", "s_h", "s_e", "s_b", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z", "sun_x", "sun_y", "sun_z", "nad_x", "nad_y", "nad_z", "sqatt_x", "sqatt_y", "sqatt_z", "sqatt_w"}
 	default:
 		return nil
 	}
@@ -592,6 +592,10 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[18] = j.Nad.Col[0]
 			row[19] = j.Nad.Col[1]
 			row[20] = j.Nad.Col[2]
+			row[21] = j.Sqatt.D.X
+			row[22] = j.Sqatt.D.Y
+			row[23] = j.Sqatt.D.Z
+			row[24] = j.Sqatt.W
 			AppendRowtoMap(frame_map, j.Node_name, row, names, "ladcsstruc")
 		case gadcsstruc:
 			transform_to_timeseries = false
@@ -618,6 +622,10 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[18] = j.Nad.Col[0]
 			row[19] = j.Nad.Col[1]
 			row[20] = j.Nad.Col[2]
+			row[21] = j.Sqatt.D.X
+			row[22] = j.Sqatt.D.Y
+			row[23] = j.Sqatt.D.Z
+			row[24] = j.Sqatt.W
 			AppendRowtoMap(frame_map, j.Node_name, row, names, "gadcsstruc")
 		}
 	}

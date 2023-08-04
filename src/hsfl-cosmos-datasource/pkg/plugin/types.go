@@ -95,6 +95,7 @@ type ladcsstruc struct {
 	A         rvector `json:"a,omitempty"`
 	Sun 	  rvector `json:"sun,omitempty"`
 	Nad 	  rvector `json:"nad,omitempty"`
+	Sqatt 	  quaternion `json:"sqatt,omitempty"`
 }
 
 type gadcsstruc struct {
@@ -107,6 +108,7 @@ type gadcsstruc struct {
 	A         rvector `json:"a,omitempty"`
 	Sun 	  rvector `json:"sun,omitempty"`
 	Nad 	  rvector `json:"nad,omitempty"`
+	Sqatt 	  quaternion `json:"sqatt,omitempty"`
 }
 
 type qvatt struct {
