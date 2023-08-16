@@ -105,8 +105,8 @@ export class CosmosCesiumDatasource {
     let node_model = undefined;
     let node_path = undefined;
     let node_graphic = undefined;
-    // if node is type 0 = a satellite, use a model for this, 
-    // 
+    // if node is type 0 = a satellite, use a model for this,
+    //
     if (node_type === 0) {
       node_model = {
         uri: './public/plugins/hsfl-orbit-display/img/GenericSatellite.glb',
@@ -116,7 +116,7 @@ export class CosmosCesiumDatasource {
       node_path = {
         leadTime: 0,
         width: 2,
-        show: true
+        show: true,
       };
     } else {
       // Every other type is just a sphere, and with no trailing path
@@ -150,11 +150,11 @@ export class CosmosCesiumDatasource {
     const timeRangeStart = JulianDate.fromDate(new Date(time.get(0)));
     const timeRangeStop = JulianDate.fromDate(new Date(time.get(time.length - 1)));
     const timeRange = TimeIntervalCollection.fromJulianDateArray({ julianDates: [timeRangeStart, timeRangeStop] });
-    
-    const entity = entities.getById(node_name+'id');
+
+    const entity = entities.getById(node_name + 'id');
     if (entity === undefined) {
       entities.add({
-        id: node_name+'id',
+        id: node_name + 'id',
         name: node_name,
         path: node_path,
         position: pos,
@@ -166,7 +166,7 @@ export class CosmosCesiumDatasource {
       entity.position = pos;
       entity.availability = timeRange;
     }
-    
+
     let clock = new DataSourceClock();
     if (this.clock === undefined) {
       this.clock = new DataSourceClock();

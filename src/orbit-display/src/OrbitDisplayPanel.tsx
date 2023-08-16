@@ -32,6 +32,7 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
 
   const [refInputs, updateDOMRefs] = useDomUpdate(cesiumViewer);
   useCosmosTimeline(data, eventBus, updateDOMRefs);
+  // console.log('orbit data: ', data);
 
   // Update Cesium viewer with latest data
   useEffect(() => {
@@ -56,11 +57,11 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
       // values are the rows within that field
       // const historical: string = data.series[0].fields.find((x) => x.name === 'historical')?.values.get(0);
       // cosmosDS.clearEntities();
-      for (let i=0; i<data.series.length; i++) {
+      for (let i = 0; i < data.series.length; i++) {
         const node_name = data.series[i].name ?? 'node';
         cosmosDS.load(node_name, data.series[i], cesiumViewer.clock);
       }
-      
+
       // data.timeRange is in unix seconds, but the data.series Time is in unix milliseconds
       const timeRangeStart = JulianDate.fromDate(new Date(data.timeRange.from.unix() * 1000));
       const timeRangeStop = JulianDate.fromDate(new Date(data.timeRange.to.unix() * 1000));
@@ -167,19 +168,19 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
         <div style={{ gridRow: 2, gridColumn: 1 }}>Longitude</div>
         <div style={{ gridRow: 3, gridColumn: 1 }}>Altitude</div>
         <div style={{ gridRow: 1, gridColumn: 2 }}>
-          <Input ref={(ref) => (refInputs.current['s_x'] = ref)} type="number" value="0" />
+          <Input ref={(ref) => (refInputs.current['s_lat'] = ref)} type="number" value="" />
         </div>
         <div style={{ gridRow: 2, gridColumn: 2 }}>
-          <Input ref={(ref) => (refInputs.current['s_y'] = ref)} type="number" value="0" />
+          <Input ref={(ref) => (refInputs.current['s_lon'] = ref)} type="number" value="" />
         </div>
         <div style={{ gridRow: 3, gridColumn: 2 }}>
-          <Input ref={(ref) => (refInputs.current['s_z'] = ref)} type="number" value="0" />
+          <Input ref={(ref) => (refInputs.current['s_h'] = ref)} type="number" value="" />
         </div>
         <div style={{ gridRow: 1, gridColumn: 4 }}>in Beta Angle</div>
         <div style={{ gridRow: 2, gridColumn: 4 }}>Time to Eclipse</div>
         <div style={{ gridRow: 3, gridColumn: 4 }}>Time to Sunlight</div>
         <div style={{ gridRow: 1, gridColumn: 5 }}>
-          <Input ref={(ref) => (refInputs.current['beta'] = ref)} type="number" value="" />
+          <Input ref={(ref) => (refInputs.current['sun_beta'] = ref)} type="number" value="" />
         </div>
         <div style={{ gridRow: 2, gridColumn: 5 }}>
           <Input ref={(ref) => (refInputs.current['eclipse'] = ref)} type="number" value="" />

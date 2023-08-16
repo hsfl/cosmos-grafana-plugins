@@ -155,7 +155,18 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     // let icrf_s_h = 0;
     // let icrf_s_e = 0;
     // let icrf_s_b = 0;
+    // the ATT ICRF S quaternion
+    let icrf_s_q_x = live_data[0].fields.find((field) => field.name === 'q_s_x');
+    let icrf_s_q_y = live_data[0].fields.find((field) => field.name === 'q_s_y');
+    let icrf_s_q_z = live_data[0].fields.find((field) => field.name === 'q_s_z');
+    let icrf_s_q_w = live_data[0].fields.find((field) => field.name === 'q_s_w');
+    let icrf_s_q_x_d = 0;
+    let icrf_s_q_y_d = 0;
+    let icrf_s_q_z_d = 0;
+    let icrf_s_q_w_d = 0;
+    let icrf_s_quaternion = new THREE.Quaternion();
 
+    // the ATT LVLH/ GEOC S quaternion
     let sqatt_x = live_data[0].fields.find((field) => field.name === 'sqatt_x');
     let sqatt_y = live_data[0].fields.find((field) => field.name === 'sqatt_y');
     let sqatt_z = live_data[0].fields.find((field) => field.name === 'sqatt_z');
@@ -523,15 +534,47 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           // icrf_s_b = currentValue_icrf_b;
 
           // set the s quaternion data values
-          if (sqatt_x === undefined || sqatt_y === undefined || sqatt_z === undefined || sqatt_w === undefined) {
+          if (
+            sqatt_x === undefined ||
+            sqatt_y === undefined ||
+            sqatt_z === undefined ||
+            sqatt_w === undefined ||
+            icrf_s_q_x === undefined ||
+            icrf_s_q_y === undefined ||
+            icrf_s_q_z === undefined ||
+            icrf_s_q_w === undefined
+          ) {
             return;
           }
+          // ICRF
+          icrf_s_q_x_d = icrf_s_q_x.values.get(array_pos) ?? 0;
+          icrf_s_q_y_d = icrf_s_q_y.values.get(array_pos) ?? 0;
+          icrf_s_q_z_d = icrf_s_q_z.values.get(array_pos) ?? 0;
+          icrf_s_q_w_d = icrf_s_q_w.values.get(array_pos) ?? 0;
+          icrf_s_quaternion = new THREE.Quaternion(icrf_s_q_x_d, icrf_s_q_y_d, icrf_s_q_z_d, icrf_s_q_w_d);
+          // LVLH or GEOC
           sqatt_x_d = sqatt_x.values.get(array_pos) ?? 0;
           sqatt_y_d = sqatt_y.values.get(array_pos) ?? 0;
           sqatt_z_d = sqatt_z.values.get(array_pos) ?? 0;
           sqatt_w_d = sqatt_w.values.get(array_pos) ?? 0;
           s_quaternion = new THREE.Quaternion(sqatt_x_d, sqatt_y_d, sqatt_z_d, sqatt_w_d);
+          // conj...
           s_quaternion_inverse = new THREE.Quaternion(-sqatt_x_d, -sqatt_y_d, -sqatt_z_d, sqatt_w_d);
+        } else if (key === 'YAW' && refDS.current === 'ICRF') {
+          if (
+            icrf_s_q_x === undefined ||
+            icrf_s_q_y === undefined ||
+            icrf_s_q_z === undefined ||
+            icrf_s_q_w === undefined
+          ) {
+            return;
+          }
+          // ICRF
+          icrf_s_q_x_d = icrf_s_q_x.values.get(array_pos) ?? 0;
+          icrf_s_q_y_d = icrf_s_q_y.values.get(array_pos) ?? 0;
+          icrf_s_q_z_d = icrf_s_q_z.values.get(array_pos) ?? 0;
+          icrf_s_q_w_d = icrf_s_q_w.values.get(array_pos) ?? 0;
+          icrf_s_quaternion = new THREE.Quaternion(icrf_s_q_x_d, icrf_s_q_y_d, icrf_s_q_z_d, icrf_s_q_w_d);
         }
         // round the 9 telem data points to sci notation 5 places
         // translate display ref.value units to Degrees when set; 3D display always in radians
@@ -582,7 +625,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           refModel.current.setRotationFromQuaternion(s_quaternion);
 
           // apply inverse quaternion to fix model back to default orientation
-          refModel.current.applyQuaternion(s_quaternion_inverse);
+          // refModel.current.applyQuaternion(s_quaternion_inverse);
 
           refSun.current.applyQuaternion(s_quaternion);
           refNad.current.applyQuaternion(s_quaternion);
@@ -613,12 +656,20 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           // refModel.current.rotation.set(roll, pitch, yaw);
           // refModel.current.applyQuaternion(s_quaternion);
 
+          // camera.position.set(0, 1.5, 0); // for lvlh; make sure cartesian distance sq.rt(x^2 + y^2 + z^2) is same
+          // camera.lookAt(new THREE.Vector3(0, 0, 0));
+          // refCamera.current = camera;
+
           // apply lvlh.s quaternion to model rotation
           refModel.current.setRotationFromQuaternion(s_quaternion);
 
           // apply inverse quaternion to fix model back to default orientation
-          refModel.current.applyQuaternion(s_quaternion_inverse);
+          // refModel.current.applyQuaternion(s_quaternion_inverse);
+          // prevent yarn build error for two declarations
+          console.log(s_quaternion_inverse);
+          console.log(icrf_s_quaternion);
 
+          // refSun.current.applyQuaternion(icrf_s_quaternion); // icrf
           refSun.current.applyQuaternion(s_quaternion);
           refNad.current.applyQuaternion(s_quaternion);
 

@@ -105,7 +105,9 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       1,
       1000
     );
-    camera.position.set((2 * 45 * Math.PI) / 180, 1, (2 * 45 * Math.PI) / 180);
+    // z 0 , x 0, y 45 = lvlh ; z 0 , x 0, y 45 = lvlh
+    // camera.position.set((2 * 45 * Math.PI) / 180, 1, (2 * 45 * Math.PI) / 180);
+    camera.position.set(0, 1.5, 0); // for lvlh; make sure cartesian distance sq.rt(x^2 + y^2 + z^2) is same
     camera.lookAt(new THREE.Vector3(0, 0, 0));
     refCamera.current = camera;
     // const ambientLight = new THREE.AmbientLight(0xcccccc, 1);
@@ -137,7 +139,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     const sundir = new THREE.Vector3(0, 0, 0);
     const origin = new THREE.Vector3(0, 0, 0);
     const length = 1;
-    const sunarrowHelper = new THREE.ArrowHelper(sundir, origin, length, 0xffffff);
+    const sunarrowHelper = new THREE.ArrowHelper(sundir, origin, length, 0xffff00);
     scene.add(sunarrowHelper);
     refSun.current = sunarrowHelper;
     // nadir vector
@@ -242,9 +244,9 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
         {/* Heading: z axis: Yaw
             Elevation: y axis: Pitch
             Bank: x axis: Roll */}
-        <div style={{ gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' }}><h6 style={{ color: 'aqua' }}>Z: Yaw</h6></div>
-        <div style={{ gridRow: 3, gridColumn: 1, marginInlineEnd: '1em' }}><h6 style={{ color: 'lime' }}>Y: Pitch</h6></div>
-        <div style={{ gridRow: 4, gridColumn: 1, marginInlineEnd: '1em' }}><h6 style={{ color: 'red' }}>X: Roll</h6></div>
+        <div style={{ gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' }}><h6 style={{ color: 'aqua' }}>Yaw</h6></div>
+        <div style={{ gridRow: 3, gridColumn: 1, marginInlineEnd: '1em' }}><h6 style={{ color: 'lime' }}>Pitch</h6></div>
+        <div style={{ gridRow: 4, gridColumn: 1, marginInlineEnd: '1em' }}><h6 style={{ color: 'red' }}>Roll</h6></div>
 
         <div style={{ gridRow: 2, gridColumn: 2 }}>
           <Input ref={(ref) => (refInputs.current['YAW'] = ref)} type="text" readOnly />

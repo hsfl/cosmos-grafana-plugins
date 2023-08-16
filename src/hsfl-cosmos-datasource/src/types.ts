@@ -26,6 +26,7 @@ export const posTypeOptions: Array<SelectOption<string>> = [
   { label: 'ICRF', value: 'icrf', description: 'icrf for H E B in ADCS' },
   { label: 'GEOC', value: 'geoc', description: 'goec for H E B in ADCS' },
   { label: 'EUL_LVLH', value: 'eul_lvlh', description: 'Euler Angle and LVLH for H E B in ADCS' },
+  { label: 'ORBIT', value: 'orbit', description: 'Orbit position: eci.s, geod lat/lon/alt, kepstruc.beta' },
 ];
 
 // Origin point node options for Nodal Awareness query type, todo: async-ify
