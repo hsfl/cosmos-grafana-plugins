@@ -30,7 +30,7 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
   // Cesium object
   const [cesiumViewer, setCesiumViewer] = useState<CesiumViewer>();
 
-  const [refInputs, updateDOMRefs] = useDomUpdate(cesiumViewer);
+  const [refInputs, refUS, updateDOMRefs] = useDomUpdate(cesiumViewer);
   useCosmosTimeline(data, eventBus, updateDOMRefs);
   // console.log('orbit data: ', data);
 
@@ -142,6 +142,16 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
             value={{ label: 'View Normal' }}
             options={[{ label: 'View Normal' }, { label: 'View Nadir' }]}
             onChange={() => {}}
+            width="auto"
+          />
+          <Select
+            id="unity"
+            defaultValue={{ label: 'Degrees' }}
+            value={refUS.current}
+            options={[{ label: 'Radians' }, { label: 'Degrees' }]}
+            onChange={(e) => {
+              refUS.current = e.label;
+            }}
             width="auto"
           />
           <Button

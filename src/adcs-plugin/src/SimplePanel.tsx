@@ -6,7 +6,7 @@ import { SimpleOptions } from 'types';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
-interface Props extends PanelProps<SimpleOptions> {}
+interface Props extends PanelProps<SimpleOptions> { }
 
 // Load in a glb/gltf model
 const loadModel = (scene: THREE.Scene): Promise<THREE.Group> => {
@@ -58,10 +58,11 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   // const refInputs = useRef<RefDict>({});
   // The index into the data array
   //const refIdxs = useRef<number[]>([]);
-  const [refRenderer, refScene, refCamera, refModel, refSun, refNad, refInputs, refDS, refUS, updateDOMRefs] = useDomUpdate(data);
+  const [refRenderer, refScene, refCamera, refModel, refSun, refNad, refInputs, refDS, refUS, updateDOMRefs] =
+    useDomUpdate(data);
   // console.log('sim pan eventBus: ', eventBus);
   useCosmosTimeline(data, eventBus, updateDOMRefs);
-  refDS.current = 'ICRF';
+  // refDS.current = 'ICRF';
   // console.log('adcs data: ', data);
   // console.log('data select, state ', data.state);
   // console.log('ref data state . current ', refDS.current);
@@ -98,15 +99,16 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     //   1000
     // );
     const camera = new THREE.OrthographicCamera(
-      ((aspectRatio * viewSize)) / - 2,
-      ((aspectRatio * viewSize)) / 2,
+      (aspectRatio * viewSize) / -2,
+      (aspectRatio * viewSize) / 2,
       viewSize / 2,
-      viewSize / - 2,
+      viewSize / -2,
       1,
       1000
     );
     // z 0 , x 0, y 45 = lvlh ; z 0 , x 0, y 45 = lvlh
     // camera.position.set((2 * 45 * Math.PI) / 180, 1, (2 * 45 * Math.PI) / 180);
+    // camera.position.set(0, 1.5, 0); // for lvlh; make sure cartesian distance sq.rt(x^2 + y^2 + z^2) is same
     camera.position.set(0, 1.5, 0); // for lvlh; make sure cartesian distance sq.rt(x^2 + y^2 + z^2) is same
     camera.lookAt(new THREE.Vector3(0, 0, 0));
     refCamera.current = camera;
@@ -144,13 +146,13 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     refSun.current = sunarrowHelper;
     // nadir vector
     const naddir = new THREE.Vector3(0, 0, 0);
-    const nadarrowHelper = new THREE.ArrowHelper(naddir, origin, .75, 0x0fff00);
+    const nadarrowHelper = new THREE.ArrowHelper(naddir, origin, 0.75, 0x0fff00);
     scene.add(nadarrowHelper);
     refNad.current = nadarrowHelper;
 
-    // x y z orient set upper left dynamic to frame; z points left, x points right, y points up in rendering.. 
+    // x y z orient set upper left dynamic to frame; z points left, x points right, y points up in rendering.
     const coord_ref = new THREE.Vector3(-1.5, height / 3000, width / 700);
-    const coord_length = .6;
+    const coord_length = 0.6;
     const coord_dir = new THREE.Vector3(1, 0, 0);
     const coord_x_arrow = new THREE.ArrowHelper(coord_dir, coord_ref, coord_length, 0xff0000);
     coord_dir.set(0, 1, 0);
@@ -168,7 +170,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       refRenderer.current!.render(scene, camera);
     });
     // Note: refs are stable, will not trigger effect, but calms the exhaustive-deps lint rule
-  }, [width, height, refRenderer, refScene, refCamera, refModel, refSun, refInputs, refUS]);
+  }, [width, height, refRenderer, refScene, refCamera, refModel, refSun, refNad, refInputs, refUS]);
   // console.log('REF inputs adcs simple panel: ', refInputs);
 
   // function Label({ name, isDeg }: { name: string; isDeg: string }) {
@@ -177,7 +179,6 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   //   }
   //   return <div>{name} (rad)</div>;
   // }
-
 
   // function units(units: string) {
   //   if (units === 'Degrees') {
@@ -205,7 +206,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
         </InlineField>
         <InlineField transparent label="Units" labelWidth={6}>
           <Select
-            id='unity'
+            id="unity"
             defaultValue={{ label: 'Radians' }}
             value={refUS.current}
             options={[{ label: 'Radians' }, { label: 'Degrees' }]}
@@ -229,24 +230,21 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
           gridTemplateColumns: 'auto auto auto auto',
         }}
       >
-        <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 2 }}>
-          Angle
-          {/* <Label isDeg={refUS.current!} name="Angle " /> */}
-          {/* <h6 onChange={(e) => { result = units(refUS.current!) }}>Angle (rad){result}</h6> */}
-          {/* <InlineField transparent label={units(refUS.current!)} labelWidth={6}><div></div></InlineField> */}
-          {/* <InlineLabel transparent onChange={(e) => {}} >Angle</InlineLabel> */}
-        </div>
-        {/* change units to degree; starts in si units radians */}
+        <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 2 }}>Angle</div>
         <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 3 }}>Angular Vel</div>
-        <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 4 }}>
-          Angular Accel
-        </div>
+        <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 4 }}>Angular Accel</div>
         {/* Heading: z axis: Yaw
             Elevation: y axis: Pitch
             Bank: x axis: Roll */}
-        <div style={{ gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' }}><h6 style={{ color: 'aqua' }}>Yaw</h6></div>
-        <div style={{ gridRow: 3, gridColumn: 1, marginInlineEnd: '1em' }}><h6 style={{ color: 'lime' }}>Pitch</h6></div>
-        <div style={{ gridRow: 4, gridColumn: 1, marginInlineEnd: '1em' }}><h6 style={{ color: 'red' }}>Roll</h6></div>
+        <div style={{ gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' }}>
+          <h6 style={{ color: 'aqua' }}>Yaw</h6>
+        </div>
+        <div style={{ gridRow: 3, gridColumn: 1, marginInlineEnd: '1em' }}>
+          <h6 style={{ color: 'lime' }}>Pitch</h6>
+        </div>
+        <div style={{ gridRow: 4, gridColumn: 1, marginInlineEnd: '1em' }}>
+          <h6 style={{ color: 'red' }}>Roll</h6>
+        </div>
 
         <div style={{ gridRow: 2, gridColumn: 2 }}>
           <Input ref={(ref) => (refInputs.current['YAW'] = ref)} type="text" readOnly />

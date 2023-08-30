@@ -23,6 +23,7 @@ export const useCosmosTimeline = (data: PanelData, eventBus: EventBus, callback:
 // ---------------------------------------------------
 type DomUpdateReturn = [
   refInputs: React.MutableRefObject<RefDict>,
+  refUS: React.MutableRefObject<string | undefined>,
   callback: (data: PanelData, event: TimeEvent) => void
 ];
 // Imperative animation manager
@@ -31,6 +32,8 @@ export const useDomUpdate = (cesiumViewer: CesiumViewer | undefined): DomUpdateR
   const refInputs = useRef<RefDict>({});
   // The index into the data array
   const refIdxs = useRef<IdxDict>({});
+  // the units string RAD||DEG
+  const refUS = useRef<string>();
 
   useEffect(() => {
     // Clean up renderer on unmount
@@ -49,6 +52,17 @@ export const useDomUpdate = (cesiumViewer: CesiumViewer | undefined): DomUpdateR
         //refIdx.current = 0;
         return;
       }
+
+      // converts radians to degrees: 1rad x (180/PI) = DEGREE
+      const rad2deg: number = 180 / Math.PI;
+      // console.log('rad 2 deg: ', rad2deg);
+      // result: rad 2 deg:  57.29577951308232
+      // let units: string = 'radians'; // radians // degrees
+      let units: string = refUS.current!; // radians // degrees
+      if (refUS.current === undefined) {
+        units = 'Degrees';
+      }
+      // console.log(units);
 
       // Update field values
       Object.entries(refInputs.current).forEach(([key, ref], i) => {
@@ -94,9 +108,18 @@ export const useDomUpdate = (cesiumViewer: CesiumViewer | undefined): DomUpdateR
           if (field === undefined) {
             return;
           }
+
           // Finally, update display with most up-to-date values
-          const currentValue: number = field.values.get(refIdxs.current[input_field_key]!) ?? 0;
-          ref.value = currentValue.toString();
+          let currentValue: number = field.values.get(refIdxs.current[input_field_key]!) ?? 0;
+          if (key === 's_lat' || key === 's_lon') {
+            if (units === 'Degrees') {
+              currentValue = currentValue * rad2deg;
+            }
+            ref.value = currentValue.toFixed(5).toString();
+          } else {
+            ref.value = currentValue.toString();
+          }
+          // ref.value = currentValue.toString();
         }
       });
 
@@ -117,5 +140,5 @@ export const useDomUpdate = (cesiumViewer: CesiumViewer | undefined): DomUpdateR
     [cesiumViewer]
   );
 
-  return [refInputs, updateDOMRefs];
+  return [refInputs, refUS, updateDOMRefs];
 };

@@ -57,6 +57,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
   // the data state from selection: {LVLH: qatt, ICRF: eci}
   // to reference & filter query data.meta.custom == qatt || eci
   const refDS = useRef<string>();
+  // the units string RAD||DEG
   const refUS = useRef<string>();
   // console.log('useDomUpdate');
   // console.log('update DOM refInputs.current: ', refInputs.current);
@@ -122,8 +123,13 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     //   // data_type = DataMap[key];
     //   DataMap[key as keyof DataMap]
     // }
+    if (refDS.current === undefined) {
+      refDS.current = 'ICRF';
+    }
     let live_data = data.series.filter((row) => row.meta?.custom?.type === DataMap[refDS.current as keyof Object]);
-    // console.log('Live filtered data: ', live_data);
+    console.log('Live filtered data: ', live_data);
+    console.log('refds current: ', refDS.current);
+    console.log('refUS current: ', refUS.current);
 
     // converts radians to degrees: 1rad x (180/PI) = DEGREE
     const rad2deg: number = 180 / Math.PI;
@@ -582,7 +588,8 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           if (units === 'Degrees') {
             currentValue = currentValue * rad2deg;
           }
-          ref.value = currentValue.toExponential(5).toString();
+          // ref.value = currentValue.toExponential(5).toString();
+          ref.value = currentValue.toFixed(5).toString();
         } else {
           ref.value = currentValue.toString();
         }
@@ -621,8 +628,16 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           // refNad.current.rotateY(icrf_s_e);
           // refNad.current.rotateZ(icrf_s_h);
 
+          // const s_quaternion_inverse = s_quaternion.invert();
+          // refModel.current.setRotationFromQuaternion(s_quaternion_inverse);
+
           // apply geoc.s quaternion to model rotation
           refModel.current.setRotationFromQuaternion(s_quaternion);
+          // refModel.current.applyQuaternion(s_quaternion);
+
+          // const icrf_s_quaternion_inverse = icrf_s_quaternion.invert();
+          // refModel.current.applyQuaternion(icrf_s_quaternion_inverse);
+          // refModel.current.applyQuaternion(icrf_s_quaternion);
 
           // apply inverse quaternion to fix model back to default orientation
           // refModel.current.applyQuaternion(s_quaternion_inverse);
@@ -661,10 +676,16 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           // refCamera.current = camera;
 
           // apply lvlh.s quaternion to model rotation
+          // const s_quaternion_inverse = s_quaternion.invert();
+          // refModel.current.setRotationFromQuaternion(s_quaternion_inverse);
           refModel.current.setRotationFromQuaternion(s_quaternion);
+          // refModel.current.applyQuaternion(s_quaternion);
 
           // apply inverse quaternion to fix model back to default orientation
-          // refModel.current.applyQuaternion(s_quaternion_inverse);
+          // const icrf_s_quaternion_inverse = icrf_s_quaternion.invert();
+          // refModel.current.applyQuaternion(icrf_s_quaternion_inverse);
+          // refModel.current.applyQuaternion(icrf_s_quaternion);
+
           // prevent yarn build error for two declarations
           console.log(s_quaternion_inverse);
           console.log(icrf_s_quaternion);
