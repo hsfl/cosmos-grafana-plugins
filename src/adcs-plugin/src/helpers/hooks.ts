@@ -609,10 +609,14 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
       ) {
         // refModel.current.rotation.set(roll, pitch, yaw);
         if (refDS.current === 'ICRF') {
-          refModel.current.rotation.set(0, 0, 0);
-          if (roll !== 0 && pitch !== 0 && yaw !== 0) {
-            refModel.current.rotation.set(roll, pitch, yaw);
-          }
+          // refModel.current.rotation.set(0, 0, 0);
+          refModel.current.setRotationFromQuaternion(icrf_s_quaternion);
+          refSun.current.applyQuaternion(icrf_s_quaternion);
+          refNad.current.applyQuaternion(icrf_s_quaternion);
+          console.log(roll, pitch, yaw);
+          // if (roll !== 0 && pitch !== 0 && yaw !== 0) {
+          //   refModel.current.rotation.set(roll, pitch, yaw);
+          // }
         }
         // TODO
         // rotate the nad and sun vectors by the qaternion HEB for LVLH and GEOC data frames
