@@ -49,6 +49,9 @@ type Cosmosresponse struct {
 	Cpus      []cpu      `json:"cpus,omitempty"`
 	Events    []event    `json:"events,omitempty"`
 	Mags      []mag      `json:"mags,omitempty"`
+	Imus      []imu      `json:"imus,omitempty"`
+	Ssens     []ssen     `json:"ssens,omitempty"`
+	Gpss      []gps      `json:"gpss,omitempty"`
 	Geods     []geod     `json:"geods,omitempty"`
 	Geoss     []geos     `json:"geoss,omitempty"`
 	Lvlhs     []lvlh     `json:"lvlhs,omitempty"`
@@ -317,6 +320,46 @@ type qatt struct {
 	A         rvector    `json:"a,omitempty"`
 }
 
+type imu struct {
+	Time      float64
+	Node_name string
+	Name 	  string
+	Theta_x   float64    `json:"theta_x,omitempty"`
+	Theta_y   float64    `json:"theta_y,omitempty"`
+	Theta_z   float64    `json:"theta_z,omitempty"`
+	Theta_w   float64    `json:"theta_w,omitempty"`
+	Omega_x   float64    `json:"omega_x,omitempty"`
+	Omega_y   float64    `json:"omega_y,omitempty"`
+	Omega_z   float64    `json:"omega_z,omitempty"`
+	Mag_x     float64    `json:"mag_x,omitempty"`
+	Mag_y     float64    `json:"mag_y,omitempty"`
+	Mag_z     float64    `json:"mag_z,omitempty"`
+}
+
+type ssen struct {
+	Time      float64
+	Node_name string
+	Name 	  string
+	Qva   float64    `json:"qva,omitempty"`
+	Qvb   float64    `json:"qvb,omitempty"`
+	Qvc   float64    `json:"qvc,omitempty"`
+	Qvd   float64    `json:"qvd,omitempty"`
+	Azi   float64    `json:"azi,omitempty"`
+	Elev  float64    `json:"elev,omitempty"`
+}
+
+type gps struct {
+	Time      float64
+	Node_name string
+	Name 	  string
+	Geocs_x   float64    `json:"geocs_x,omitempty"`
+	Geocs_y   float64    `json:"geocs_y,omitempty"`
+	Geocs_z   float64    `json:"geocs_z,omitempty"`
+	Geods_lat float64    `json:"geods_lat,omitempty"`
+	Geods_lon float64    `json:"geods_lon,omitempty"`
+	Geods_alt float64    `json:"geods_alt,omitempty"`
+}
+
 type command_history struct {
 	Time    float64
 	Id      uint32 `json:"id"`
@@ -324,7 +367,36 @@ type command_history struct {
 }
 
 type cosmostype interface {
-	avector | real_avector | adcsstruc | ladcsstruc | gadcsstruc | qvatt | qaatt | eci | orbit | batt | bcreg | tsen | cpu | event | mag | geod | geos | lvlh | gvector | geoidpos | svector | spherpos | rvector | cvector | quaternion | qatt | command_history
+	avector | 
+	real_avector | 
+	adcsstruc | 
+	ladcsstruc | 
+	gadcsstruc | 
+	qvatt | 
+	qaatt | 
+	eci | 
+	orbit | 
+	batt | 
+	bcreg | 
+	tsen | 
+	cpu | 
+	event | 
+	mag | 
+	geod | 
+	geos | 
+	lvlh | 
+	gvector | 
+	geoidpos | 
+	svector | 
+	spherpos | 
+	rvector | 
+	cvector | 
+	quaternion | 
+	qatt | 
+	imu | 
+	ssen | 
+	gps | 
+	command_history
 }
 
 // Datasource is an example datasource which can respond to data queries, reports

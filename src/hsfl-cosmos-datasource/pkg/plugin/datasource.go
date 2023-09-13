@@ -180,6 +180,9 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 	ConvertToFrame(&response.Frames, &j.Payload.Cpus)
 	ConvertToFrame(&response.Frames, &j.Payload.Events)
 	ConvertToFrame(&response.Frames, &j.Payload.Mags)
+	ConvertToFrame(&response.Frames, &j.Payload.Imus)
+	ConvertToFrame(&response.Frames, &j.Payload.Ssens)
+	ConvertToFrame(&response.Frames, &j.Payload.Gpss)
 	ConvertToFrame(&response.Frames, &j.Payload.Geods)
 	ConvertToFrame(&response.Frames, &j.Payload.Geoss)
 	ConvertToFrame(&response.Frames, &j.Payload.Lvlhs)
@@ -281,6 +284,12 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 		names = []string{"time", "node_name", "duration", "event_id", "type", "event_name"}
 	case mag:
 		names = []string{"time", "node_name", "didx", "mag_x", "mag_y", "mag_z"}
+	case imu:
+		names = []string{"time", "node_name", "name", "theta_x", "theta_y", "theta_z", "theta_w", "omega_x", "omega_y", "omega_z", "mag_x", "mag_y", "mag_z"}
+	case ssen:
+		names = []string{"time", "node_name", "name", "qva", "qvb", "qvc", "qvd", "azi", "elev"}
+	case gps:
+		names = []string{"time", "node_name", "name", "geoc_s_x", "geoc_s_y", "geoc_s_z", "geod_s_lat", "geod_s_lon", "geod_s_alt"}
 	case geod:
 		names = []string{"time", "s_lat", "s_lon", "s_h", "v_lat", "v_lon", "v_h", "a_lat", "a_lon", "a_h"}
 	case geoidpos:
@@ -457,6 +466,49 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[4] = j.Mag_y
 			row[5] = j.Mag_z
 			AppendRowtoMap(frame_map, j.Node_name, row, names, "mag")
+		case imu:
+			timestamp := mjd_to_time(j.Time)
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = &j.Node_name
+			row[2] = &j.Name
+			row[3] = j.Theta_x
+			row[4] = j.Theta_y
+			row[5] = j.Theta_z
+			row[6] = j.Theta_w
+			row[7] = j.Omega_x
+			row[8] = j.Omega_y
+			row[9] = j.Omega_z
+			row[10] = j.Mag_x
+			row[11] = j.Mag_y
+			row[12] = j.Mag_z
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "imu")
+		case ssen:
+			timestamp := mjd_to_time(j.Time)
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = &j.Node_name
+			row[2] = &j.Name
+			row[3] = j.Qva
+			row[4] = j.Qvb
+			row[5] = j.Qvc
+			row[6] = j.Qvd
+			row[7] = j.Azi
+			row[8] = j.Elev
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "ssen")
+		case gps:
+			timestamp := mjd_to_time(j.Time)
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = &j.Node_name
+			row[2] = &j.Name
+			row[3] = j.Geocs_x
+			row[4] = j.Geocs_y
+			row[5] = j.Geocs_z
+			row[6] = j.Geods_lat
+			row[7] = j.Geods_lon
+			row[8] = j.Geods_alt
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "gps")
 		case geod:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
