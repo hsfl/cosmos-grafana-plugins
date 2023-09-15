@@ -15,6 +15,7 @@ export const queryOptions: Array<SelectOption<string>> = [
   { label: 'Events', value: 'event' },
   { label: 'Thermal', value: 'tsen' },
   { label: 'Nodal Awareness', value: 'nodalaware', description: 'Relative angle/range to other nodes' },
+  { label: 'Target', value: 'target' },
 ];
 
 // Coordinate-frame conversion options for the Position query type

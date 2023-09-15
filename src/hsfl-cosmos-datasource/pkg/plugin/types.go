@@ -35,27 +35,28 @@ type jsonResponse struct {
 }
 
 type Cosmosresponse struct {
-	Avectors  []avector  `json:"avectors,omitempty"`
-	Adcsstrucs  []adcsstruc  `json:"adcsstrucs,omitempty"`
-	Ladcsstrucs  []ladcsstruc  `json:"lvlhadcsstrucs,omitempty"`
-	Gadcsstrucs  []gadcsstruc  `json:"geocadcsstrucs,omitempty"`
-	Qvatts    []qvatt    `json:"qvatts,omitempty"`
-	Qaatts    []qaatt    `json:"qaatts,omitempty"`
-	Ecis      []eci      `json:"ecis,omitempty"`
-	Orbits    []orbit    `json:"orbits,omitempty"`
-	Batts     []batt     `json:"batts,omitempty"`
-	Bcregs    []bcreg    `json:"bcregs,omitempty"`
-	Tsens     []tsen     `json:"tsens,omitempty"`
-	Cpus      []cpu      `json:"cpus,omitempty"`
-	Events    []event    `json:"events,omitempty"`
-	Mags      []mag      `json:"mags,omitempty"`
-	Geods     []geod     `json:"geods,omitempty"`
-	Geoss     []geos     `json:"geoss,omitempty"`
-	Lvlhs     []lvlh     `json:"lvlhs,omitempty"`
-	Geoidposs []geoidpos `json:"geoidposs,omitempty"`
-	Spherposs []spherpos `json:"spherposs,omitempty"`
-	Svectors  []svector  `json:"svectors,omitempty"`
-	Qatts     []qatt     `json:"qatts,omitempty"`
+	Avectors       []avector         `json:"avectors,omitempty"`
+	Adcsstrucs     []adcsstruc       `json:"adcsstrucs,omitempty"`
+	Ladcsstrucs    []ladcsstruc      `json:"lvlhadcsstrucs,omitempty"`
+	Gadcsstrucs    []gadcsstruc      `json:"geocadcsstrucs,omitempty"`
+	Qvatts         []qvatt           `json:"qvatts,omitempty"`
+	Qaatts         []qaatt           `json:"qaatts,omitempty"`
+	Ecis           []eci             `json:"ecis,omitempty"`
+	Orbits         []orbit           `json:"orbits,omitempty"`
+	Batts          []batt            `json:"batts,omitempty"`
+	Bcregs         []bcreg           `json:"bcregs,omitempty"`
+	Tsens          []tsen            `json:"tsens,omitempty"`
+	Cpus           []cpu             `json:"cpus,omitempty"`
+	Events         []event           `json:"events,omitempty"`
+	Mags           []mag             `json:"mags,omitempty"`
+	Geods          []geod            `json:"geods,omitempty"`
+	Geoss          []geos            `json:"geoss,omitempty"`
+	Lvlhs          []lvlh            `json:"lvlhs,omitempty"`
+	Geoidposs      []geoidpos        `json:"geoidposs,omitempty"`
+	Spherposs      []spherpos        `json:"spherposs,omitempty"`
+	Svectors       []svector         `json:"svectors,omitempty"`
+	Qatts          []qatt            `json:"qatts,omitempty"`
+	Targets        []target          `json:"targets,omitempty"`
 	CommandHistory []command_history `json:"command_history,omitempty"`
 }
 
@@ -317,6 +318,15 @@ type qatt struct {
 	A         rvector    `json:"a,omitempty"`
 }
 
+type target struct {
+	Name string  `json:"name,omitempty"`
+	Type uint32  `json:"type,omitempty"`
+	Lat  float64 `json:"lat,omitempty"`
+	Lon  float64 `json:"lon,omitempty"`
+	H    float64 `json:"h,omitempty"`
+	Area float64 `json:"area,omitempty"`
+}
+
 type command_history struct {
 	Time    float64
 	Id      uint32 `json:"id"`
@@ -324,7 +334,7 @@ type command_history struct {
 }
 
 type cosmostype interface {
-	avector | real_avector | adcsstruc | ladcsstruc | gadcsstruc | qvatt | qaatt | eci | orbit | batt | bcreg | tsen | cpu | event | mag | geod | geos | lvlh | gvector | geoidpos | svector | spherpos | rvector | cvector | quaternion | qatt | command_history
+	avector | real_avector | adcsstruc | ladcsstruc | gadcsstruc | qvatt | qaatt | eci | orbit | batt | bcreg | tsen | cpu | event | mag | geod | geos | lvlh | gvector | geoidpos | svector | spherpos | rvector | cvector | quaternion | qatt | target | command_history
 }
 
 // Datasource is an example datasource which can respond to data queries, reports

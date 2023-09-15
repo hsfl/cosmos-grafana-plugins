@@ -190,7 +190,7 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 	ConvertToFrame(&response.Frames, &j.Payload.Adcsstrucs)
 	ConvertToFrame(&response.Frames, &j.Payload.Ladcsstrucs)
 	ConvertToFrame(&response.Frames, &j.Payload.Gadcsstrucs)
-
+	ConvertToFrame(&response.Frames, &j.Payload.Targets)
 
 	return response
 }
@@ -295,6 +295,8 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 		names = []string{"time", "s_d_x", "s_d_y", "s_d_z", "s_w", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z"}
 	case qatt:
 		names = []string{"time", "node_name", "node_type", "s_d_x", "s_d_y", "s_d_z", "s_w", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z"}
+	case target:
+		names = []string{"name", "type", "lat", "lon", "h", "area"}
 	case adcsstruc:
 		names = []string{"time", "node_name", "node_type", "s_h", "s_e", "s_b", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z", "sun_x", "sun_y", "sun_z", "nad_x", "nad_y", "nad_z", "q_s_x", "q_s_y", "q_s_z", "q_s_w"}
 	case ladcsstruc:
@@ -565,6 +567,16 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[11] = j.A.Col[1]
 			row[12] = j.A.Col[2]
 			AppendRowtoMap(frame_map, j.Node_name, row, names, "qatt")
+		case target:
+			transform_to_timeseries = false
+			row := make([]interface{}, len(names))
+			row[0] = &j.Name
+			row[1] = j.Type
+			row[2] = j.Lat
+			row[3] = j.Lon
+			row[4] = j.H
+			row[5] = j.Area
+			AppendRowtoMap(frame_map, "Targets", row, names, "target")
 		case adcsstruc:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
