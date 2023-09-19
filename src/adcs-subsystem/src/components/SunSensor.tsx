@@ -1,53 +1,54 @@
 import { HorizontalGroup, VerticalGroup } from '@grafana/ui';
 import React from 'react';
+import { RefDict } from '../types';
 //import { PanelProps } from '@grafana/data';
 import './styles.css';
 
 const orbitStyle = {
   width: '75px',
-  height: '15px', 
-  fontSize: '10px', 
+  height: '15px',
+  fontSize: '10px',
   color: '#32CD32',
 };
 
-  const SunSensor = () => {
-    return (
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
-        {/*Sun Sensor*/}
-        <VerticalGroup>
-          <HorizontalGroup>
-        <div className="quadrant-container">
-      <div className="quadrant-row">
-        <div className="quadrant">
-          <input style={orbitStyle} type="text" placeholder="Quadrant 1" />
-        </div>
-        <div className="quadrant-vertical-line"></div>
-        <div className="quadrant">
-          <input style={orbitStyle} type="text" placeholder="Quadrant 2" />
-        </div>
-      </div>
-      <div className="quadrant-horizontal-line"></div>
-      <div className="quadrant-row">
-        <div className="quadrant">
-          <input style={orbitStyle} type="text" placeholder="Quadrant 3" />
-        </div>
-        <div className="quadrant-vertical-line"></div>
-        <div className="quadrant">
-          <input style={orbitStyle} type="text" placeholder="Quadrant 4" />
-        </div>
-      </div>
-    </div>
+const SunSensor = (refInputs: React.MutableRefObject<RefDict>) => {
+  return (
+    <div style={ { display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' } }>
+      {/*Sun Sensor*/ }
       <VerticalGroup>
-      <text className='smaller-font'>{"Azimuth (Deg)"}</text>
-      <input style={orbitStyle} type="text" value="" />
-      <text className='smaller-font'>{"Elevation (Deg)"}</text>
-      <input style={orbitStyle} type="text" value="" />
+        <HorizontalGroup>
+          <div className="quadrant-container">
+            <div className="quadrant-row">
+              <div className="quadrant">
+                <input ref={ (ref) => (refInputs.current['qva'] = ref) } style={ orbitStyle } type="text" placeholder="Quadrant 1" />
+              </div>
+              <div className="quadrant-vertical-line"></div>
+              <div className="quadrant">
+                <input ref={ (ref) => (refInputs.current['qvb'] = ref) } style={ orbitStyle } type="text" placeholder="Quadrant 2" />
+              </div>
+            </div>
+            <div className="quadrant-horizontal-line"></div>
+            <div className="quadrant-row">
+              <div className="quadrant">
+                <input ref={ (ref) => (refInputs.current['qvc'] = ref) } style={ orbitStyle } type="text" placeholder="Quadrant 3" />
+              </div>
+              <div className="quadrant-vertical-line"></div>
+              <div className="quadrant">
+                <input ref={ (ref) => (refInputs.current['qvd'] = ref) } style={ orbitStyle } type="text" placeholder="Quadrant 4" />
+              </div>
+            </div>
+          </div>
+          <VerticalGroup>
+            <text className='smaller-font'>{ "Azimuth (Deg)" }</text>
+            <input ref={ (ref) => (refInputs.current['azi'] = ref) } style={ orbitStyle } type="text" value="" />
+            <text className='smaller-font'>{ "Elevation (Deg)" }</text>
+            <input ref={ (ref) => (refInputs.current['elev'] = ref) } style={ orbitStyle } type="text" value="" />
+          </VerticalGroup>
+        </HorizontalGroup>
       </VerticalGroup>
-    </HorizontalGroup>
-    </VerticalGroup>
-      </div>
-    );
-  };
+    </div>
+  );
+};
 
-  export default SunSensor;
+export default SunSensor;
 

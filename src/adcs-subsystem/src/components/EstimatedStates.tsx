@@ -5,22 +5,22 @@ import './styles.css';
 
 const orbitStyle = {
   width: '75px',
-  height: '15px', 
-  fontSize: '10px', 
+  height: '15px',
+  fontSize: '10px',
   color: '#32CD32',
 };
 const smallerStyle = {
   width: '50px',
-  height: '15px', 
-  fontSize: '10px', 
+  height: '15px',
+  fontSize: '10px',
   color: '#32CD32',
 };
 
-  const EstimatedStates = () => {
-    return (
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
-        {/*IMU*/}
-        <HorizontalGroup>
+const EstimatedStates = () => {
+  return (
+    <div style={ { display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' } }>
+      {/*IMU*/ }
+      {/* <HorizontalGroup>
         <VerticalGroup>
             <HorizontalGroup>
             <text className='smaller-font'>q<span className="subscript">0</span></text>
@@ -60,9 +60,9 @@ const smallerStyle = {
             <input style={{ ...orbitStyle, marginLeft: '15px' }} type="text" value="" />
         </HorizontalGroup>
         </VerticalGroup>
-        </HorizontalGroup>
-        {/*Sun Sensor*/}
-        <VerticalGroup>
+        </HorizontalGroup> */}
+      {/*Sun Sensor*/ }
+      {/* <VerticalGroup>
           <HorizontalGroup>
         <div className="quadrant-container">
       <div className="quadrant-row">
@@ -92,9 +92,9 @@ const smallerStyle = {
       <input style={orbitStyle} type="text" value="" />
       </VerticalGroup>
     </HorizontalGroup>
-    </VerticalGroup>
-    {/*GPS*/}
-    <VerticalGroup>
+    </VerticalGroup> */}
+      {/*GPS*/ }
+      {/* <VerticalGroup>
       <HorizontalGroup>
         <text className='smaller-font'>{"Sampling Rate (Hz)"}</text>
         <input style={orbitStyle} type="text" value="" />
@@ -129,9 +129,9 @@ const smallerStyle = {
           </HorizontalGroup>
         </VerticalGroup>
       </HorizontalGroup>
-    </VerticalGroup>
-    {/*Controls*/}
-    <VerticalGroup>
+    </VerticalGroup> */}
+      {/*Controls*/ }
+      {/* <VerticalGroup>
       <HorizontalGroup>
       <text style={{marginLeft: '70px'}} className='smaller-font'>{"Torque (Nm)"}</text>
       <text style={{marginLeft: '10px'}} className='smaller-font'>{"Current (A)"}</text>
@@ -160,59 +160,59 @@ const smallerStyle = {
       <input style={orbitStyle} type="text" value="" />
       <input style={orbitStyle} type="text" value="" />
       </HorizontalGroup>
-    </VerticalGroup>
-    {/*Estimated States*/}
-    <VerticalGroup>
-    <text className='smaller-font'>{"Total Attitude Matrix"}</text>
-      <HorizontalGroup>
-      <input style={smallerStyle} type="text" value="" />
-      <input style={smallerStyle} type="text" value="" />
-      <input style={smallerStyle} type="text" value="" />
-      </HorizontalGroup>
-      <HorizontalGroup>
-      <input style={smallerStyle} type="text" value="" />
-      <input style={smallerStyle} type="text" value="" />
-      <input style={smallerStyle} type="text" value="" />
-      </HorizontalGroup>
-      <HorizontalGroup>
-      <input style={smallerStyle} type="text" value="" />
-      <input style={smallerStyle} type="text" value="" />
-      <input style={smallerStyle} type="text" value="" />
-      </HorizontalGroup>
-    </VerticalGroup>
-    <VerticalGroup>
-    <text className='smaller-font'>{"Total Angular Velocity"}</text>
-    <HorizontalGroup>
-    <text className='smaller-font'>{"X (Deg/s)"}</text>
-    <input style={orbitStyle} type="text" value="" />
-    </HorizontalGroup>
-    <HorizontalGroup>
-    <text className='smaller-font'>{"Y (Deg/s)"}</text>
-    <input style={orbitStyle} type="text" value="" />
-    </HorizontalGroup>
-    <HorizontalGroup>
-    <text className='smaller-font'>{"Z (Deg/s)"}</text>
-    <input style={orbitStyle} type="text" value="" />
-    </HorizontalGroup>
-    </VerticalGroup>
-    <VerticalGroup>
-    <text className='smaller-font'>{"Position"}</text>
-    <HorizontalGroup>
-    <text className='smaller-font'>{"Lat. (Deg)"}</text>
-    <input style={orbitStyle} type="text" value="" />
-    </HorizontalGroup>
-    <HorizontalGroup>
-    <text className='smaller-font'>{"Long. (Deg)"}</text>
-    <input style={orbitStyle} type="text" value="" />
-    </HorizontalGroup>
-    <HorizontalGroup>
-    <text className='smaller-font'>{"Alt. (m)"}</text>
-    <input style={orbitStyle} type="text" value="" />
-    </HorizontalGroup>
-    </VerticalGroup>
-      </div>
-    );
-  };
+    </VerticalGroup> */}
+      {/*Estimated States*/ }
+      <VerticalGroup>
+        <text className='smaller-font'>{ "Total Attitude Matrix" }</text>
+        <HorizontalGroup>
+          <input style={ smallerStyle } type="text" value="" />
+          <input style={ smallerStyle } type="text" value="" />
+          <input style={ smallerStyle } type="text" value="" />
+        </HorizontalGroup>
+        <HorizontalGroup>
+          <input style={ smallerStyle } type="text" value="" />
+          <input style={ smallerStyle } type="text" value="" />
+          <input style={ smallerStyle } type="text" value="" />
+        </HorizontalGroup>
+        <HorizontalGroup>
+          <input style={ smallerStyle } type="text" value="" />
+          <input style={ smallerStyle } type="text" value="" />
+          <input style={ smallerStyle } type="text" value="" />
+        </HorizontalGroup>
+      </VerticalGroup>
+      <VerticalGroup>
+        <text className='smaller-font'>{ "Total Angular Velocity" }</text>
+        <HorizontalGroup>
+          <text className='smaller-font'>{ "X (Deg/s)" }</text>
+          <input style={ orbitStyle } type="text" value="" />
+        </HorizontalGroup>
+        <HorizontalGroup>
+          <text className='smaller-font'>{ "Y (Deg/s)" }</text>
+          <input style={ orbitStyle } type="text" value="" />
+        </HorizontalGroup>
+        <HorizontalGroup>
+          <text className='smaller-font'>{ "Z (Deg/s)" }</text>
+          <input style={ orbitStyle } type="text" value="" />
+        </HorizontalGroup>
+      </VerticalGroup>
+      <VerticalGroup>
+        <text className='smaller-font'>{ "Position" }</text>
+        <HorizontalGroup>
+          <text className='smaller-font'>{ "Lat. (Deg)" }</text>
+          <input style={ orbitStyle } type="text" value="" />
+        </HorizontalGroup>
+        <HorizontalGroup>
+          <text className='smaller-font'>{ "Long. (Deg)" }</text>
+          <input style={ orbitStyle } type="text" value="" />
+        </HorizontalGroup>
+        <HorizontalGroup>
+          <text className='smaller-font'>{ "Alt. (m)" }</text>
+          <input style={ orbitStyle } type="text" value="" />
+        </HorizontalGroup>
+      </VerticalGroup>
+    </div>
+  );
+};
 
-  export default EstimatedStates;
+export default EstimatedStates;
 
