@@ -20,11 +20,11 @@ const SunSensor = (refInputs: React.MutableRefObject<RefDict>) => {
           <div className="quadrant-container">
             <div className="quadrant-row">
               <div className="quadrant">
-                <input ref={ (ref) => (refInputs.current['qva'] = ref) } style={ orbitStyle } type="text" placeholder="Quadrant 1" />
+                <input ref={ (ref) => (refInputs.current['qva'] = ref) } style={ { ...orbitStyle, marginTop: '45px' } } type="text" placeholder="Quadrant 1" />
               </div>
               <div className="quadrant-vertical-line"></div>
               <div className="quadrant">
-                <input ref={ (ref) => (refInputs.current['qvb'] = ref) } style={ orbitStyle } type="text" placeholder="Quadrant 2" />
+                <input ref={ (ref) => (refInputs.current['qvb'] = ref) } style={ { ...orbitStyle, marginTop: '45px' } } type="text" placeholder="Quadrant 2" />
               </div>
             </div>
             <div className="quadrant-horizontal-line"></div>

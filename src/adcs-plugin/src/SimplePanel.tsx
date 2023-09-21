@@ -152,7 +152,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     refNad.current = nadarrowHelper;
 
     // x y z orient set upper left dynamic to frame; z points left, x points right, y points up in rendering.
-    const coord_ref = new THREE.Vector3(-1.5, height / 3000, width / 700);
+    const coord_ref = new THREE.Vector3(-1.4, 0, -0.7);
     const coord_length = 0.6;
     const coord_dir = new THREE.Vector3(1, 0, 0);
     const coord_x_arrow = new THREE.ArrowHelper(coord_dir, coord_ref, coord_length, 0xff0000);
@@ -191,38 +191,38 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   // let result = units(refUS.current!);
   if (show_table) {
     return (
-      <div style={ { width: width, height: height, overflow: 'auto' } }>
-        <div ref={ refWebGLContainer } />
+      <div style={{ width: width, height: height, overflow: 'auto' }}>
+        <div ref={refWebGLContainer} />
         <InlineFieldRow>
-          <InlineField transparent label="Data" labelWidth={ 6 }>
+          <InlineField transparent label="Data" labelWidth={6}>
             <Select
-              defaultValue={ { label: 'ICRF' } }
-              value={ refDS.current }
-              options={ [{ label: 'ICRF' }, { label: 'GEOC' }, { label: 'LVLH' }] }
-              onChange={ (e) => {
+              defaultValue={{ label: 'ICRF' }}
+              value={refDS.current}
+              options={[{ label: 'ICRF' }, { label: 'GEOC' }, { label: 'LVLH' }]}
+              onChange={(e) => {
                 refDS.current = e.label;
-              } }
+              }}
               width="auto"
             />
           </InlineField>
-          <InlineField transparent label="Units" labelWidth={ 6 }>
+          <InlineField transparent label="Units" labelWidth={6}>
             <Select
               id="unity"
-              defaultValue={ { label: 'Radians' } }
-              value={ refUS.current }
-              options={ [{ label: 'Radians' }, { label: 'Degrees' }] }
-              onChange={ (e) => {
+              defaultValue={{ label: 'Radians' }}
+              value={refUS.current}
+              options={[{ label: 'Radians' }, { label: 'Degrees' }]}
+              onChange={(e) => {
                 refUS.current = e.label;
                 // units(e.label!);
                 // result = units(refUS.current!)
-              } }
+              }}
               width="auto"
             />
           </InlineField>
         </InlineFieldRow>
-        {/* {% if show_table %} */ }
+        {/* {% if show_table %} */}
         <div
-          style={ {
+          style={{
             alignItems: 'center',
             justifyItems: 'center',
             textAlign: 'center',
@@ -230,63 +230,63 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
             //columnGap: '1em',
             gridTemplateRows: 'auto auto auto auto',
             gridTemplateColumns: 'auto auto auto auto',
-          } }
+          }}
         >
-          <div style={ { fontSize: '0.8em', gridRow: 1, gridColumn: 2 } }>Angle</div>
-          <div style={ { fontSize: '0.8em', gridRow: 1, gridColumn: 3 } }>Angular Vel</div>
-          <div style={ { fontSize: '0.8em', gridRow: 1, gridColumn: 4 } }>Angular Accel</div>
+          <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 2 }}>Angle</div>
+          <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 3 }}>Angular Vel</div>
+          <div style={{ fontSize: '0.8em', gridRow: 1, gridColumn: 4 }}>Angular Accel</div>
           {/* Heading: z axis: Yaw
             Elevation: y axis: Pitch
             Bank: x axis: Roll */}
-          <div style={ { gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' } }>
-            <h6 style={ { color: 'aqua' } }>Yaw</h6>
+          <div style={{ gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' }}>
+            <h6 style={{ color: 'aqua' }}>Yaw</h6>
           </div>
-          <div style={ { gridRow: 3, gridColumn: 1, marginInlineEnd: '1em' } }>
-            <h6 style={ { color: 'lime' } }>Pitch</h6>
+          <div style={{ gridRow: 3, gridColumn: 1, marginInlineEnd: '1em' }}>
+            <h6 style={{ color: 'lime' }}>Pitch</h6>
           </div>
-          <div style={ { gridRow: 4, gridColumn: 1, marginInlineEnd: '1em' } }>
-            <h6 style={ { color: 'red' } }>Roll</h6>
+          <div style={{ gridRow: 4, gridColumn: 1, marginInlineEnd: '1em' }}>
+            <h6 style={{ color: 'red' }}>Roll</h6>
           </div>
 
-          <div style={ { gridRow: 2, gridColumn: 2 } }>
-            <Input ref={ (ref) => (refInputs.current['YAW'] = ref) } type="text" readOnly />
+          <div style={{ gridRow: 2, gridColumn: 2 }}>
+            <Input ref={(ref) => (refInputs.current['YAW'] = ref)} type="text" readOnly />
           </div>
-          <div style={ { gridRow: 2, gridColumn: 3 } }>
-            <Input ref={ (ref) => (refInputs.current['VYAW'] = ref) } type="text" readOnly />
+          <div style={{ gridRow: 2, gridColumn: 3 }}>
+            <Input ref={(ref) => (refInputs.current['VYAW'] = ref)} type="text" readOnly />
           </div>
-          <div style={ { gridRow: 2, gridColumn: 4 } }>
-            <Input ref={ (ref) => (refInputs.current['AYAW'] = ref) } type="text" readOnly />
+          <div style={{ gridRow: 2, gridColumn: 4 }}>
+            <Input ref={(ref) => (refInputs.current['AYAW'] = ref)} type="text" readOnly />
           </div>
-          <div style={ { gridRow: 3, gridColumn: 2 } }>
-            <Input ref={ (ref) => (refInputs.current['PITCH'] = ref) } type="text" readOnly />
+          <div style={{ gridRow: 3, gridColumn: 2 }}>
+            <Input ref={(ref) => (refInputs.current['PITCH'] = ref)} type="text" readOnly />
           </div>
-          <div style={ { gridRow: 3, gridColumn: 3 } }>
-            <Input ref={ (ref) => (refInputs.current['VPITCH'] = ref) } type="text" readOnly />
+          <div style={{ gridRow: 3, gridColumn: 3 }}>
+            <Input ref={(ref) => (refInputs.current['VPITCH'] = ref)} type="text" readOnly />
           </div>
-          <div style={ { gridRow: 3, gridColumn: 4 } }>
-            <Input ref={ (ref) => (refInputs.current['APITCH'] = ref) } type="text" readOnly />
+          <div style={{ gridRow: 3, gridColumn: 4 }}>
+            <Input ref={(ref) => (refInputs.current['APITCH'] = ref)} type="text" readOnly />
           </div>
-          <div style={ { gridRow: 4, gridColumn: 2 } }>
-            <Input ref={ (ref) => (refInputs.current['ROLL'] = ref) } type="text" readOnly />
+          <div style={{ gridRow: 4, gridColumn: 2 }}>
+            <Input ref={(ref) => (refInputs.current['ROLL'] = ref)} type="text" readOnly />
           </div>
-          <div style={ { gridRow: 4, gridColumn: 3 } }>
-            <Input ref={ (ref) => (refInputs.current['VROLL'] = ref) } type="text" readOnly />
+          <div style={{ gridRow: 4, gridColumn: 3 }}>
+            <Input ref={(ref) => (refInputs.current['VROLL'] = ref)} type="text" readOnly />
           </div>
-          <div style={ { gridRow: 4, gridColumn: 4 } }>
-            <Input ref={ (ref) => (refInputs.current['AROLL'] = ref) } type="text" readOnly />
+          <div style={{ gridRow: 4, gridColumn: 4 }}>
+            <Input ref={(ref) => (refInputs.current['AROLL'] = ref)} type="text" readOnly />
           </div>
         </div>
         <div>
-          <div style={ { gridRow: 1, gridColumn: 1, marginInlineEnd: '1em' } }> Time: </div>
-          <div style={ { gridRow: 1, gridColumn: 2 } }>
-            <Input ref={ (ref) => (refInputs.current['TIME'] = ref) } type="text" readOnly />
+          <div style={{ gridRow: 1, gridColumn: 1, marginInlineEnd: '1em' }}> Time: </div>
+          <div style={{ gridRow: 1, gridColumn: 2 }}>
+            <Input ref={(ref) => (refInputs.current['TIME'] = ref)} type="text" readOnly />
           </div>
-          <div style={ { gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' } }> Node: </div>
-          <div style={ { gridRow: 2, gridColumn: 2 } }>
-            <Input ref={ (ref) => (refInputs.current['NODE'] = ref) } type="text" readOnly />
+          <div style={{ gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' }}> Node: </div>
+          <div style={{ gridRow: 2, gridColumn: 2 }}>
+            <Input ref={(ref) => (refInputs.current['NODE'] = ref)} type="text" readOnly />
           </div>
-          <div style={ { gridRow: 3, gridColumn: 1 } }>
-            <Input ref={ (ref) => (refInputs.current['PLTIME'] = ref) } type="text" hidden />
+          <div style={{ gridRow: 3, gridColumn: 1 }}>
+            <Input ref={(ref) => (refInputs.current['PLTIME'] = ref)} type="text" hidden />
           </div>
         </div>
       </div>
@@ -295,38 +295,38 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     );
   } else {
     return (
-      <div style={ { width: width, height: height, overflow: 'auto' } }>
-        <div ref={ refWebGLContainer } />
+      <div style={{ width: width, height: height, overflow: 'auto' }}>
+        <div ref={refWebGLContainer} />
         <InlineFieldRow>
-          <InlineField transparent label="Data" labelWidth={ 6 }>
+          <InlineField transparent label="Data" labelWidth={6}>
             <Select
-              defaultValue={ { label: 'ICRF' } }
-              value={ refDS.current }
-              options={ [{ label: 'ICRF' }, { label: 'GEOC' }, { label: 'LVLH' }] }
-              onChange={ (e) => {
+              defaultValue={{ label: 'ICRF' }}
+              value={refDS.current}
+              options={[{ label: 'ICRF' }, { label: 'GEOC' }, { label: 'LVLH' }]}
+              onChange={(e) => {
                 refDS.current = e.label;
-              } }
+              }}
               width="auto"
             />
           </InlineField>
-          <InlineField transparent label="Units" labelWidth={ 6 }>
+          <InlineField transparent label="Units" labelWidth={6}>
             <Select
               id="unity"
-              defaultValue={ { label: 'Radians' } }
-              value={ refUS.current }
-              options={ [{ label: 'Radians' }, { label: 'Degrees' }] }
-              onChange={ (e) => {
+              defaultValue={{ label: 'Radians' }}
+              value={refUS.current}
+              options={[{ label: 'Radians' }, { label: 'Degrees' }]}
+              onChange={(e) => {
                 refUS.current = e.label;
                 // units(e.label!);
                 // result = units(refUS.current!)
-              } }
+              }}
               width="auto"
             />
           </InlineField>
         </InlineFieldRow>
-        {/* {% if show_table %} */ }
+        {/* {% if show_table %} */}
         <div
-          style={ {
+          style={{
             alignItems: 'center',
             justifyItems: 'center',
             textAlign: 'center',
@@ -334,47 +334,51 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
             //columnGap: '1em',
             gridTemplateRows: 'auto auto auto auto',
             gridTemplateColumns: 'auto auto auto auto',
-          } }
+          }}
         >
-          <div style={ { gridRow: 2, gridColumn: 2 } }>
-            <Input ref={ (ref) => (refInputs.current['YAW'] = ref) } type="text" hidden />
+          <div style={{ gridRow: 2, gridColumn: 2 }}>
+            <Input ref={(ref) => (refInputs.current['YAW'] = ref)} type="text" hidden />
           </div>
-          <div style={ { gridRow: 2, gridColumn: 3 } }>
-            <Input ref={ (ref) => (refInputs.current['VYAW'] = ref) } type="text" hidden />
+          <div style={{ gridRow: 2, gridColumn: 3 }}>
+            <Input ref={(ref) => (refInputs.current['VYAW'] = ref)} type="text" hidden />
           </div>
-          <div style={ { gridRow: 2, gridColumn: 4 } }>
-            <Input ref={ (ref) => (refInputs.current['AYAW'] = ref) } type="text" hidden />
+          <div style={{ gridRow: 2, gridColumn: 4 }}>
+            <Input ref={(ref) => (refInputs.current['AYAW'] = ref)} type="text" hidden />
           </div>
-          <div style={ { gridRow: 3, gridColumn: 2 } }>
-            <Input ref={ (ref) => (refInputs.current['PITCH'] = ref) } type="text" hidden />
+          <div style={{ gridRow: 3, gridColumn: 2 }}>
+            <Input ref={(ref) => (refInputs.current['PITCH'] = ref)} type="text" hidden />
           </div>
-          <div style={ { gridRow: 3, gridColumn: 3 } }>
-            <Input ref={ (ref) => (refInputs.current['VPITCH'] = ref) } type="text" hidden />
+          <div style={{ gridRow: 3, gridColumn: 3 }}>
+            <Input ref={(ref) => (refInputs.current['VPITCH'] = ref)} type="text" hidden />
           </div>
-          <div style={ { gridRow: 3, gridColumn: 4 } }>
-            <Input ref={ (ref) => (refInputs.current['APITCH'] = ref) } type="text" hidden />
+          <div style={{ gridRow: 3, gridColumn: 4 }}>
+            <Input ref={(ref) => (refInputs.current['APITCH'] = ref)} type="text" hidden />
           </div>
-          <div style={ { gridRow: 4, gridColumn: 2 } }>
-            <Input ref={ (ref) => (refInputs.current['ROLL'] = ref) } type="text" hidden />
+          <div style={{ gridRow: 4, gridColumn: 2 }}>
+            <Input ref={(ref) => (refInputs.current['ROLL'] = ref)} type="text" hidden />
           </div>
-          <div style={ { gridRow: 4, gridColumn: 3 } }>
-            <Input ref={ (ref) => (refInputs.current['VROLL'] = ref) } type="text" hidden />
+          <div style={{ gridRow: 4, gridColumn: 3 }}>
+            <Input ref={(ref) => (refInputs.current['VROLL'] = ref)} type="text" hidden />
           </div>
-          <div style={ { gridRow: 4, gridColumn: 4 } }>
-            <Input ref={ (ref) => (refInputs.current['AROLL'] = ref) } type="text" hidden />
+          <div style={{ gridRow: 4, gridColumn: 4 }}>
+            <Input ref={(ref) => (refInputs.current['AROLL'] = ref)} type="text" hidden />
           </div>
         </div>
         <div>
-          <div style={ { gridRow: 1, gridColumn: 1, marginInlineEnd: '1em' } } hidden> Time: </div>
-          <div style={ { gridRow: 1, gridColumn: 2 } }>
-            <Input ref={ (ref) => (refInputs.current['TIME'] = ref) } type="text" hidden />
+          <div style={{ gridRow: 1, gridColumn: 1, marginInlineEnd: '1em' }} hidden>
+            Time:
           </div>
-          <div style={ { gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' } } hidden> Node: </div>
-          <div style={ { gridRow: 2, gridColumn: 2 } }>
-            <Input ref={ (ref) => (refInputs.current['NODE'] = ref) } type="text" hidden />
+          <div style={{ gridRow: 1, gridColumn: 2 }}>
+            <Input ref={(ref) => (refInputs.current['TIME'] = ref)} type="text" hidden />
           </div>
-          <div style={ { gridRow: 3, gridColumn: 1 } }>
-            <Input ref={ (ref) => (refInputs.current['PLTIME'] = ref) } type="text" hidden />
+          <div style={{ gridRow: 2, gridColumn: 1, marginInlineEnd: '1em' }} hidden>
+            Node:
+          </div>
+          <div style={{ gridRow: 2, gridColumn: 2 }}>
+            <Input ref={(ref) => (refInputs.current['NODE'] = ref)} type="text" hidden />
+          </div>
+          <div style={{ gridRow: 3, gridColumn: 1 }}>
+            <Input ref={(ref) => (refInputs.current['PLTIME'] = ref)} type="text" hidden />
           </div>
         </div>
       </div>

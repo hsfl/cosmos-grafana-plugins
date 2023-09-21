@@ -220,55 +220,54 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
             array_pos = max_index;
           } else {
             // the inner case for payload within data range below
-          }
-        }
-
-        // iterate over data array for best fit timestamp
-        for (let t_index = 0; t_index < timeValues.length - 1; t_index++) {
-          // time = timeValues[refIdxs.current[input_field_key]!];
-          let t_time = timeValues.get(t_index);
-          // console.log('timevalues', timeValues, 't time', t_time, 'time diff', event.payload.time! - t_time);
-          if (t_time === event.payload.time!) {
-            array_pos = t_index;
-            // console.log("t_time === event.payload.time!", t_index);
-            break;
-          }
-          if (t_time > event.payload.time!) {
-            if (t_index > 0) {
-              let t_time_minus = timeValues.get(t_index - 1);
-              if (t_time_minus > event.payload.time!) {
-                for (let t_index_minus = t_index - 1; t_time_minus < event.payload.time!; t_time_minus--) {
-                  // console.log('backwards scrub', t_index);
-                  let t_time_minus_minus = timeValues.get(t_index_minus);
-                  if (t_time_minus_minus < event.payload.time!) {
-                    array_pos = t_index_minus;
-                    // console.log('backwards scrub done', t_index);
-                    break;
-                  }
-                }
-                break;
-              } else {
-                // this is the one
-                array_pos = t_index - 1;
-                // console.log("t_time_minus < event.payload.time! index zero, return", t_index - 1);
+            // iterate over data array for best fit timestamp
+            for (let t_index = 0; t_index < timeValues.length - 1; t_index++) {
+              // time = timeValues[refIdxs.current[input_field_key]!];
+              let t_time = timeValues.get(t_index);
+              // console.log('timevalues', timeValues, 't time', t_time, 'time diff', event.payload.time! - t_time);
+              if (t_time === event.payload.time!) {
+                array_pos = t_index;
+                // console.log("t_time === event.payload.time!", t_index);
                 break;
               }
-            } else {
-              array_pos = 0;
-              // console.log("t_time > event.payload.time! index zero, return", t_index);
-              return;
-            }
-          } else if (t_time < event.payload.time!) {
-            if (t_index === timeValues.length - 1) {
-              // console.log("t_time < event.payload.time! max index", t_index);
-              array_pos = t_index;
-              break;
-            }
-            let t_time_plus = timeValues.get(t_index + 1);
-            if (t_time_plus > event.payload.time!) {
-              array_pos = t_index;
-              // console.log("t_time < event.payload.time!", t_index);
-              break;
+              if (t_time > event.payload.time!) {
+                if (t_index > 0) {
+                  let t_time_minus = timeValues.get(t_index - 1);
+                  if (t_time_minus > event.payload.time!) {
+                    for (let t_index_minus = t_index - 1; t_time_minus < event.payload.time!; t_time_minus--) {
+                      // console.log('backwards scrub', t_index);
+                      let t_time_minus_minus = timeValues.get(t_index_minus);
+                      if (t_time_minus_minus < event.payload.time!) {
+                        array_pos = t_index_minus;
+                        // console.log('backwards scrub done', t_index);
+                        break;
+                      }
+                    }
+                    break;
+                  } else {
+                    // this is the one
+                    array_pos = t_index - 1;
+                    // console.log("t_time_minus < event.payload.time! index zero, return", t_index - 1);
+                    break;
+                  }
+                } else {
+                  array_pos = 0;
+                  // console.log("t_time > event.payload.time! index zero, return", t_index);
+                  return;
+                }
+              } else if (t_time < event.payload.time!) {
+                if (t_index === timeValues.length - 1) {
+                  // console.log("t_time < event.payload.time! max index", t_index);
+                  array_pos = t_index;
+                  break;
+                }
+                let t_time_plus = timeValues.get(t_index + 1);
+                if (t_time_plus > event.payload.time!) {
+                  array_pos = t_index;
+                  // console.log("t_time < event.payload.time!", t_index);
+                  break;
+                }
+              }
             }
           }
         }
