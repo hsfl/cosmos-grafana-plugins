@@ -68,8 +68,8 @@ export const SimplePanel: React.FC<Props> = ({ data, eventBus, timeRange }) => {
 
   if (selectPanel?.label === 'imu') {
     return (
-      <div style={ { display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' } }>
-        <IMU { ...refInputs } />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
+        <IMU {...refInputs} />
         {/* <SunSensor />
         <GPS />
         <Controls />
@@ -78,9 +78,9 @@ export const SimplePanel: React.FC<Props> = ({ data, eventBus, timeRange }) => {
     );
   } else if (selectPanel?.label === 'ssen') {
     return (
-      <div style={ { display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' } }>
-        {/* <IMU { ...refInputs } /> */ }
-        <SunSensor { ...refInputs } />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
+        {/* <IMU { ...refInputs } /> */}
+        <SunSensor {...refInputs} />
         {/* <GPS />
         <Controls />
         <EstimatedStates /> */}
@@ -88,43 +88,43 @@ export const SimplePanel: React.FC<Props> = ({ data, eventBus, timeRange }) => {
     );
   } else if (selectPanel?.label === 'gps') {
     return (
-      <div style={ { display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' } }>
-        {/* <IMU { ...refInputs } /> */ }
-        {/* <SunSensor /> */ }
-        <GPS { ...refInputs } />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
+        {/* <IMU { ...refInputs } /> */}
+        {/* <SunSensor /> */}
+        <GPS {...refInputs} />
         {/* <Controls />
         <EstimatedStates /> */}
       </div>
     );
   } else if (selectPanel?.label === 'control') {
     return (
-      <div style={ { display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' } }>
-        {/* <IMU { ...refInputs } /> */ }
-        {/* <SunSensor /> */ }
-        {/* <GPS /> */ }
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
+        {/* <IMU { ...refInputs } /> */}
+        {/* <SunSensor /> */}
+        {/* <GPS /> */}
         <Controls />
-        {/* <EstimatedStates /> */ }
+        {/* <EstimatedStates /> */}
       </div>
     );
-  } else if (selectPanel?.label === 'eststate') {
+  } else if (selectPanel?.label === 'adcstotal') {
     return (
-      <div style={ { display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' } }>
-        {/* <IMU { ...refInputs } /> */ }
-        {/* <SunSensor /> */ }
-        {/* <GPS /> */ }
-        {/* <Controls /> */ }
-        <EstimatedStates />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
+        {/* <IMU { ...refInputs } /> */}
+        {/* <SunSensor /> */}
+        {/* <GPS /> */}
+        {/* <Controls /> */}
+        <EstimatedStates {...refInputs} />
       </div>
     );
   } else {
     return (
-      <div style={ { display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' } }>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
         <h1>reset query</h1>
-        <IMU { ...refInputs } />
-        <SunSensor { ...refInputs } />
-        <GPS { ...refInputs } />
+        <IMU {...refInputs} />
+        <SunSensor {...refInputs} />
+        <GPS {...refInputs} />
         <Controls />
-        <EstimatedStates />
+        <EstimatedStates {...refInputs} />
       </div>
     );
   }

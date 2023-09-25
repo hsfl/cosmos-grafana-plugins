@@ -1,5 +1,6 @@
 import { HorizontalGroup, VerticalGroup } from '@grafana/ui';
 import React from 'react';
+import { RefDict } from '../types';
 //import { PanelProps } from '@grafana/data';
 import './styles.css';
 
@@ -16,10 +17,10 @@ const smallerStyle = {
   color: '#32CD32',
 };
 
-const EstimatedStates = () => {
+const EstimatedStates = (refInputs: React.MutableRefObject<RefDict>) => {
   return (
-    <div style={ { display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' } }>
-      {/*IMU*/ }
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
+      {/*IMU*/}
       {/* <HorizontalGroup>
         <VerticalGroup>
             <HorizontalGroup>
@@ -61,7 +62,7 @@ const EstimatedStates = () => {
         </HorizontalGroup>
         </VerticalGroup>
         </HorizontalGroup> */}
-      {/*Sun Sensor*/ }
+      {/*Sun Sensor*/}
       {/* <VerticalGroup>
           <HorizontalGroup>
         <div className="quadrant-container">
@@ -93,7 +94,7 @@ const EstimatedStates = () => {
       </VerticalGroup>
     </HorizontalGroup>
     </VerticalGroup> */}
-      {/*GPS*/ }
+      {/*GPS*/}
       {/* <VerticalGroup>
       <HorizontalGroup>
         <text className='smaller-font'>{"Sampling Rate (Hz)"}</text>
@@ -130,7 +131,7 @@ const EstimatedStates = () => {
         </VerticalGroup>
       </HorizontalGroup>
     </VerticalGroup> */}
-      {/*Controls*/ }
+      {/*Controls*/}
       {/* <VerticalGroup>
       <HorizontalGroup>
       <text style={{marginLeft: '70px'}} className='smaller-font'>{"Torque (Nm)"}</text>
@@ -161,53 +162,53 @@ const EstimatedStates = () => {
       <input style={orbitStyle} type="text" value="" />
       </HorizontalGroup>
     </VerticalGroup> */}
-      {/*Estimated States*/ }
+      {/*Estimated States*/}
       <VerticalGroup>
-        <text className='smaller-font'>{ "Total Attitude Matrix" }</text>
+        <text className='smaller-font'>{"Total Attitude Matrix"}</text>
         <HorizontalGroup>
-          <input style={ smallerStyle } type="text" value="" />
-          <input style={ smallerStyle } type="text" value="" />
-          <input style={ smallerStyle } type="text" value="" />
+          <input ref={(ref) => (refInputs.current['s_b'] = ref)} style={smallerStyle} type="text" value="" />
+          <input ref={(ref) => (refInputs.current['v_x'] = ref)} style={smallerStyle} type="text" value="" />
+          <input ref={(ref) => (refInputs.current['a_x'] = ref)} style={smallerStyle} type="text" value="" />
         </HorizontalGroup>
         <HorizontalGroup>
-          <input style={ smallerStyle } type="text" value="" />
-          <input style={ smallerStyle } type="text" value="" />
-          <input style={ smallerStyle } type="text" value="" />
+          <input ref={(ref) => (refInputs.current['s_e'] = ref)} style={smallerStyle} type="text" value="" />
+          <input ref={(ref) => (refInputs.current['v_y'] = ref)} style={smallerStyle} type="text" value="" />
+          <input ref={(ref) => (refInputs.current['a_y'] = ref)} style={smallerStyle} type="text" value="" />
         </HorizontalGroup>
         <HorizontalGroup>
-          <input style={ smallerStyle } type="text" value="" />
-          <input style={ smallerStyle } type="text" value="" />
-          <input style={ smallerStyle } type="text" value="" />
+          <input ref={(ref) => (refInputs.current['s_h'] = ref)} style={smallerStyle} type="text" value="" />
+          <input ref={(ref) => (refInputs.current['v_z'] = ref)} style={smallerStyle} type="text" value="" />
+          <input ref={(ref) => (refInputs.current['a_z'] = ref)} style={smallerStyle} type="text" value="" />
         </HorizontalGroup>
       </VerticalGroup>
       <VerticalGroup>
-        <text className='smaller-font'>{ "Total Angular Velocity" }</text>
+        <text className='smaller-font'>{"Total Angular Velocity"}</text>
         <HorizontalGroup>
-          <text className='smaller-font'>{ "X (Deg/s)" }</text>
-          <input style={ orbitStyle } type="text" value="" />
+          <text className='smaller-font'>{"X (Deg/s)"}</text>
+          <input ref={(ref) => (refInputs.current['v_deg_x'] = ref)} style={orbitStyle} type="text" value="" />
         </HorizontalGroup>
         <HorizontalGroup>
-          <text className='smaller-font'>{ "Y (Deg/s)" }</text>
-          <input style={ orbitStyle } type="text" value="" />
+          <text className='smaller-font'>{"Y (Deg/s)"}</text>
+          <input ref={(ref) => (refInputs.current['v_deg_y'] = ref)} style={orbitStyle} type="text" value="" />
         </HorizontalGroup>
         <HorizontalGroup>
-          <text className='smaller-font'>{ "Z (Deg/s)" }</text>
-          <input style={ orbitStyle } type="text" value="" />
+          <text className='smaller-font'>{"Z (Deg/s)"}</text>
+          <input ref={(ref) => (refInputs.current['v_deg_z'] = ref)} style={orbitStyle} type="text" value="" />
         </HorizontalGroup>
       </VerticalGroup>
       <VerticalGroup>
-        <text className='smaller-font'>{ "Position" }</text>
+        <text className='smaller-font'>{"Position"}</text>
         <HorizontalGroup>
-          <text className='smaller-font'>{ "Lat. (Deg)" }</text>
-          <input style={ orbitStyle } type="text" value="" />
+          <text className='smaller-font'>{"Lat. (Deg)"}</text>
+          <input ref={(ref) => (refInputs.current['geod_s_lat'] = ref)} style={orbitStyle} type="text" value="" />
         </HorizontalGroup>
         <HorizontalGroup>
-          <text className='smaller-font'>{ "Long. (Deg)" }</text>
-          <input style={ orbitStyle } type="text" value="" />
+          <text className='smaller-font'>{"Long. (Deg)"}</text>
+          <input ref={(ref) => (refInputs.current['geod_s_lon'] = ref)} style={orbitStyle} type="text" value="" />
         </HorizontalGroup>
         <HorizontalGroup>
-          <text className='smaller-font'>{ "Alt. (m)" }</text>
-          <input style={ orbitStyle } type="text" value="" />
+          <text className='smaller-font'>{"Alt. (m)"}</text>
+          <input ref={(ref) => (refInputs.current['geod_s_alt'] = ref)} style={orbitStyle} type="text" value="" />
         </HorizontalGroup>
       </VerticalGroup>
     </div>

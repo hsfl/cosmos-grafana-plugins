@@ -37,6 +37,7 @@ type jsonResponse struct {
 type Cosmosresponse struct {
 	Avectors  []avector  `json:"avectors,omitempty"`
 	Adcsstrucs  []adcsstruc  `json:"adcsstrucs,omitempty"`
+	Adcstotals  []adcstotal  `json:"atttotals,omitempty"`
 	Ladcsstrucs  []ladcsstruc  `json:"lvlhadcsstrucs,omitempty"`
 	Gadcsstrucs  []gadcsstruc  `json:"geocadcsstrucs,omitempty"`
 	Qvatts    []qvatt    `json:"qvatts,omitempty"`
@@ -88,6 +89,17 @@ type adcsstruc struct {
 	A         rvector `json:"a,omitempty"`
 	Sun 	  rvector `json:"sun,omitempty"`
 	Nad 	  rvector `json:"nad,omitempty"`
+}
+
+type adcstotal struct {
+	Time      	  float64
+	Node_name 	  string
+	Node_type 	  float64
+	S         	  real_avector `json:"s,omitempty"`
+	V         	  rvector `json:"v,omitempty"`
+	A         	  rvector `json:"a,omitempty"`
+	V_deg 	  	  rvector `json:"v_deg,omitempty"`
+	Pos_geod_s 	  gvector `json:"pos_geod_s,omitempty"`
 }
 
 type ladcsstruc struct {
@@ -370,6 +382,7 @@ type cosmostype interface {
 	avector | 
 	real_avector | 
 	adcsstruc | 
+	adcstotal | 
 	ladcsstruc | 
 	gadcsstruc | 
 	qvatt | 
