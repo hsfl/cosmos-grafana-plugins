@@ -1,9 +1,9 @@
 import { HorizontalGroup, VerticalGroup } from '@grafana/ui';
 import React from 'react';
 import { RefDict } from '../types';
-//import { PanelProps } from '@grafana/data';
 import './styles.css';
 
+//Input Style
 const orbitStyle = {
   width: '75px',
   height: '15px',

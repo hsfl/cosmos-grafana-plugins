@@ -1,7 +1,6 @@
 import { HorizontalGroup, VerticalGroup } from '@grafana/ui';
 import React from 'react';
 import { RefDict } from '../types';
-//import { PanelProps } from '@grafana/data';
 import './styles.css';
 
 const orbitStyle = {
@@ -17,6 +16,7 @@ const IMU = (refInputs: React.MutableRefObject<RefDict>) => {
       {/*IMU*/ }
       <HorizontalGroup>
         <VerticalGroup>
+          {/*Quaternions*/ }
           <HorizontalGroup>
             <text className='smaller-font'>q<span className="subscript">0</span></text>
             <input ref={ (ref) => (refInputs.current['theta_x'] = ref) } style={ orbitStyle } type="text" value="" />

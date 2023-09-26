@@ -1,9 +1,9 @@
 import { HorizontalGroup, VerticalGroup } from '@grafana/ui';
 import React from 'react';
 import { RefDict } from '../types';
-//import { PanelProps } from '@grafana/data';
 import './styles.css';
 
+//Input Style
 const orbitStyle = {
   width: '75px',
   height: '15px',
@@ -15,6 +15,7 @@ const SunSensor = (refInputs: React.MutableRefObject<RefDict>) => {
   return (
     <div style={ { display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' } }>
       {/*Sun Sensor*/ }
+      {/*Quadrants*/}
       <VerticalGroup>
         <HorizontalGroup>
           <div className="quadrant-container">
@@ -39,8 +40,10 @@ const SunSensor = (refInputs: React.MutableRefObject<RefDict>) => {
             </div>
           </div>
           <VerticalGroup>
+            {/*Azimuth Values*/}
             <text className='smaller-font'>{ "Azimuth (Deg)" }</text>
             <input ref={ (ref) => (refInputs.current['azi'] = ref) } style={ orbitStyle } type="text" value="" />
+            {/*Elevation Values*/}
             <text className='smaller-font'>{ "Elevation (Deg)" }</text>
             <input ref={ (ref) => (refInputs.current['elev'] = ref) } style={ orbitStyle } type="text" value="" />
           </VerticalGroup>

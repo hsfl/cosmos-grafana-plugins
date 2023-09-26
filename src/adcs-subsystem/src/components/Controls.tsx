@@ -1,8 +1,8 @@
 import { HorizontalGroup, VerticalGroup } from '@grafana/ui';
 import React from 'react';
-//import { PanelProps } from '@grafana/data';
 import './styles.css';
 
+//Input Style
 const orbitStyle = {
   width: '75px',
   height: '15px', 
@@ -20,17 +20,17 @@ const orbitStyle = {
       <text style={{marginLeft: '10px'}} className='smaller-font'>{"Current (A)"}</text>
       </HorizontalGroup>
       <HorizontalGroup>
-      <text className='smaller-font'>{"Torqurod 1"}</text>
+      <text className='smaller-font'>{"Torquerod 1"}</text>
       <input style={orbitStyle} type="text" value="" />
       <input style={orbitStyle} type="text" value="" />
       </HorizontalGroup>
       <HorizontalGroup>
-      <text className='smaller-font'>{"Torqurod 2"}</text>
+      <text className='smaller-font'>{"Torquerod 2"}</text>
       <input style={orbitStyle} type="text" value="" />
       <input style={orbitStyle} type="text" value="" />
       </HorizontalGroup>
       <HorizontalGroup>
-      <text className='smaller-font'>{"Torqurod 3"}</text>
+      <text className='smaller-font'>{"Torquerod 3"}</text>
       <input style={orbitStyle} type="text" value="" />
       <input style={orbitStyle} type="text" value="" />
       </HorizontalGroup>
