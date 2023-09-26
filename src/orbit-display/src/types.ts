@@ -1,8 +1,13 @@
 import { BusEventWithPayload, PanelData } from '@grafana/data';
 
 export interface SimpleOptions {
+  showCesiumIonLogo: boolean;
   showTimeline: boolean;
   showAnimation: boolean;
+  showPath: boolean;
+  showTargets: boolean;
+  showSensorCones: boolean;
+  showFormationGoalLocations: boolean;
 }
 
 export interface CzmlPacket {

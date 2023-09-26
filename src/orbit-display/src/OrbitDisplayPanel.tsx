@@ -34,13 +34,22 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
   useCosmosTimeline(data, eventBus, updateDOMRefs);
   // console.log('orbit data: ', data);
 
+  // Cesium Ion logo toggling. Since no Ion services are being used, give users options to toggle visibility
+  useEffect(() => {
+    if (cesiumViewer === undefined) {
+      return;
+    }
+    if (!options.showCesiumIonLogo) {
+      // TODO: save the child so it can be readded if toggled on
+      cesiumViewer.cesiumWidget.creditContainer.parentNode?.removeChild(cesiumViewer.cesiumWidget.creditContainer);
+    }
+  }, [cesiumViewer, options.showCesiumIonLogo]);
+
   // Update Cesium viewer with latest data
   useEffect(() => {
     if (cesiumViewer === undefined || !data.series.length) {
       return;
     }
-    // No Cesium Ion services are being used, hide watermark
-    cesiumViewer.cesiumWidget.creditContainer.parentNode?.removeChild(cesiumViewer.cesiumWidget.creditContainer);
 
     // Load new data into custom cesium datasource
     if (cesiumViewer.dataSources.length) {
@@ -59,7 +68,7 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
       // cosmosDS.clearEntities();
       for (let i = 0; i < data.series.length; i++) {
         const node_name = data.series[i].name ?? 'node';
-        cosmosDS.load(node_name, data.series[i], cesiumViewer.clock);
+        cosmosDS.load(node_name, data.series[i], cesiumViewer.clock, options);
       }
 
       // data.timeRange is in unix seconds, but the data.series Time is in unix milliseconds
@@ -78,7 +87,7 @@ export const OrbitDisplayPanel: React.FC<Props> = ({ options, data, width, heigh
       //   cesiumViewer.clock.clockRange = ClockRange.CLAMPED;
       // }
     }
-  }, [data, cesiumViewer]);
+  }, [data, cesiumViewer, options]);
 
   useEffect(() => {
     if (cesiumViewer !== undefined) {
