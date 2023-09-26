@@ -37,6 +37,7 @@ type jsonResponse struct {
 type Cosmosresponse struct {
 	Avectors       []avector         `json:"avectors,omitempty"`
 	Adcsstrucs     []adcsstruc       `json:"adcsstrucs,omitempty"`
+	Adcstotals     []adcstotal       `json:"atttotals,omitempty"`
 	Ladcsstrucs    []ladcsstruc      `json:"lvlhadcsstrucs,omitempty"`
 	Gadcsstrucs    []gadcsstruc      `json:"geocadcsstrucs,omitempty"`
 	Qvatts         []qvatt           `json:"qvatts,omitempty"`
@@ -49,6 +50,9 @@ type Cosmosresponse struct {
 	Cpus           []cpu             `json:"cpus,omitempty"`
 	Events         []event           `json:"events,omitempty"`
 	Mags           []mag             `json:"mags,omitempty"`
+	Imus           []imu             `json:"imus,omitempty"`
+	Ssens          []ssen            `json:"ssens,omitempty"`
+	Gpss           []gps             `json:"gpss,omitempty"`
 	Geods          []geod            `json:"geods,omitempty"`
 	Geoss          []geos            `json:"geoss,omitempty"`
 	Lvlhs          []lvlh            `json:"lvlhs,omitempty"`
@@ -80,12 +84,23 @@ type adcsstruc struct {
 	Time      float64
 	Node_name string
 	Node_type float64
-	Q_s       quaternion `json:"q_s"`
+	Q_s       quaternion   `json:"q_s"`
 	S         real_avector `json:"s,omitempty"`
-	V         rvector `json:"v,omitempty"`
-	A         rvector `json:"a,omitempty"`
-	Sun 	  rvector `json:"sun,omitempty"`
-	Nad 	  rvector `json:"nad,omitempty"`
+	V         rvector      `json:"v,omitempty"`
+	A         rvector      `json:"a,omitempty"`
+	Sun       rvector      `json:"sun,omitempty"`
+	Nad       rvector      `json:"nad,omitempty"`
+}
+
+type adcstotal struct {
+	Time       float64
+	Node_name  string
+	Node_type  float64
+	S          real_avector `json:"s,omitempty"`
+	V          rvector      `json:"v,omitempty"`
+	A          rvector      `json:"a,omitempty"`
+	V_deg      rvector      `json:"v_deg,omitempty"`
+	Pos_geod_s gvector      `json:"pos_geod_s,omitempty"`
 }
 
 type ladcsstruc struct {
@@ -93,13 +108,13 @@ type ladcsstruc struct {
 	Node_name string
 	Node_type float64
 	ICRF_S    real_avector `json:"icrfs,omitempty"`
-	Q_s       quaternion `json:"q_s"`
+	Q_s       quaternion   `json:"q_s"`
 	S         real_avector `json:"s,omitempty"`
-	V         rvector `json:"v,omitempty"`
-	A         rvector `json:"a,omitempty"`
-	Sun 	  rvector `json:"sun,omitempty"`
-	Nad 	  rvector `json:"nad,omitempty"`
-	Sqatt 	  quaternion `json:"sqatt,omitempty"`
+	V         rvector      `json:"v,omitempty"`
+	A         rvector      `json:"a,omitempty"`
+	Sun       rvector      `json:"sun,omitempty"`
+	Nad       rvector      `json:"nad,omitempty"`
+	Sqatt     quaternion   `json:"sqatt,omitempty"`
 }
 
 type gadcsstruc struct {
@@ -107,13 +122,13 @@ type gadcsstruc struct {
 	Node_name string
 	Node_type float64
 	ICRF_S    real_avector `json:"icrfs,omitempty"`
-	Q_s       quaternion `json:"q_s"`
+	Q_s       quaternion   `json:"q_s"`
 	S         real_avector `json:"s,omitempty"`
-	V         rvector `json:"v,omitempty"`
-	A         rvector `json:"a,omitempty"`
-	Sun 	  rvector `json:"sun,omitempty"`
-	Nad 	  rvector `json:"nad,omitempty"`
-	Sqatt 	  quaternion `json:"sqatt,omitempty"`
+	V         rvector      `json:"v,omitempty"`
+	A         rvector      `json:"a,omitempty"`
+	Sun       rvector      `json:"sun,omitempty"`
+	Nad       rvector      `json:"nad,omitempty"`
+	Sqatt     quaternion   `json:"sqatt,omitempty"`
 }
 
 type qvatt struct {
@@ -149,14 +164,14 @@ type orbit struct {
 	Time      float64
 	Node_name string
 	Node_type float64
-	S_x       float64 `json:"eci_s_x"`
-	S_y       float64 `json:"eci_s_y"`
-	S_z       float64 `json:"eci_s_z"`
-	S_lat     float64 `json:"geod_s_lat"`
-	S_lon     float64 `json:"geod_s_lon"`
-	S_h       float64 `json:"geod_s_h"`
+	S_x       float64    `json:"eci_s_x"`
+	S_y       float64    `json:"eci_s_y"`
+	S_z       float64    `json:"eci_s_z"`
+	S_lat     float64    `json:"geod_s_lat"`
+	S_lon     float64    `json:"geod_s_lon"`
+	S_h       float64    `json:"geod_s_h"`
 	Q_s       quaternion `json:"q_s"`
-	Sun_beta  float64 `json:"sunbeta"`
+	Sun_beta  float64    `json:"sunbeta"`
 }
 
 type batt struct {
@@ -205,11 +220,11 @@ type tsen struct {
 
 type event struct {
 	Time       float64
-	Node_name  string `json:"node_name,omitempty"`
+	Node_name  string  `json:"node_name,omitempty"`
 	Duration   float64 `json:"duration,omitempty"`
-	Event_id   uint8  `json:"event_id,omitempty"`
-	Type       uint32 `json:"type,omitempty"`
-	Event_name string `json:"event_name,omitempty"`
+	Event_id   uint8   `json:"event_id,omitempty"`
+	Type       uint32  `json:"type,omitempty"`
+	Event_name string  `json:"event_name,omitempty"`
 }
 
 type mag struct {
@@ -327,6 +342,46 @@ type target struct {
 	Area float64 `json:"area,omitempty"`
 }
 
+type imu struct {
+	Time      float64
+	Node_name string
+	Name      string
+	Theta_x   float64 `json:"theta_x,omitempty"`
+	Theta_y   float64 `json:"theta_y,omitempty"`
+	Theta_z   float64 `json:"theta_z,omitempty"`
+	Theta_w   float64 `json:"theta_w,omitempty"`
+	Omega_x   float64 `json:"omega_x,omitempty"`
+	Omega_y   float64 `json:"omega_y,omitempty"`
+	Omega_z   float64 `json:"omega_z,omitempty"`
+	Mag_x     float64 `json:"mag_x,omitempty"`
+	Mag_y     float64 `json:"mag_y,omitempty"`
+	Mag_z     float64 `json:"mag_z,omitempty"`
+}
+
+type ssen struct {
+	Time      float64
+	Node_name string
+	Name      string
+	Qva       float64 `json:"qva,omitempty"`
+	Qvb       float64 `json:"qvb,omitempty"`
+	Qvc       float64 `json:"qvc,omitempty"`
+	Qvd       float64 `json:"qvd,omitempty"`
+	Azi       float64 `json:"azi,omitempty"`
+	Elev      float64 `json:"elev,omitempty"`
+}
+
+type gps struct {
+	Time      float64
+	Node_name string
+	Name      string
+	Geocs_x   float64 `json:"geocs_x,omitempty"`
+	Geocs_y   float64 `json:"geocs_y,omitempty"`
+	Geocs_z   float64 `json:"geocs_z,omitempty"`
+	Geods_lat float64 `json:"geods_lat,omitempty"`
+	Geods_lon float64 `json:"geods_lon,omitempty"`
+	Geods_alt float64 `json:"geods_alt,omitempty"`
+}
+
 type command_history struct {
 	Time    float64
 	Id      uint32 `json:"id"`
@@ -334,7 +389,38 @@ type command_history struct {
 }
 
 type cosmostype interface {
-	avector | real_avector | adcsstruc | ladcsstruc | gadcsstruc | qvatt | qaatt | eci | orbit | batt | bcreg | tsen | cpu | event | mag | geod | geos | lvlh | gvector | geoidpos | svector | spherpos | rvector | cvector | quaternion | qatt | target | command_history
+	avector |
+		real_avector |
+		adcsstruc |
+		adcstotal |
+		ladcsstruc |
+		gadcsstruc |
+		qvatt |
+		qaatt |
+		eci |
+		orbit |
+		batt |
+		bcreg |
+		tsen |
+		cpu |
+		event |
+		mag |
+		geod |
+		geos |
+		lvlh |
+		gvector |
+		geoidpos |
+		svector |
+		spherpos |
+		rvector |
+		cvector |
+		quaternion |
+		qatt |
+		target |
+		imu |
+		ssen |
+		gps |
+		command_history
 }
 
 // Datasource is an example datasource which can respond to data queries, reports

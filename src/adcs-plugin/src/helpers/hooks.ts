@@ -5,16 +5,13 @@ import * as THREE from 'three';
 
 // Hook to listen to eventBus for cosmos timeevents, running animation callback when event fires
 export const useCosmosTimeline = (data: PanelData, eventBus: EventBus, callback: TimeEventCallback) => {
-  // console.log('enter Cosmos Timeline');
   // const [entity, setEntity] = useState<TimeEvent>();
   // ---------------------------------------------------
   // Imperative animation controller
   // Unix seconds timestamp that denotes current time, obtained from cosmos-timeline event publisher
   useEffect(() => {
-    // console.log('useEffect Cosmos Timeline ');
     const subscriber = eventBus.getStream(TimeEvent).subscribe({
       next: (event: TimeEvent) => {
-        // console.log('subscribe Cosmos Timeline');
         if (event.payload.time !== undefined) {
           callback(data, event);
         }
@@ -57,6 +54,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
   // the data state from selection: {LVLH: qatt, ICRF: eci}
   // to reference & filter query data.meta.custom == qatt || eci
   const refDS = useRef<string>();
+  // the units string RAD||DEG
   const refUS = useRef<string>();
   // console.log('useDomUpdate');
   // console.log('update DOM refInputs.current: ', refInputs.current);
@@ -94,36 +92,30 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
   // ---------------------------------------------------
   // Imperative animation update call
   const updateDOMRefs = useCallback((data: PanelData, event: TimeEvent) => {
-    // console.log('updateDOMRefs use callback function in hooks');
-    // console.log('Data State ref', refDS.current);
-
     if (
       !data.series.length || // Check if there is valid query result
       data.series[0].fields.length < 2 // || // Check if there are time and value columns in query
       //refIdx.current >= data.series[0].fields[0].values.length // Check if there are values in those columns
     ) {
       // console.log('no data updateDOMRefs in hooks');
-      //refIdx.current = 0;
       return;
     }
-    // console.log('start of updateDOMRefs in hooks');
 
     // filter data based on current data series type;
-    // live data .... where data.meta.custom = eci || qatt for map to refDS.current = LVLH || ICRF ....  TODO
-    // let live_data = data.series.map(filter: )
     const DataMap: Object = {
       ICRF: 'adcsstruc',
       LVLH: 'ladcsstruc',
       GEOC: 'gadcsstruc',
     };
-    // let data_type: string;
-    // if (refDS.current) {
-    //   const key: string = refDS.current;
-    //   // data_type = DataMap[key];
-    //   DataMap[key as keyof DataMap]
-    // }
+    // set default dataframe
+    if (refDS.current === undefined) {
+      refDS.current = 'ICRF';
+    }
+    // filter multi-query for data frame selected
     let live_data = data.series.filter((row) => row.meta?.custom?.type === DataMap[refDS.current as keyof Object]);
     // console.log('Live filtered data: ', live_data);
+    // console.log('refds current: ', refDS.current);
+    // console.log('refUS current: ', refUS.current);
 
     // converts radians to degrees: 1rad x (180/PI) = DEGREE
     const rad2deg: number = 180 / Math.PI;
@@ -132,9 +124,9 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     // let units: string = 'radians'; // radians // degrees
     let units: string = refUS.current!; // radians // degrees
 
-    let yaw = 0;
-    let pitch = 0;
-    let roll = 0;
+    // let yaw = 0;
+    // let pitch = 0;
+    // let roll = 0;
     // sun vector
     let sunx = live_data[0].fields.find((field) => field.name === 'sun_x');
     let suny = live_data[0].fields.find((field) => field.name === 'sun_y');
@@ -152,9 +144,6 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     let nady_d = 0;
     let nadz_d = 0;
 
-    // let icrf_s_h = 0;
-    // let icrf_s_e = 0;
-    // let icrf_s_b = 0;
     // the ATT ICRF S quaternion
     let icrf_s_q_x = live_data[0].fields.find((field) => field.name === 'q_s_x');
     let icrf_s_q_y = live_data[0].fields.find((field) => field.name === 'q_s_y');
@@ -180,70 +169,27 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
 
     // console.log('update DOM refInputs.current: ', refInputs.current);
 
-    let last_time = 0;
-    if (refInputs.current.TIME) {
-      last_time = parseFloat(refInputs.current.TIME.value);
-    }
-    // console.log('last time', last_time);
-    let pl_time = 0;
-    if (refInputs.current.PLTIME) {
-      pl_time = parseFloat(refInputs.current.PLTIME.value);
-    }
+    // let last_time = 0;
+    // if (refInputs.current.TIME) {
+    //   last_time = parseFloat(refInputs.current.TIME.value);
+    // }
+    // // console.log('last time', last_time);
+    // let pl_time = 0;
+    // if (refInputs.current.PLTIME) {
+    //   pl_time = parseFloat(refInputs.current.PLTIME.value);
+    // }
 
     // Update field values
     Object.entries(refInputs.current).forEach(([key, ref], i) => {
-      // console.log('object refInputs.current iterator: key, ref', key, ref);
-      // console.log('data series live_data view in iterator: ', live_data);
-
       if (ref !== null) {
         // Check that there are query results
-        //  should be checking if greater than default length [0] so not  (!data.series.length) as it was instead  (data.series.length <=1)
-
         if (live_data.length < 1) {
           console.log('EMPTY QUERY');
           return;
         }
-        // 0th, 1st, and 2nd derivatives have been separated into separate series
-        // for first data element always
-        // let seriesIdx = 0;
-        // TODO remove archaic data reference
-        // switch (key) {
-        //   case 'VYAW':
-        //   case 'VPITCH':
-        //   case 'VROLL':
-        //     seriesIdx = 1;
-        //     break;
-        //   case 'AYAW':
-        //   case 'APITCH':
-        //   case 'AROLL':
-        //     seriesIdx = 2;
-        //     break;
-        //   default:
-        //     break;
-        // }
-        // setState takes one rerender cycle to be reset to the correct value
-        // TODO: make this a better check?
-        // const boundCheck = (i % 3) + 1;
-        // why is this looping over a different node row return from the query for each iteration of location part X derivative level ?
-        // should this be instead looping over every node row, data.series[node_row] , then selecting the appropriate location part X derivative level i.e. AYAW
-        // console.log('bound check function, data series for idX [0]: ', seriesIdx, live_data[seriesIdx]);
-        // console.log('event time check: event payload ', event.payload);
 
-        // console.log('bound check function, data series fields[0] values for first row: ', seriesIdx, data.series[seriesIdx].fields[3].values);
-        // for (let i = 0; i < data.series[0].fields.length; i++) {
-        //   console.log('iterator data series[0] field[i] value[0]: ', data.series[seriesIdx].fields[i].name, ': ', data.series[seriesIdx].fields[i].values.get(0));
-
-        // }
-
-        // TODO redefine bound check for new data series type
-        // if (boundCheck >= data.series[seriesIdx].fields.length) {
-        //   return;
-        // }
         // Query must have returned some values; select array of beacon time stamps
         const timeValues = live_data[0].fields[0].values;
-        // console.log('timeValues: ', timeValues);
-        // console.log('i; refIdxs.current[i] ', i, '; ', refIdxs.current[i]);
-
         if (timeValues.length === 0) {
           return;
         }
@@ -253,184 +199,86 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         //   refIdxs.current[i] = 0;
         // }
 
-        // If new timestamp is less than our current timestamp, then search from start
-        // TODO: depending on circumstances, we could perhaps just search backwards, eg: if scrubbing is in event?
-
-        let time = timeValues.get(0);
-        // console.log('timeValues get first row time', time);
-
-        // if (time > event.payload.time!) {
-        //   refIdxs.current[i] = 0;
-        // }
-
-        // // Search through timestamps, and get the timestamp that is one before we go over the event timestamp
-        // for (; refIdxs.current[i] < timeValues.length - 1; refIdxs.current[i]++) {
-        //   time = timeValues.get(refIdxs.current[i]);
-        //   if (time === event.payload.time!) {
-        //     break;
-        //   }
-        //   if (time > event.payload.time!) {
-        //     refIdxs.current[i] += 1;
-        //     break;
-        //   }
-        // }
+        // let time = timeValues.get(0);
 
         // add clause here to check   && (time > last_time)
         let array_pos = -1;
-        for (let i = 0; i < timeValues.length; i++) {
-          time = timeValues.get(i);
-          // console.log('this time i ', time);
-          const delta_time = time - last_time;
-          const delta_payload_time = event.payload.time! - pl_time;
 
-          // if (time === event.payload.time! && (time > last_time || Number.isNaN(last_time))) {
-          // initial time
-          if (Number.isNaN(last_time) && Number.isNaN(pl_time) && time > event.payload.time!) {
-            // console.log('init utc delta time: ', delta_time);
-            // console.log('init payload delta time: ', delta_payload_time);
-            const pltime = event.payload.time!;
-            array_pos = i;
-            if (key === 'TIME') {
-              ref.value = time.toString();
-              break;
+        // find time values minimum bound
+        const time_min_bound = timeValues.get(0);
+        if (time_min_bound > event.payload.time!) {
+          // filter out payload preceeding data range
+          // console.log('time min bound', time_min_bound);
+          return;
+        } else {
+          // check max bound
+          const max_index = timeValues.length - 1;
+          const time_max_bound = timeValues.get(max_index);
+          if (time_max_bound < event.payload.time!) {
+            // filter out payload after data range
+            // console.log('time max bound', time_max_bound);
+            array_pos = max_index;
+          } else {
+            // the inner case for payload within data range below
+            // iterate over data array for best fit timestamp
+            for (let t_index = 0; t_index < timeValues.length - 1; t_index++) {
+              // time = timeValues[refIdxs.current[input_field_key]!];
+              let t_time = timeValues.get(t_index);
+              // console.log('timevalues', timeValues, 't time', t_time, 'time diff', event.payload.time! - t_time);
+              if (t_time === event.payload.time!) {
+                array_pos = t_index;
+                // console.log("t_time === event.payload.time!", t_index);
+                break;
+              }
+              if (t_time > event.payload.time!) {
+                if (t_index > 0) {
+                  let t_time_minus = timeValues.get(t_index - 1);
+                  if (t_time_minus > event.payload.time!) {
+                    for (let t_index_minus = t_index - 1; t_time_minus < event.payload.time!; t_time_minus--) {
+                      // console.log('backwards scrub', t_index);
+                      let t_time_minus_minus = timeValues.get(t_index_minus);
+                      if (t_time_minus_minus < event.payload.time!) {
+                        array_pos = t_index_minus;
+                        // console.log('backwards scrub done', t_index);
+                        break;
+                      }
+                    }
+                    break;
+                  } else {
+                    // this is the one
+                    array_pos = t_index - 1;
+                    // console.log("t_time_minus < event.payload.time! index zero, return", t_index - 1);
+                    break;
+                  }
+                } else {
+                  array_pos = 0;
+                  // console.log("t_time > event.payload.time! index zero, return", t_index);
+                  return;
+                }
+              } else if (t_time < event.payload.time!) {
+                if (t_index === timeValues.length - 1) {
+                  // console.log("t_time < event.payload.time! max index", t_index);
+                  array_pos = t_index;
+                  break;
+                }
+                let t_time_plus = timeValues.get(t_index + 1);
+                if (t_time_plus > event.payload.time!) {
+                  array_pos = t_index;
+                  // console.log("t_time < event.payload.time!", t_index);
+                  break;
+                }
+              }
             }
-            if (key === 'PLTIME') {
-              ref.value = pltime.toString();
-              break;
-            }
-            break;
           }
-          // Increment time forwards
-          else if (2000 > delta_time && delta_time > 0 && delta_payload_time > 0) {
-            // console.log('increment utc delta time: ', delta_time);
-            // console.log('increment payload delta time: ', delta_payload_time);
-            const pltime = event.payload.time!;
-            array_pos = i;
-            if (key === 'TIME') {
-              ref.value = time.toString();
-              break;
-            }
-            if (key === 'PLTIME') {
-              ref.value = pltime.toString();
-              break;
-            }
-            break;
-          } else if (delta_payload_time > delta_time && delta_time > 0 && delta_payload_time > 0) {
-            // console.log('increment big utc delta time: ', delta_time);
-            // console.log('increment big payload delta time: ', delta_payload_time);
-            const pltime = event.payload.time!;
-            array_pos = i;
-            if (key === 'TIME') {
-              ref.value = time.toString();
-              break;
-            }
-            if (key === 'PLTIME') {
-              ref.value = pltime.toString();
-              break;
-            }
-            break;
-          }
-          // decrement time backwards
-          else if (
-            time > event.payload.time! &&
-            // (time < last_time || Number.isNaN(last_time)) &&
-            // (event.payload.time! < pl_time || Number.isNaN(pl_time)
-            event.payload.time! < pl_time
-          ) {
-            // else if ((delta_time > -2000) && (delta_time < 0) && (delta_payload_time < 0)) {
-            // console.log('INCREMENT Last time: ', last_time, '; time: ', time, '; payload time: ', event.payload.time);
-            // console.log('decrement utc delta time: ', delta_time);
-            // console.log('decrement payload delta time: ', delta_payload_time);
-            const pltime = event.payload.time!;
-            array_pos = i;
-            if (key === 'TIME') {
-              ref.value = time.toString();
-              break;
-            }
-            if (key === 'PLTIME') {
-              ref.value = pltime.toString();
-              break;
-            }
-            break;
-          }
-          // delta_payload_time > delta_time
-          // (delta_time > -61000)
-          else if (delta_payload_time < delta_time && delta_time < -2000 && delta_time < 0 && delta_payload_time < 0) {
-            // console.log('INCREMENT Last time: ', last_time, '; time: ', time, '; payload time: ', event.payload.time);
-            // console.log('decrement big utc delta time: ', delta_time);
-            // console.log('decrement big payload delta time: ', delta_payload_time);
-            const pltime = event.payload.time!;
-            array_pos = i;
-            if (key === 'TIME') {
-              ref.value = time.toString();
-              break;
-            }
-            if (key === 'PLTIME') {
-              ref.value = pltime.toString();
-              break;
-            }
-            break;
-          }
-
-          // if (
-          //   time > event.payload.time! &&
-          //   (time > last_time || Number.isNaN(last_time)) &&
-          //   (event.payload.time! > pl_time || Number.isNaN(pl_time))
-          // ) {
-          //   // console.log('INCREMENT Last time: ', last_time, '; time: ', time, '; payload time: ', event.payload.time);
-          //   console.log('rando utc delta time: ', delta_time);
-          //   console.log('rando payload delta time: ', delta_payload_time);
-          //   const pltime = event.payload.time!;
-          //   array_pos = i;
-          //   if (key === 'TIME') {
-          //     ref.value = time.toString();
-          //     break;
-          //   }
-          //   if (key === 'PLTIME') {
-          //     ref.value = pltime.toString();
-          //     break;
-          //   }
-          //   break;
-          // }
-
-          // console.log('last time - time', last_time - time, 'last time - event time', last_time - event.payload.time!);
-          // TODO need to update to account for instances where there was a gap in beacons greater than 1000... for rewind function
-
-          // console.log('previous event time: ', pl_time, 'event time: ', event.payload.time!, 'delta event time: ', pl_time - event.payload.time!, 'pl_time - i time', pl_time - time);
-          // if (
-          //   (last_time - time === 1000 || last_time - time <= 1800 || last_time - time >= pl_time - event.payload.time!) &&
-          //   pl_time < event.payload.time!
-          // ) {
-          //   //&& (last_time > time) && (time > event.payload.time!)
-          //   array_pos = i;
-          //   // console.log('DECREMENT Last time: ', last_time, '; time: ', time);
-          //   const pltime = event.payload.time!;
-
-          //   if (key === 'TIME') {
-          //     ref.value = time.toString();
-          //     break;
-          //   }
-          //   if (key === 'PLTIME') {
-          //     ref.value = pltime.toString();
-          //     break;
-          //   }
-          //   break;
-          // }
         }
+
+        if (key === 'TIME') {
+          ref.value = timeValues.get(array_pos).toString();
+        }
+
         if (array_pos === -1) {
-          // console.log('SKIP Last time: ', last_time, '; time: ', time);
           return;
         }
-
-        // TODO remove log of data series:
-        // for (let i = 0; i < live_data[0].fields.length; i++) {
-        //   console.log(
-        //     'iterator data series[0] field[i] value[array_pos]: ',
-        //     live_data[seriesIdx].fields[i].name,
-        //     ': ',
-        //     live_data[seriesIdx].fields[i].values.get(array_pos)
-        //   );
-        // }
 
         sunx_d = sunx!.values.get(array_pos) ?? 0;
         suny_d = suny!.values.get(array_pos) ?? 0;
@@ -445,7 +293,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         refSun.current!.setDirection(new_sundir);
         refNad.current!.setDirection(new_naddir);
 
-        // Map appropriate column
+        // Map appropriate columns for data frame
         // redefine new column names as map
         const keyMap: Object = {
           ICRF: {
@@ -496,43 +344,26 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           return;
         }
         // Finally, update display with most up-to-date values
-        // console.log('update display latest value: refIdxs: ', refIdxs);
-
-        // const currentValue: number = field.values.get(refIdxs.current[i]) ?? 0;
-        // console.log('refIdxs.current[i] ', refIdxs.current[i]);
-
         // define index based on timestamp map to time column
         let currentValue: number = field.values.get(array_pos) ?? 0;
-        switch (key) {
-          case 'YAW':
-            // z axis || Heading || Yaw
-            yaw = currentValue;
-            break;
-          case 'PITCH':
-            // y axis || Elevation || Pitch
-            pitch = currentValue;
-            break;
-          case 'ROLL':
-            // x axis || Bank || Roll
-            roll = currentValue;
-            break;
-        }
+        // define variables for 3D model
+        // switch (key) {
+        //   case 'YAW':
+        //     // z axis || Heading || Yaw
+        //     yaw = currentValue;
+        //     break;
+        //   case 'PITCH':
+        //     // y axis || Elevation || Pitch
+        //     pitch = currentValue;
+        //     break;
+        //   case 'ROLL':
+        //     // x axis || Bank || Roll
+        //     roll = currentValue;
+        //     break;
+        // }
 
         // set icrf_s base rotation values for LVLH or GEOC frames
         if (key === 'YAW' && (refDS.current === 'GEOC' || refDS.current === 'LVLH')) {
-          // const icrf_h = live_data[0].fields.find((field) => field.name === 'icrf_s_h');
-          // const icrf_e = live_data[0].fields.find((field) => field.name === 'icrf_s_e');
-          // const icrf_b = live_data[0].fields.find((field) => field.name === 'icrf_s_b');
-          // if (icrf_h === undefined || icrf_e === undefined || icrf_b === undefined) {
-          //   return;
-          // }
-          // let currentValue_icrf_h: number = icrf_h.values.get(array_pos) ?? 0;
-          // let currentValue_icrf_e: number = icrf_e.values.get(array_pos) ?? 0;
-          // let currentValue_icrf_b: number = icrf_b.values.get(array_pos) ?? 0;
-          // icrf_s_h = currentValue_icrf_h;
-          // icrf_s_e = currentValue_icrf_e;
-          // icrf_s_b = currentValue_icrf_b;
-
           // set the s quaternion data values
           if (
             sqatt_x === undefined ||
@@ -582,7 +413,8 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           if (units === 'Degrees') {
             currentValue = currentValue * rad2deg;
           }
-          ref.value = currentValue.toExponential(5).toString();
+          // ref.value = currentValue.toExponential(5).toString();
+          ref.value = currentValue.toFixed(5).toString();
         } else {
           ref.value = currentValue.toString();
         }
@@ -602,10 +434,14 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
       ) {
         // refModel.current.rotation.set(roll, pitch, yaw);
         if (refDS.current === 'ICRF') {
-          refModel.current.rotation.set(0, 0, 0);
-          if (roll !== 0 && pitch !== 0 && yaw !== 0) {
-            refModel.current.rotation.set(roll, pitch, yaw);
-          }
+          // refModel.current.rotation.set(0, 0, 0);
+          refModel.current.setRotationFromQuaternion(icrf_s_quaternion);
+          refSun.current.applyQuaternion(icrf_s_quaternion);
+          refNad.current.applyQuaternion(icrf_s_quaternion);
+          // console.log(roll, pitch, yaw);
+          // if (roll !== 0 && pitch !== 0 && yaw !== 0) {
+          //   refModel.current.rotation.set(roll, pitch, yaw);
+          // }
         }
         // TODO
         // rotate the nad and sun vectors by the qaternion HEB for LVLH and GEOC data frames
@@ -621,8 +457,16 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           // refNad.current.rotateY(icrf_s_e);
           // refNad.current.rotateZ(icrf_s_h);
 
+          // const s_quaternion_inverse = s_quaternion.invert();
+          // refModel.current.setRotationFromQuaternion(s_quaternion_inverse);
+
           // apply geoc.s quaternion to model rotation
           refModel.current.setRotationFromQuaternion(s_quaternion);
+          // refModel.current.applyQuaternion(s_quaternion);
+
+          // const icrf_s_quaternion_inverse = icrf_s_quaternion.invert();
+          // refModel.current.applyQuaternion(icrf_s_quaternion_inverse);
+          // refModel.current.applyQuaternion(icrf_s_quaternion);
 
           // apply inverse quaternion to fix model back to default orientation
           // refModel.current.applyQuaternion(s_quaternion_inverse);
@@ -661,10 +505,16 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           // refCamera.current = camera;
 
           // apply lvlh.s quaternion to model rotation
+          // const s_quaternion_inverse = s_quaternion.invert();
+          // refModel.current.setRotationFromQuaternion(s_quaternion_inverse);
           refModel.current.setRotationFromQuaternion(s_quaternion);
+          // refModel.current.applyQuaternion(s_quaternion);
 
           // apply inverse quaternion to fix model back to default orientation
-          // refModel.current.applyQuaternion(s_quaternion_inverse);
+          // const icrf_s_quaternion_inverse = icrf_s_quaternion.invert();
+          // refModel.current.applyQuaternion(icrf_s_quaternion_inverse);
+          // refModel.current.applyQuaternion(icrf_s_quaternion);
+
           // prevent yarn build error for two declarations
           console.log(s_quaternion_inverse);
           console.log(icrf_s_quaternion);

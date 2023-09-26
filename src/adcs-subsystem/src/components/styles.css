@@ -1,0 +1,53 @@
+.subscript {
+    vertical-align: sub;
+    font-size: smaller;
+  }
+
+.superscript {
+    vertical-align: super;
+    font-size: smaller;
+}
+
+.smaller-font {
+    font-size:10px;
+  }
+  
+.even-smaller-font {
+    font-size:8px;
+}
+
+.quadrant-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100px;
+  }
+  
+  .quadrant-row {
+    display: flex;
+  }
+  
+  .quadrant {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 25px;
+  }
+  
+  .quadrant-vertical-line {
+    width: 1px;
+    background-color: #aaa;
+    margin: 0 10px;
+    height: 50px;
+  }
+  
+  .quadrant-horizontal-line {
+    width: 200px;
+    border-top: 1px solid #aaa;
+    margin: 10px 0;
+  }
+  
+  
+  

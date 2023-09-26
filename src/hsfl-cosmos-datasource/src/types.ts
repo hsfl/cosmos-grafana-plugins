@@ -12,6 +12,9 @@ export const queryOptions: Array<SelectOption<string>> = [
   { label: 'Battery', value: 'battery' },
   { label: 'BC Regulator', value: 'bcreg' },
   { label: 'CPU', value: 'cpu' },
+  { label: 'IMU', value: 'imu' },
+  { label: 'SSEN', value: 'ssen' },
+  { label: 'GPS', value: 'gps' },
   { label: 'Events', value: 'event' },
   { label: 'Thermal', value: 'tsen' },
   { label: 'Nodal Awareness', value: 'nodalaware', description: 'Relative angle/range to other nodes' },
@@ -28,6 +31,7 @@ export const posTypeOptions: Array<SelectOption<string>> = [
   { label: 'GEOC', value: 'geoc', description: 'goec for H E B in ADCS' },
   { label: 'EUL_LVLH', value: 'eul_lvlh', description: 'Euler Angle and LVLH for H E B in ADCS' },
   { label: 'ORBIT', value: 'orbit', description: 'Orbit position: eci.s, geod lat/lon/alt, kepstruc.beta' },
+  { label: 'Total Att', value: 'att_total', description: 'ADCS estimated state for total attitude and position' },
 ];
 
 // Origin point node options for Nodal Awareness query type, todo: async-ify
