@@ -27,6 +27,7 @@ export interface RectWithTextProps {
   /** Height of one little bar gauge */
   height: number;
   /** Ref to the inner SVG element */
+  device: string;
 }
 
 export type RectWithTextHandle = {
