@@ -21,7 +21,7 @@ const RectWithText = React.forwardRef<RectWithTextHandle, RectWithTextProps>((pr
 
   return (
     <div style={{ display: 'inline-block' }}>
-      <h3>{device}</h3>
+      <p>{device}</p>
       <svg width={width + padding * 2} height={height + padding * 2}>
         <Group>
           <rect ref={refRect} x={padding / 2} y={padding / 2} width={width} height={height} fill="rgba(0, 225, 0, 1)" />

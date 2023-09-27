@@ -180,6 +180,8 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, fie
         if (data.series.length && i + 1 < data.series[0].fields.length) {
           // const idx = data.series[0].fields[i + 1].values.length - 1;
           temp = data.series[0].fields[i + 1].values.get(refIdxs.current[i]);
+          name = data.series[0].fields[i + 1].labels?.name!;
+          // console.log('names', data.series[0]);
           // let name_field = data.series[0].fields.find((field) => field.name === 'name');
           // if (name_field === undefined) {
           //   return;
