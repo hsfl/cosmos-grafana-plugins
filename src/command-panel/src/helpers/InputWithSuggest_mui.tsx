@@ -10,7 +10,7 @@ import type { AutocompleteHighlightChangeReason } from '@mui/material';
 import Chip from '@mui/material/Chip';
 import Fade from '@mui/material/Fade';
 import ListItem from '@mui/material/ListItem';
-import Popper, { PopperProps }  from '@mui/material/Popper';
+import Popper, { PopperProps } from '@mui/material/Popper';
 import TextField from '@mui/material/TextField';
 
 // interface PacketCommandDescription {
@@ -26,9 +26,9 @@ import TextField from '@mui/material/TextField';
 // }
 
 interface CommandHistoryDescription {
-    command: string;
-    utc: number;
-    node: string;
+  command: string;
+  utc: number;
+  node: string;
 }
 
 export const useInputSuggest_mui = () => {
@@ -39,12 +39,12 @@ export const useInputSuggest_mui = () => {
   const [anchorEl, setAnchorEl] = useState<PopperProps['anchorEl']>(null);
   const [open, setOpen] = useState(false);
 
-//   useEffect(() => {
-//     console.log('inputValue changed: ', inputValue);
-//   }, [inputValue]);
-//   useEffect(() => {
-//     console.log('value changed: ', value);
-//   }, [value]);
+  //   useEffect(() => {
+  //     console.log('inputValue changed: ', inputValue);
+  //   }, [inputValue]);
+  //   useEffect(() => {
+  //     console.log('value changed: ', value);
+  //   }, [value]);
 
   // If an option is chosen from the list
   const onValueChange = (
@@ -69,7 +69,7 @@ export const useInputSuggest_mui = () => {
     option: CommandHistoryDescription | null,
     reason: AutocompleteHighlightChangeReason
   ) => {
-    console.log('onhighlightchange', 'event:', event, 'option:', option, 'reason:', reason)
+    console.log('onhighlightchange', 'event:', event, 'option:', option, 'reason:', reason);
     if (option === null) {
       return;
     }
@@ -85,8 +85,8 @@ export const useInputSuggest_mui = () => {
   ) => {
     const ret = <ListItem {...props}>{typeof option === 'string' ? option : option.command}</ListItem>;
     if (state.selected) {
-    //   setAnchorEl(ret);
-    //   setOpen(true);
+      //   setAnchorEl(ret);
+      //   setOpen(true);
     }
     return ret;
   };
@@ -135,7 +135,7 @@ export const useInputSuggest_mui = () => {
             return;
           }
         }}
-        renderInput={(params) => <TextField {...params}  variant="standard" size="small" />}
+        renderInput={(params) => <TextField {...params} variant="standard" size="small" />}
         renderOption={renderOption}
         renderTags={renderTags}
       />
@@ -144,16 +144,16 @@ export const useInputSuggest_mui = () => {
 };
 
 const commandHistory: CommandHistoryDescription[] = [
-    {
-        utc: 60101.09,
-        command: "agent ground comm ping",
-        node: "ground",
-    },
-    {
-        utc: 60101.1,
-        command: "agent ground comm command iobc UHFUP:UHFDOWN Ping",
-        node: "ground",
-    }
+  {
+    utc: 60101.09,
+    command: 'agent ground comm ping',
+    node: 'ground',
+  },
+  {
+    utc: 60101.1,
+    command: 'agent ground comm command iobc UHFUP:UHFDOWN Ping',
+    node: 'ground',
+  },
 ];
 
 // const packetCommands: PacketCommandDescription[] = [

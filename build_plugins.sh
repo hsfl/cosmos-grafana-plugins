@@ -50,6 +50,7 @@ for f in *; do
 
         # Build frontend part of plugin
         yarn install
+	yarn lint:fix
         yarn build
 
 	# Backend datasources must also be built with mage
