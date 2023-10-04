@@ -8,10 +8,6 @@ import { TargetChart } from './components/TargetChart';
 interface Props extends PanelProps<SimpleOptions> {}
 
 export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) => {
-  if (data.series === undefined || data.series.length === 0 || data.series[0].fields === undefined) {
-    return null;
-  }
-  console.log(data);
   const dataArray = [];
   for (let i = 0; i < data.series.length; i++) {
     dataArray.push(data.series[i]);
@@ -38,7 +34,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
   //distance from center of concentric rings to indicator dot using elevation
   const nodeR = ((90 - Math.abs(dataArray[1].fields[3].values.get(0)) * (180 / Math.PI)) / 90) * concentricR;
   //distance from center of concentric rings to indicator dot using slant range
-  const nodeRSlant = ((1000 - Math.abs(dataArray[1].fields[4].values.get(0))) / 2000) * concentricR;
+  const nodeRSlant = (Math.abs(dataArray[1].fields[4].values.get(0)) / 2000) * concentricR;
   const [dotRadius, setDotRadius] = useState<number>(nodeR);
 
   const handleRadioButtonChange = (value: string) => {
@@ -52,6 +48,9 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
   };
 
   const plotWidth = Math.min((width * 2) / 3, height * 1.5);
+  if (data.series === undefined || data.series.length === 0 || data.series[0].fields === undefined) {
+    return null;
+  }
   return (
     // TODO: fix plot/table relative spacing
     <div style={{ width, height, display: 'grid', gridTemplateColumns: 'auto auto auto' }}>
