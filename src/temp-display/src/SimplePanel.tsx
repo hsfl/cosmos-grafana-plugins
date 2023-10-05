@@ -156,7 +156,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, fie
           //   }
           // }
           const currentTemp: number = data.series[0].fields[i + 1].values.get(refIdxs.current[i]) ?? 0;
-          console.log('current temp: ', currentTemp);
+          // console.log('current temp: ', currentTemp);
           val.text!.textContent = currentTemp.toFixed(2);
         });
       }

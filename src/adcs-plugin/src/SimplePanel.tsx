@@ -66,7 +66,8 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   // console.log('adcs data: ', data);
   // console.log('data select, state ', data.state);
   // console.log('ref data state . current ', refDS.current);
-  let show_table = true;
+  // let show_table = true;
+  let show_table = options.showSeriesCount;
 
   // Setup the scene
   useEffect(() => {
@@ -85,7 +86,11 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       //setRenderer(renderer);
     }
     // Threejs canvas to take up the upper half of the panel
-    const [canvasWidth, canvasHeight] = [width, height / 2];
+    let panelHeight = height * 0.85;
+    if (show_table) {
+      panelHeight = height / 2;
+    }
+    const [canvasWidth, canvasHeight] = [width, panelHeight];
     refRenderer.current.setSize(canvasWidth, canvasHeight);
     const scene = new THREE.Scene();
     refScene.current = scene;
@@ -171,7 +176,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       refRenderer.current!.render(scene, camera);
     });
     // Note: refs are stable, will not trigger effect, but calms the exhaustive-deps lint rule
-  }, [width, height, refRenderer, refScene, refCamera, refModel, refSun, refNad, refInputs, refUS]);
+  }, [width, height, show_table, refRenderer, refScene, refCamera, refModel, refSun, refNad, refInputs, refUS]);
   // console.log('REF inputs adcs simple panel: ', refInputs);
 
   // function Label({ name, isDeg }: { name: string; isDeg: string }) {

@@ -436,8 +436,14 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         if (refDS.current === 'ICRF') {
           // refModel.current.rotation.set(0, 0, 0);
           refModel.current.setRotationFromQuaternion(icrf_s_quaternion);
+          // refModel.current.applyQuaternion(icrf_s_quaternion.invert());
+          // s_quaternion_inverse
+          // refSun.current.setRotationFromQuaternion(s_quaternion_inverse);
           refSun.current.applyQuaternion(icrf_s_quaternion);
+          refSun.current.applyQuaternion(icrf_s_quaternion.invert());
+          // refNad.current.setRotationFromQuaternion(icrf_s_quaternion);
           refNad.current.applyQuaternion(icrf_s_quaternion);
+          refNad.current.applyQuaternion(icrf_s_quaternion.invert());
           // console.log(roll, pitch, yaw);
           // if (roll !== 0 && pitch !== 0 && yaw !== 0) {
           //   refModel.current.rotation.set(roll, pitch, yaw);

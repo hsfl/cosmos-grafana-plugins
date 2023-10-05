@@ -43,16 +43,6 @@ export const SimplePanel: React.FC<Props> = ({ data, eventBus, timeRange }) => {
     //   selection = { label: panel_type };
     // }
     panelList.push({ label: panel_type });
-    // data.series[0].fields.forEach((field) => {
-    //   const cpu_name = field.labels?.name;
-    //   if (cpu_name === undefined) {
-    //     return;
-    //   }
-    //   if (cpuList.findIndex((v) => v.label === cpu_name) === -1) {
-    //     cpuList.push({ label: cpu_name });
-    //   }
-    // });
-    // setCpuSelectOptions(cpuList);
     setSelectPanel((selection) => {
       if (panelList.length === 0) {
         return selection;
@@ -102,7 +92,7 @@ export const SimplePanel: React.FC<Props> = ({ data, eventBus, timeRange }) => {
         {/* <IMU { ...refInputs } /> */}
         {/* <SunSensor /> */}
         {/* <GPS /> */}
-        <Controls />
+        <Controls {...refInputs} />
         {/* <EstimatedStates /> */}
       </div>
     );
@@ -123,7 +113,7 @@ export const SimplePanel: React.FC<Props> = ({ data, eventBus, timeRange }) => {
         <IMU {...refInputs} />
         <SunSensor {...refInputs} />
         <GPS {...refInputs} />
-        <Controls />
+        <Controls {...refInputs} />
         <EstimatedStates {...refInputs} />
       </div>
     );

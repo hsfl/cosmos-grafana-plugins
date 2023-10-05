@@ -46,16 +46,21 @@ export const useDomUpdate = (): DomUpdateReturn => {
         data.series[0].fields.length < 2 // || // Check if there are time and value columns in query
         //refIdx.current >= data.series[0].fields[0].values.length // Check if there are values in those columns
       ) {
-        //refIdx.current = 0;
         return;
       }
-
       // Update field values
       Object.entries(refInputs.current).forEach(([key, ref]) => {
         if (ref !== null) {
           // Note, this type cast does NOT ensure that key is in input_field
           const input_field_key = key as input_field;
           if (!data.series.length) {
+            return;
+          }
+          let focusPanel = data.series[0].meta?.custom?.type;
+          let live_data = data.series.filter((row) => row.meta?.custom?.type === focusPanel);
+          const field = live_data[0].fields?.find((field) => field.name === key);
+          // console.log("select filtered field: ", field);
+          if (field === undefined) {
             return;
           }
           // Query must have returned some values
@@ -141,29 +146,10 @@ export const useDomUpdate = (): DomUpdateReturn => {
               }
             }
           }
-
-          let focusPanel = '';
-          focusPanel = data.series[0].meta?.custom?.type;
-          // if (panelSelected?.label === undefined) {
-          //   focusPanel = data.series[0].meta?.custom?.type;
-          //   // panelSelected!.label = focusPanel;
-          // } else {
-          //   focusPanel = panelSelected?.label;
-          // }
-          let live_data = data.series.filter((row) => row.meta?.custom?.type === focusPanel);
-          // console.log("adcs s live data: ", live_data);
-
           // converts radians to degrees: 1rad x (180/PI) = DEGREE
           const rad2deg: number = 180 / Math.PI;
           // console.log('rad 2 deg: ', rad2deg);
           // result: rad 2 deg:  57.29577951308232
-
-          const field = live_data[0].fields?.find((field) => field.name === key);
-          // console.log("select filtered field: ", field);
-          if (field === undefined) {
-            return;
-          }
-
           // Finally, update display with most up-to-date values
           const currentValue: number = field.values.get(refIdxs.current[input_field_key]!) ?? 0;
           if (['azi', 'elev'].some((x) => x === key)) {

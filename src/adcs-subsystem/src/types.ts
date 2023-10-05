@@ -16,8 +16,11 @@ export type input_field = 'theta_x' | 'theta_y' | 'theta_z' | 'theta_w' |
   'mag_x' | 'mag_y' | 'mag_z' |
   'qva' | 'qvb' | 'qvc' | 'qvd' | 'azi' | 'elev' |
   'geoc_s_x' | 'geoc_s_y' | 'geoc_s_z' | 'geod_s_lat' | 'geod_s_lon' | 'geod_s_alt' |
-  's_h' | 's_e' | 's_b' | 'v_x' | 'v_y' | 'v_z' | 'a_x' | 'a_y' | 'a_z' | 'v_deg_x' | 'v_deg_y' | 'v_deg_z' |
-  'load' | 'gib' | 'storage';
+  's_h' | 's_e' | 's_b' | 'v_x' | 'v_y' | 'v_z' |
+  'mtr_torq' | 'mtr_a' | 'rw_torq' | 'rw_rpm' |
+  'a_x' | 'a_y' | 'a_z' | 'v_deg_x' | 'v_deg_y' | 'v_deg_z';
+// add types for controls; need to have single row, add other rows dynamically... 
+// query twice for controls panel for mtr and rw ? 
 
 export interface TimeEventPayload {
   // The starting time, positive unix timestamp
