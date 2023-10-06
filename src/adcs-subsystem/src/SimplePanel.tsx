@@ -86,7 +86,7 @@ export const SimplePanel: React.FC<Props> = ({ data, eventBus, timeRange }) => {
         <EstimatedStates /> */}
       </div>
     );
-  } else if (selectPanel?.label === 'control') {
+  } else if (selectPanel?.label === 'mtr' || selectPanel?.label === 'rw') {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
         {/* <IMU { ...refInputs } /> */}

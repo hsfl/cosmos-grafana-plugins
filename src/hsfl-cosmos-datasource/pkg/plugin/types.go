@@ -53,6 +53,8 @@ type Cosmosresponse struct {
 	Imus           []imu             `json:"imus,omitempty"`
 	Ssens          []ssen            `json:"ssens,omitempty"`
 	Gpss           []gps             `json:"gpss,omitempty"`
+	Mtrs           []mtr             `json:"mtrs,omitempty"`
+	Rws            []rw              `json:"rws,omitempty"`
 	Geods          []geod            `json:"geods,omitempty"`
 	Geoss          []geos            `json:"geoss,omitempty"`
 	Lvlhs          []lvlh            `json:"lvlhs,omitempty"`
@@ -370,6 +372,22 @@ type ssen struct {
 	Elev      float64 `json:"elev,omitempty"`
 }
 
+type mtr struct {
+	Time      float64
+	Node_name string
+	Name      string
+	Amp   	  float64 `json:"amp,omitempty"`
+	Torq  	  float64 `json:"torq,omitempty"`
+}
+
+type rw struct {
+	Time      float64
+	Node_name string
+	Name      string
+	Omg   	  float64 `json:"omg,omitempty"`
+	Torq   	  float64 `json:"torq,omitempty"`
+}
+
 type gps struct {
 	Time      float64
 	Node_name string
@@ -420,6 +438,8 @@ type cosmostype interface {
 		imu |
 		ssen |
 		gps |
+		mtr |
+		rw |
 		command_history
 }
 

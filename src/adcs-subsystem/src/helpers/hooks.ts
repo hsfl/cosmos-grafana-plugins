@@ -56,7 +56,22 @@ export const useDomUpdate = (): DomUpdateReturn => {
           if (!data.series.length) {
             return;
           }
-          let focusPanel = data.series[0].meta?.custom?.type;
+          let focusPanel = '';
+          // filter for Control panel case
+          if (['mtr_torq', 'mtr_a', 'rw_torq', 'rw_rpm'].some((x) => x === key)) {
+            if (key === 'mtr_torq' || key === 'mtr_a') {
+              focusPanel = 'mtr';
+            } else if (key === 'rw_torq' || key === 'rw_rpm') {
+              focusPanel = 'rw';
+            }
+          } else {
+            focusPanel = data.series[0].meta?.custom?.type;
+          }
+          // let focusPanel = data.series[0].meta?.custom?.type;
+          // // Combine data frames for Controls panel, rw and mtr types
+          // if (focusPanel === 'mtr' || focusPanel === 'rw') {
+          //   // then combine the data frames 
+          // }
           let live_data = data.series.filter((row) => row.meta?.custom?.type === focusPanel);
           const field = live_data[0].fields?.find((field) => field.name === key);
           // console.log("select filtered field: ", field);
@@ -64,7 +79,7 @@ export const useDomUpdate = (): DomUpdateReturn => {
             return;
           }
           // Query must have returned some values
-          const timeValues = data.series[0].fields[0].values;
+          const timeValues = live_data[0].fields[0].values;
           // console.log('time values: ', timeValues);
           // console.log('time values length: ', timeValues.length);
           if (timeValues.length === 0) {

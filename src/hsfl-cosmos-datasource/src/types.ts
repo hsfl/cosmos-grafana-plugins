@@ -15,6 +15,8 @@ export const queryOptions: Array<SelectOption<string>> = [
   { label: 'IMU', value: 'imu' },
   { label: 'SSEN', value: 'ssen' },
   { label: 'GPS', value: 'gps' },
+  { label: 'MTR Torq', value: 'mtr' },
+  { label: 'RW Torq', value: 'rw' },
   { label: 'Events', value: 'event' },
   { label: 'Thermal', value: 'tsen' },
   { label: 'Nodal Awareness', value: 'nodalaware', description: 'Relative angle/range to other nodes' },

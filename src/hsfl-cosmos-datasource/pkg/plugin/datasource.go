@@ -183,6 +183,8 @@ func (d *Datasource) query(_ context.Context, pCtx backend.PluginContext, query 
 	ConvertToFrame(&response.Frames, &j.Payload.Imus)
 	ConvertToFrame(&response.Frames, &j.Payload.Ssens)
 	ConvertToFrame(&response.Frames, &j.Payload.Gpss)
+	ConvertToFrame(&response.Frames, &j.Payload.Mtrs)
+	ConvertToFrame(&response.Frames, &j.Payload.Rws)
 	ConvertToFrame(&response.Frames, &j.Payload.Geods)
 	ConvertToFrame(&response.Frames, &j.Payload.Geoss)
 	ConvertToFrame(&response.Frames, &j.Payload.Lvlhs)
@@ -291,6 +293,10 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 		names = []string{"time", "node_name", "name", "qva", "qvb", "qvc", "qvd", "azi", "elev"}
 	case gps:
 		names = []string{"time", "node_name", "name", "geoc_s_x", "geoc_s_y", "geoc_s_z", "geod_s_lat", "geod_s_lon", "geod_s_alt"}
+	case mtr:
+		names = []string{"time", "node_name", "name", "mtr_a", "mtr_torq"}
+	case rw:
+		names = []string{"time", "node_name", "name", "rw_rpm", "rw_torq"}
 	case geod:
 		names = []string{"time", "s_lat", "s_lon", "s_h", "v_lat", "v_lon", "v_h", "a_lat", "a_lon", "a_h"}
 	case geoidpos:
@@ -514,6 +520,24 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row[7] = j.Geods_lon
 			row[8] = j.Geods_alt
 			AppendRowtoMap(frame_map, j.Node_name, row, names, "gps")
+		case mtr:
+			timestamp := mjd_to_time(j.Time)
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = &j.Node_name
+			row[2] = &j.Name
+			row[3] = j.Amp
+			row[4] = j.Torq
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "mtr")
+		case rw:
+			timestamp := mjd_to_time(j.Time)
+			row := make([]interface{}, len(names))
+			row[0] = &timestamp
+			row[1] = &j.Node_name
+			row[2] = &j.Name
+			row[3] = j.Omg
+			row[4] = j.Torq
+			AppendRowtoMap(frame_map, j.Node_name, row, names, "rw")
 		case geod:
 			transform_to_timeseries = false
 			timestamp := mjd_to_time(j.Time)
