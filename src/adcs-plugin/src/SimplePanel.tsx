@@ -58,8 +58,19 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
   // const refInputs = useRef<RefDict>({});
   // The index into the data array
   //const refIdxs = useRef<number[]>([]);
-  const [refRenderer, refScene, refCamera, refModel, refSun, refNad, refInputs, refDS, refUS, updateDOMRefs] =
-    useDomUpdate(data);
+  const [
+    refRenderer,
+    refScene,
+    refCamera,
+    refModel,
+    refCoordinateArrows,
+    refSun,
+    refNad,
+    refInputs,
+    refDS,
+    refUS,
+    updateDOMRefs,
+  ] = useDomUpdate(data);
   // console.log('sim pan eventBus: ', eventBus);
   useCosmosTimeline(data, eventBus, updateDOMRefs);
   // refDS.current = 'ICRF';
@@ -96,6 +107,8 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     refScene.current = scene;
     const aspectRatio = canvasWidth / canvasHeight;
     const viewSize = 2;
+    const camHalfWidth = (aspectRatio * viewSize) / -2;
+    const camHalfHeight = viewSize / 2;
     // const camera = new THREE.OrthographicCamera(
     //   (-aspectRatio * viewSize) / 2,
     //   (aspectRatio * viewSize) / 2,
@@ -104,14 +117,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     //   -1,
     //   1000
     // );
-    const camera = new THREE.OrthographicCamera(
-      (aspectRatio * viewSize) / -2,
-      (aspectRatio * viewSize) / 2,
-      viewSize / 2,
-      viewSize / -2,
-      1,
-      1000
-    );
+    const camera = new THREE.OrthographicCamera(-camHalfWidth, camHalfWidth, camHalfHeight, -camHalfHeight, 1, 1000);
     const camera_distance = 1.5;
     camera.position.set(1, 1, 1);
     camera.position.normalize().multiplyScalar(camera_distance);
@@ -120,9 +126,9 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     // const ambientLight = new THREE.AmbientLight(0xcccccc, 1);
     // scene.add(ambientLight);
     // Light placed facing origin from a little to the left of the camera
-    const directionalLight = new THREE.DirectionalLight(0xeeeeee, 3.5);
-    directionalLight.position.set(1, 4, 2);
-    scene.add(directionalLight);
+    const directionalLight = new THREE.DirectionalLight(0xeeeeee, 2);
+    directionalLight.position.set(0, 0, -6);
+    camera.add(directionalLight);
     scene.background = new THREE.Color(0x050505);
 
     // Add axis arrows
@@ -156,7 +162,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     refNad.current = nadarrowHelper;
 
     // x y z orient set upper left dynamic to frame; z points left, x points right, y points up in rendering.
-    const coord_length = 0.6;
+    const coord_length = 0.5;
     const coord_dir = new THREE.Vector3(1, 0, 0);
     const coord_x_arrow = new THREE.ArrowHelper(coord_dir, origin, coord_length, 0xff0000);
     coord_dir.set(0, 1, 0);
@@ -168,8 +174,16 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     coordinate_arrows.add(coord_x_arrow);
     coordinate_arrows.add(coord_y_arrow);
     coordinate_arrows.add(coord_z_arrow);
-    coordinate_arrows.position.set(-1.4, 0, -0.7);
-    scene.add(coordinate_arrows);
+    // coordinate_arrows.position.set(-1.4, 0, -0.7);
+    coordinate_arrows.position.set(-camHalfWidth * (2 / 3), camHalfHeight * (1 / 2), -10);
+    coordinate_arrows.rotation.set((45 * Math.PI) / 180, (-45 * Math.PI) / 180, 0);
+    refCoordinateArrows.current = coordinate_arrows;
+    // coordinate_arrows.lookAt(new THREE.Vector3(0, 0, 0));
+    // Coordinate arrows are always static with respect to the camera
+    camera.add(coordinate_arrows);
+
+    // Add camera to scene, to render its children
+    scene.add(camera);
 
     // Add the satellite model
     loadModel(scene).then((obj) => {
@@ -177,7 +191,20 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       refRenderer.current!.render(scene, camera);
     });
     // Note: refs are stable, will not trigger effect, but calms the exhaustive-deps lint rule
-  }, [width, height, show_table, refRenderer, refScene, refCamera, refModel, refSun, refNad, refInputs, refUS]);
+  }, [
+    width,
+    height,
+    show_table,
+    refRenderer,
+    refScene,
+    refCamera,
+    refModel,
+    refCoordinateArrows,
+    refSun,
+    refNad,
+    refInputs,
+    refUS,
+  ]);
   // console.log('REF inputs adcs simple panel: ', refInputs);
 
   // function Label({ name, isDeg }: { name: string; isDeg: string }) {

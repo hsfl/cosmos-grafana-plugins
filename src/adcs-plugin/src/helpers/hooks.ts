@@ -29,6 +29,7 @@ type DomUpdateReturn = [
   refScene: React.MutableRefObject<THREE.Scene | undefined>,
   refCamera: React.MutableRefObject<THREE.OrthographicCamera | undefined>,
   refModel: React.MutableRefObject<THREE.Group | undefined>,
+  refCoordinateArrows: React.MutableRefObject<THREE.Group | undefined>,
   refSun: React.MutableRefObject<THREE.ArrowHelper | undefined>,
   refNad: React.MutableRefObject<THREE.ArrowHelper | undefined>,
   refInputs: React.MutableRefObject<RefDict>,
@@ -45,6 +46,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
   const refScene = useRef<THREE.Scene>();
   const refCamera = useRef<THREE.OrthographicCamera>();
   const refModel = useRef<THREE.Group>();
+  const refCoordinateArrows = useRef<THREE.Group>();
   const refSun = useRef<THREE.ArrowHelper>();
   const refNad = useRef<THREE.ArrowHelper>();
   // An array of references to the text boxes
@@ -430,6 +432,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     requestAnimationFrame(() => {
       if (
         refModel.current !== undefined &&
+        refCoordinateArrows.current !== undefined &&
         refSun.current !== undefined &&
         refNad.current !== undefined &&
         refRenderer.current !== undefined &&
@@ -445,6 +448,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           refCamera.current.position.set(0, 1, 0);
           refCamera.current.position.normalize().multiplyScalar(camera_distance);
           refCamera.current.lookAt(new THREE.Vector3(0, 0, 0));
+          refCoordinateArrows.current.rotation.set((45 * Math.PI) / 180, (-45 * Math.PI) / 180, 0);
         }
         // TODO
         // rotate the nad and sun vectors by the qaternion HEB for LVLH and GEOC data frames
@@ -466,6 +470,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           refCamera.current.position.set(1, 1, 1);
           refCamera.current.position.normalize().multiplyScalar(camera_distance);
           refCamera.current.lookAt(new THREE.Vector3(0, 0, 0));
+          refCoordinateArrows.current.rotation.set((45 * Math.PI) / 180, (-45 * Math.PI) / 180, 0);
         } else if (refDS.current === 'LVLH') {
           refModel.current.setRotationFromQuaternion(s_quaternion);
 
@@ -479,9 +484,11 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           // Rotate nadir vector from Body to LVLH
           refNad.current.applyQuaternion(s_quaternion);
           const camera_distance = 1.5;
-          refCamera.current.position.set(0, 1, 0);
+          refCamera.current.position.set(0, -1, 0);
           refCamera.current.position.normalize().multiplyScalar(camera_distance);
           refCamera.current.lookAt(new THREE.Vector3(0, 0, 0));
+          refCamera.current.rotateZ(Math.PI);
+          refCoordinateArrows.current.rotation.set((90 * Math.PI) / 180, 0, Math.PI);
         }
         // refNad.current.rotation.set(yaw, pitch, roll, 'ZYX');
         // refSun.current.rotation.set(yaw, pitch, roll, 'ZYX');
@@ -494,5 +501,17 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     });
   }, []);
 
-  return [refRenderer, refScene, refCamera, refModel, refSun, refNad, refInputs, refDS, refUS, updateDOMRefs];
+  return [
+    refRenderer,
+    refScene,
+    refCamera,
+    refModel,
+    refCoordinateArrows,
+    refSun,
+    refNad,
+    refInputs,
+    refDS,
+    refUS,
+    updateDOMRefs,
+  ];
 };
