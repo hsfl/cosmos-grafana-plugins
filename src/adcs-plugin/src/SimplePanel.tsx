@@ -177,7 +177,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       refRenderer.current!.render(scene, camera);
     });
     // Note: refs are stable, will not trigger effect, but calms the exhaustive-deps lint rule
-  }, [width, height, refRenderer, refScene, refCamera, refModel, refSun, refNad, refInputs, refUS]);
+  }, [width, height, show_table, refRenderer, refScene, refCamera, refModel, refSun, refNad, refInputs, refUS]);
   // console.log('REF inputs adcs simple panel: ', refInputs);
 
   // function Label({ name, isDeg }: { name: string; isDeg: string }) {
