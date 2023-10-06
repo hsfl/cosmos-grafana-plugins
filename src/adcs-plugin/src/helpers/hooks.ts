@@ -113,6 +113,14 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     }
     // filter multi-query for data frame selected
     let live_data = data.series.filter((row) => row.meta?.custom?.type === DataMap[refDS.current as keyof Object]);
+    // Keep a reference to the ICRF query results,
+    // since the ICRF quaternions will be reused for every coordinate frame selection.
+    // The sun and nadir info in the ICRF query results will also be found in the ICRF query results.
+    let icrf_data = data.series.filter((row) => row.meta?.custom?.type === 'adcsstruc');
+    if (live_data === undefined || icrf_data === undefined)
+    {
+      return;
+    }
     // console.log('Live filtered data: ', live_data);
     // console.log('refds current: ', refDS.current);
     // console.log('refUS current: ', refUS.current);
@@ -128,14 +136,14 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     // let pitch = 0;
     // let roll = 0;
     // sun vector
-    let sunx = live_data[0].fields.find((field) => field.name === 'sun_x');
-    let suny = live_data[0].fields.find((field) => field.name === 'sun_y');
-    let sunz = live_data[0].fields.find((field) => field.name === 'sun_z');
+    let sunx = icrf_data[0].fields.find((field) => field.name === 'sun_x');
+    let suny = icrf_data[0].fields.find((field) => field.name === 'sun_y');
+    let sunz = icrf_data[0].fields.find((field) => field.name === 'sun_z');
     let new_sundir: THREE.Vector3;
     // nadir vector
-    let nadx = live_data[0].fields.find((field) => field.name === 'nad_x');
-    let nady = live_data[0].fields.find((field) => field.name === 'nad_y');
-    let nadz = live_data[0].fields.find((field) => field.name === 'nad_z');
+    let nadx = icrf_data[0].fields.find((field) => field.name === 'nad_x');
+    let nady = icrf_data[0].fields.find((field) => field.name === 'nad_y');
+    let nadz = icrf_data[0].fields.find((field) => field.name === 'nad_z');
     let new_naddir: THREE.Vector3;
     let sunx_d = 0;
     let suny_d = 0;
@@ -145,10 +153,10 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     let nadz_d = 0;
 
     // the ATT ICRF S quaternion
-    let icrf_s_q_x = live_data[0].fields.find((field) => field.name === 'q_s_x');
-    let icrf_s_q_y = live_data[0].fields.find((field) => field.name === 'q_s_y');
-    let icrf_s_q_z = live_data[0].fields.find((field) => field.name === 'q_s_z');
-    let icrf_s_q_w = live_data[0].fields.find((field) => field.name === 'q_s_w');
+    let icrf_s_q_x = icrf_data[0].fields.find((field) => field.name === 'q_s_x');
+    let icrf_s_q_y = icrf_data[0].fields.find((field) => field.name === 'q_s_y');
+    let icrf_s_q_z = icrf_data[0].fields.find((field) => field.name === 'q_s_z');
+    let icrf_s_q_w = icrf_data[0].fields.find((field) => field.name === 'q_s_w');
     let icrf_s_q_x_d = 0;
     let icrf_s_q_y_d = 0;
     let icrf_s_q_z_d = 0;
@@ -165,7 +173,6 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     let sqatt_z_d = 0;
     let sqatt_w_d = 0;
     let s_quaternion = new THREE.Quaternion();
-    let s_quaternion_inverse = new THREE.Quaternion();
 
     // console.log('update DOM refInputs.current: ', refInputs.current);
 
@@ -389,8 +396,6 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           sqatt_z_d = sqatt_z.values.get(array_pos) ?? 0;
           sqatt_w_d = sqatt_w.values.get(array_pos) ?? 0;
           s_quaternion = new THREE.Quaternion(sqatt_x_d, sqatt_y_d, sqatt_z_d, sqatt_w_d);
-          // conj...
-          s_quaternion_inverse = new THREE.Quaternion(-sqatt_x_d, -sqatt_y_d, -sqatt_z_d, sqatt_w_d);
         } else if (key === 'YAW' && refDS.current === 'ICRF') {
           if (
             icrf_s_q_x === undefined ||
@@ -432,22 +437,15 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         refScene.current !== undefined &&
         refCamera.current !== undefined
       ) {
-        // refModel.current.rotation.set(roll, pitch, yaw);
         if (refDS.current === 'ICRF') {
-          // refModel.current.rotation.set(0, 0, 0);
           refModel.current.setRotationFromQuaternion(icrf_s_quaternion);
-          // refModel.current.applyQuaternion(icrf_s_quaternion.invert());
-          // s_quaternion_inverse
-          // refSun.current.setRotationFromQuaternion(s_quaternion_inverse);
-          refSun.current.applyQuaternion(icrf_s_quaternion);
-          refSun.current.applyQuaternion(icrf_s_quaternion.invert());
-          // refNad.current.setRotationFromQuaternion(icrf_s_quaternion);
-          refNad.current.applyQuaternion(icrf_s_quaternion);
-          refNad.current.applyQuaternion(icrf_s_quaternion.invert());
-          // console.log(roll, pitch, yaw);
-          // if (roll !== 0 && pitch !== 0 && yaw !== 0) {
-          //   refModel.current.rotation.set(roll, pitch, yaw);
-          // }
+          // Both sun vector and nadir vector are already in ECI,
+          // so no further rotations are necessary for them
+
+          const camera_distance = 1.5;
+          refCamera.current.position.set(0, 1, 0);
+          refCamera.current.position.normalize().multiplyScalar(camera_distance);
+          refCamera.current.lookAt(new THREE.Vector3(0, 0, 0));
         }
         // TODO
         // rotate the nad and sun vectors by the qaternion HEB for LVLH and GEOC data frames
@@ -455,108 +453,37 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         // rotate the model and reference coord for lvlh and geoc
         // fix time scrubbing for larger time increments
         else if (refDS.current === 'GEOC') {
-          //first rotate by euler icrf
-          // refSun.current.rotateX(icrf_s_b);
-          // refSun.current.rotateY(icrf_s_e);
-          // refSun.current.rotateZ(icrf_s_h);
-          // refNad.current.rotateX(icrf_s_b);
-          // refNad.current.rotateY(icrf_s_e);
-          // refNad.current.rotateZ(icrf_s_h);
-
-          // const s_quaternion_inverse = s_quaternion.invert();
-          // refModel.current.setRotationFromQuaternion(s_quaternion_inverse);
-
-          // apply geoc.s quaternion to model rotation
           refModel.current.setRotationFromQuaternion(s_quaternion);
-          // refModel.current.applyQuaternion(s_quaternion);
-
-          // const icrf_s_quaternion_inverse = icrf_s_quaternion.invert();
-          // refModel.current.applyQuaternion(icrf_s_quaternion_inverse);
-          // refModel.current.applyQuaternion(icrf_s_quaternion);
-
-          // apply inverse quaternion to fix model back to default orientation
-          // refModel.current.applyQuaternion(s_quaternion_inverse);
-
+          const icrf_s_quaternion_inverse: THREE.Quaternion = icrf_s_quaternion.clone().invert();
+          // Rotate sun vector from ICRF to Body
+          refSun.current.applyQuaternion(icrf_s_quaternion_inverse);
+          // Rotate sun vector from Body to LVLH
           refSun.current.applyQuaternion(s_quaternion);
+          // Rotate nadir vector from ICRF to Body
+          refNad.current.applyQuaternion(icrf_s_quaternion_inverse);
+          // Rotate nadir vector from Body to LVLH
           refNad.current.applyQuaternion(s_quaternion);
+          const camera_distance = 1.5;
+          refCamera.current.position.set(1, 1, 1);
+          refCamera.current.position.normalize().multiplyScalar(camera_distance);
+          refCamera.current.lookAt(new THREE.Vector3(0, 0, 0));
 
-          // if (roll !== 0 && pitch !== 0 && yaw !== 0) {
-          //   refModel.current.rotation.set(roll, pitch, yaw);
-          //   // then rotate by euler geoc'
-          //   // refSun.current.rotation.set(roll, pitch, yaw);
-          //   refSun.current.rotateX(roll);
-          //   refSun.current.rotateY(pitch);
-          //   refSun.current.rotateZ(yaw);
-          //   // refNad.current.rotation.set(roll, pitch, yaw);
-          //   refNad.current.rotateX(roll);
-          //   refNad.current.rotateY(pitch);
-          //   refNad.current.rotateZ(yaw);
-          // }
-
-          // refNad.current.rotation.set(yaw, pitch, roll, 'ZYX');
-          // refSun.current.rotation.set(yaw, pitch, roll, 'ZYX');
-
-          // refNad.current.rotation.set(nadz_d + yaw, nady_d + pitch, nadx_d + roll, 'ZYX');
-          // refSun.current.rotation.set(sunz_d + yaw, suny_d + pitch, sunx_d + roll, 'ZYX');
         } else if (refDS.current === 'LVLH') {
-          // refModel.current.rotation.set(-2, 3, -4);
-          // refNad.current.rotation.set(-2, 3, -4);
-
-          // if (roll !== 0 && pitch !== 0 && yaw !== 0) {
-          // refModel.current.rotation.set(roll, pitch, yaw);
-          // refModel.current.applyQuaternion(s_quaternion);
-
-          // camera.position.set(0, 1.5, 0); // for lvlh; make sure cartesian distance sq.rt(x^2 + y^2 + z^2) is same
-          // camera.lookAt(new THREE.Vector3(0, 0, 0));
-          // refCamera.current = camera;
-
-          // apply lvlh.s quaternion to model rotation
-          // const s_quaternion_inverse = s_quaternion.invert();
-          // refModel.current.setRotationFromQuaternion(s_quaternion_inverse);
           refModel.current.setRotationFromQuaternion(s_quaternion);
-          // refModel.current.applyQuaternion(s_quaternion);
-
-          // apply inverse quaternion to fix model back to default orientation
-          // const icrf_s_quaternion_inverse = icrf_s_quaternion.invert();
-          // refModel.current.applyQuaternion(icrf_s_quaternion_inverse);
-          // refModel.current.applyQuaternion(icrf_s_quaternion);
-
-          // prevent yarn build error for two declarations
-          console.log(s_quaternion_inverse);
-          console.log(icrf_s_quaternion);
-
-          // refSun.current.applyQuaternion(icrf_s_quaternion); // icrf
+  
+          const icrf_s_quaternion_inverse: THREE.Quaternion = icrf_s_quaternion.clone().invert();
+          // Rotate sun vector from ICRF to Body
+          refSun.current.applyQuaternion(icrf_s_quaternion_inverse);
+          // Rotate sun vector from Body to LVLH
           refSun.current.applyQuaternion(s_quaternion);
+          // Rotate nadir vector from ICRF to Body
+          refNad.current.applyQuaternion(icrf_s_quaternion_inverse);
+          // Rotate nadir vector from Body to LVLH
           refNad.current.applyQuaternion(s_quaternion);
-
-          //first rotate by euler icrf
-          // refSun.current.rotateX(icrf_s_b);
-          // refSun.current.rotateY(icrf_s_e);
-          // refSun.current.rotateZ(icrf_s_h);
-          // refNad.current.rotateX(icrf_s_b);
-          // refNad.current.rotateY(icrf_s_e);
-          // refNad.current.rotateZ(icrf_s_h);
-          // then rotate by euler geoc'
-
-          // refSun.current.rotateX(roll);
-          // refSun.current.rotateY(pitch);
-          // refSun.current.rotateZ(yaw);
-          // refNad.current.rotateX(roll);
-          // refNad.current.rotateY(pitch);
-          // refNad.current.rotateZ(yaw);
-
-          // refNad.current.rotateX(-2);
-          // refNad.current.rotateY(3);
-          // refNad.current.rotateZ(-4);
-
-          // refModel.current.rotateX(nadx_d);
-          // refModel.current.rotateY(nady_d);
-          // refModel.current.rotateZ(nadz_d);
-
-          // refModel.current.rotateX(roll);
-          // refModel.current.rotateY(pitch);
-          // refModel.current.rotateZ(yaw);
-          // }
+          const camera_distance = 1.5;
+          refCamera.current.position.set(0, 1, 0);
+          refCamera.current.position.normalize().multiplyScalar(camera_distance);
+          refCamera.current.lookAt(new THREE.Vector3(0, 0, 0));
         }
         // refNad.current.rotation.set(yaw, pitch, roll, 'ZYX');
         // refSun.current.rotation.set(yaw, pitch, roll, 'ZYX');

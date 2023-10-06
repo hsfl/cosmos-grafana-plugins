@@ -86,11 +86,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       //setRenderer(renderer);
     }
     // Threejs canvas to take up the upper half of the panel
-    let panelHeight = height * 0.85;
-    if (show_table) {
-      panelHeight = height / 2;
-    }
-    const [canvasWidth, canvasHeight] = [width, panelHeight];
+    const [canvasWidth, canvasHeight] = [width, height / 2];
     refRenderer.current.setSize(canvasWidth, canvasHeight);
     const scene = new THREE.Scene();
     refScene.current = scene;
@@ -112,10 +108,9 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       1,
       1000
     );
-    // z 0 , x 0, y 45 = lvlh ; z 0 , x 0, y 45 = lvlh
-    // camera.position.set((2 * 45 * Math.PI) / 180, 1, (2 * 45 * Math.PI) / 180);
-    // camera.position.set(0, 1.5, 0); // for lvlh; make sure cartesian distance sq.rt(x^2 + y^2 + z^2) is same
-    camera.position.set(0, 1.5, 0); // for lvlh; make sure cartesian distance sq.rt(x^2 + y^2 + z^2) is same
+    const camera_distance = 1.5;
+    camera.position.set(1, 1, 1);
+    camera.position.normalize().multiplyScalar(camera_distance);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
     refCamera.current = camera;
     // const ambientLight = new THREE.AmbientLight(0xcccccc, 1);
@@ -144,31 +139,33 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
     // scene.add(z_arrow);
 
     // sun vector
-    const sundir = new THREE.Vector3(0, 0, 0);
+    const sundir = new THREE.Vector3(0, 0, 1);
     const origin = new THREE.Vector3(0, 0, 0);
     const length = 1;
     const sunarrowHelper = new THREE.ArrowHelper(sundir, origin, length, 0xffff00);
     scene.add(sunarrowHelper);
     refSun.current = sunarrowHelper;
     // nadir vector
-    const naddir = new THREE.Vector3(0, 0, 0);
+    const naddir = new THREE.Vector3(0, 0, 1);
     const nadarrowHelper = new THREE.ArrowHelper(naddir, origin, 0.75, 0x0fff00);
     scene.add(nadarrowHelper);
     refNad.current = nadarrowHelper;
 
     // x y z orient set upper left dynamic to frame; z points left, x points right, y points up in rendering.
-    const coord_ref = new THREE.Vector3(-1.4, 0, -0.7);
     const coord_length = 0.6;
     const coord_dir = new THREE.Vector3(1, 0, 0);
-    const coord_x_arrow = new THREE.ArrowHelper(coord_dir, coord_ref, coord_length, 0xff0000);
+    const coord_x_arrow = new THREE.ArrowHelper(coord_dir, origin, coord_length, 0xff0000);
     coord_dir.set(0, 1, 0);
-    const coord_y_arrow = new THREE.ArrowHelper(coord_dir, coord_ref, coord_length, 0x00ff00);
+    const coord_y_arrow = new THREE.ArrowHelper(coord_dir, origin, coord_length, 0x00ff00);
     coord_dir.set(0, 0, 1);
     coord_dir.normalize();
-    const coord_z_arrow = new THREE.ArrowHelper(coord_dir, coord_ref, coord_length, 0x00ffff);
-    scene.add(coord_x_arrow);
-    scene.add(coord_y_arrow);
-    scene.add(coord_z_arrow);
+    const coord_z_arrow = new THREE.ArrowHelper(coord_dir, origin, coord_length, 0x00ffff);
+    const coordinate_arrows: THREE.Group = new THREE.Group();
+    coordinate_arrows.add(coord_x_arrow);
+    coordinate_arrows.add(coord_y_arrow);
+    coordinate_arrows.add(coord_z_arrow);
+    coordinate_arrows.position.set(-1.4, 0, -0.7);
+    scene.add(coordinate_arrows);
 
     // Add the satellite model
     loadModel(scene).then((obj) => {
@@ -176,7 +173,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
       refRenderer.current!.render(scene, camera);
     });
     // Note: refs are stable, will not trigger effect, but calms the exhaustive-deps lint rule
-  }, [width, height, show_table, refRenderer, refScene, refCamera, refModel, refSun, refNad, refInputs, refUS]);
+  }, [width, height, refRenderer, refScene, refCamera, refModel, refSun, refNad, refInputs, refUS]);
   // console.log('REF inputs adcs simple panel: ', refInputs);
 
   // function Label({ name, isDeg }: { name: string; isDeg: string }) {
