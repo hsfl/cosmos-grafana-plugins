@@ -117,8 +117,7 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     // since the ICRF quaternions will be reused for every coordinate frame selection.
     // The sun and nadir info in the ICRF query results will also be found in the ICRF query results.
     let icrf_data = data.series.filter((row) => row.meta?.custom?.type === 'adcsstruc');
-    if (live_data === undefined || icrf_data === undefined)
-    {
+    if (live_data === undefined || icrf_data === undefined) {
       return;
     }
     // console.log('Live filtered data: ', live_data);
@@ -467,10 +466,9 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
           refCamera.current.position.set(1, 1, 1);
           refCamera.current.position.normalize().multiplyScalar(camera_distance);
           refCamera.current.lookAt(new THREE.Vector3(0, 0, 0));
-
         } else if (refDS.current === 'LVLH') {
           refModel.current.setRotationFromQuaternion(s_quaternion);
-  
+
           const icrf_s_quaternion_inverse: THREE.Quaternion = icrf_s_quaternion.clone().invert();
           // Rotate sun vector from ICRF to Body
           refSun.current.applyQuaternion(icrf_s_quaternion_inverse);
