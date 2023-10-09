@@ -357,6 +357,56 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, eve
             />
           </InlineField>
         </InlineFieldRow>
+        <div
+          style={{
+            alignItems: 'center',
+            justifyItems: 'center',
+            textAlign: 'center',
+            display: 'grid',
+            //columnGap: '1em',
+            gridTemplateRows: 'auto auto auto auto',
+            gridTemplateColumns: 'auto auto auto auto',
+          }}
+        >
+          <div style={{ gridRow: 2, gridColumn: 2 }}>
+            <Input ref={(ref) => (refInputs.current['YAW'] = ref)} type="text" hidden />
+          </div>
+          <div style={{ gridRow: 2, gridColumn: 3 }}>
+            <Input ref={(ref) => (refInputs.current['VYAW'] = ref)} type="text" hidden />
+          </div>
+          <div style={{ gridRow: 2, gridColumn: 4 }}>
+            <Input ref={(ref) => (refInputs.current['AYAW'] = ref)} type="text" hidden />
+          </div>
+          <div style={{ gridRow: 3, gridColumn: 2 }}>
+            <Input ref={(ref) => (refInputs.current['PITCH'] = ref)} type="text" hidden />
+          </div>
+          <div style={{ gridRow: 3, gridColumn: 3 }}>
+            <Input ref={(ref) => (refInputs.current['VPITCH'] = ref)} type="text" hidden />
+          </div>
+          <div style={{ gridRow: 3, gridColumn: 4 }}>
+            <Input ref={(ref) => (refInputs.current['APITCH'] = ref)} type="text" hidden />
+          </div>
+          <div style={{ gridRow: 4, gridColumn: 2 }}>
+            <Input ref={(ref) => (refInputs.current['ROLL'] = ref)} type="text" hidden />
+          </div>
+          <div style={{ gridRow: 4, gridColumn: 3 }}>
+            <Input ref={(ref) => (refInputs.current['VROLL'] = ref)} type="text" hidden />
+          </div>
+          <div style={{ gridRow: 4, gridColumn: 4 }}>
+            <Input ref={(ref) => (refInputs.current['AROLL'] = ref)} type="text" hidden />
+          </div>
+        </div>
+        <div>
+          <div style={{ gridRow: 1, gridColumn: 2 }}>
+            <Input ref={(ref) => (refInputs.current['TIME'] = ref)} type="text" hidden />
+          </div>
+          <div style={{ gridRow: 2, gridColumn: 2 }}>
+            <Input ref={(ref) => (refInputs.current['NODE'] = ref)} type="text" hidden />
+          </div>
+          <div style={{ gridRow: 3, gridColumn: 1 }}>
+            <Input ref={(ref) => (refInputs.current['PLTIME'] = ref)} type="text" hidden />
+          </div>
+        </div>
       </div>
     );
   }
