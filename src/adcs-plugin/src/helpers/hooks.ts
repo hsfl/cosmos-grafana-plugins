@@ -187,120 +187,164 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
     //   pl_time = parseFloat(refInputs.current.PLTIME.value);
     // }
 
-    // Update field values
-    Object.entries(refInputs.current).forEach(([key, ref], i) => {
-      if (ref !== null) {
-        // Check that there are query results
-        if (live_data.length < 1) {
-          console.log('EMPTY QUERY');
-          return;
-        }
+    // Check that there are query results
+    if (live_data.length < 1) {
+      console.log('EMPTY QUERY');
+      return;
+    }
 
-        // Query must have returned some values; select array of beacon time stamps
-        const timeValues = live_data[0].fields[0].values;
-        if (timeValues.length === 0) {
-          return;
-        }
+    // Query must have returned some values; select array of beacon time stamps
+    const timeValues = live_data[0].fields[0].values;
+    if (timeValues.length === 0) {
+      return;
+    }
 
-        // // If index is out of bounds, set it back to the start
-        // if (refIdxs.current[i] >= timeValues.length - 1) {
-        //   refIdxs.current[i] = 0;
-        // }
+    // // If index is out of bounds, set it back to the start
+    // if (refIdxs.current[i] >= timeValues.length - 1) {
+    //   refIdxs.current[i] = 0;
+    // }
 
-        // let time = timeValues.get(0);
+    // let time = timeValues.get(0);
 
-        // add clause here to check   && (time > last_time)
-        let array_pos = -1;
+    // add clause here to check   && (time > last_time)
+    let array_pos = -1;
 
-        // find time values minimum bound
-        const time_min_bound = timeValues.get(0);
-        if (time_min_bound > event.payload.time!) {
-          // filter out payload preceeding data range
-          // console.log('time min bound', time_min_bound);
-          return;
-        } else {
-          // check max bound
-          const max_index = timeValues.length - 1;
-          const time_max_bound = timeValues.get(max_index);
-          if (time_max_bound < event.payload.time!) {
-            // filter out payload after data range
-            // console.log('time max bound', time_max_bound);
-            array_pos = max_index;
-          } else {
-            // the inner case for payload within data range below
-            // iterate over data array for best fit timestamp
-            for (let t_index = 0; t_index < timeValues.length - 1; t_index++) {
-              // time = timeValues[refIdxs.current[input_field_key]!];
-              let t_time = timeValues.get(t_index);
-              // console.log('timevalues', timeValues, 't time', t_time, 'time diff', event.payload.time! - t_time);
-              if (t_time === event.payload.time!) {
-                array_pos = t_index;
-                // console.log("t_time === event.payload.time!", t_index);
-                break;
-              }
-              if (t_time > event.payload.time!) {
-                if (t_index > 0) {
-                  let t_time_minus = timeValues.get(t_index - 1);
-                  if (t_time_minus > event.payload.time!) {
-                    for (let t_index_minus = t_index - 1; t_time_minus < event.payload.time!; t_time_minus--) {
-                      // console.log('backwards scrub', t_index);
-                      let t_time_minus_minus = timeValues.get(t_index_minus);
-                      if (t_time_minus_minus < event.payload.time!) {
-                        array_pos = t_index_minus;
-                        // console.log('backwards scrub done', t_index);
-                        break;
-                      }
-                    }
-                    break;
-                  } else {
-                    // this is the one
-                    array_pos = t_index - 1;
-                    // console.log("t_time_minus < event.payload.time! index zero, return", t_index - 1);
+    // find time values minimum bound
+    const time_min_bound = timeValues.get(0);
+    if (time_min_bound > event.payload.time!) {
+      // filter out payload preceeding data range
+      // console.log('time min bound', time_min_bound);
+      return;
+    } else {
+      // check max bound
+      const max_index = timeValues.length - 1;
+      const time_max_bound = timeValues.get(max_index);
+      if (time_max_bound < event.payload.time!) {
+        // filter out payload after data range
+        // console.log('time max bound', time_max_bound);
+        array_pos = max_index;
+      } else {
+        // the inner case for payload within data range below
+        // iterate over data array for best fit timestamp
+        for (let t_index = 0; t_index < timeValues.length - 1; t_index++) {
+          // time = timeValues[refIdxs.current[input_field_key]!];
+          let t_time = timeValues.get(t_index);
+          // console.log('timevalues', timeValues, 't time', t_time, 'time diff', event.payload.time! - t_time);
+          if (t_time === event.payload.time!) {
+            array_pos = t_index;
+            // console.log("t_time === event.payload.time!", t_index);
+            break;
+          }
+          if (t_time > event.payload.time!) {
+            if (t_index > 0) {
+              let t_time_minus = timeValues.get(t_index - 1);
+              if (t_time_minus > event.payload.time!) {
+                for (let t_index_minus = t_index - 1; t_time_minus < event.payload.time!; t_time_minus--) {
+                  // console.log('backwards scrub', t_index);
+                  let t_time_minus_minus = timeValues.get(t_index_minus);
+                  if (t_time_minus_minus < event.payload.time!) {
+                    array_pos = t_index_minus;
+                    // console.log('backwards scrub done', t_index);
                     break;
                   }
-                } else {
-                  array_pos = 0;
-                  // console.log("t_time > event.payload.time! index zero, return", t_index);
-                  return;
                 }
-              } else if (t_time < event.payload.time!) {
-                if (t_index === timeValues.length - 1) {
-                  // console.log("t_time < event.payload.time! max index", t_index);
-                  array_pos = t_index;
-                  break;
-                }
-                let t_time_plus = timeValues.get(t_index + 1);
-                if (t_time_plus > event.payload.time!) {
-                  array_pos = t_index;
-                  // console.log("t_time < event.payload.time!", t_index);
-                  break;
-                }
+                break;
+              } else {
+                // this is the one
+                array_pos = t_index - 1;
+                // console.log("t_time_minus < event.payload.time! index zero, return", t_index - 1);
+                break;
               }
+            } else {
+              array_pos = 0;
+              // console.log("t_time > event.payload.time! index zero, return", t_index);
+              return;
+            }
+          } else if (t_time < event.payload.time!) {
+            if (t_index === timeValues.length - 1) {
+              // console.log("t_time < event.payload.time! max index", t_index);
+              array_pos = t_index;
+              break;
+            }
+            let t_time_plus = timeValues.get(t_index + 1);
+            if (t_time_plus > event.payload.time!) {
+              array_pos = t_index;
+              // console.log("t_time < event.payload.time!", t_index);
+              break;
             }
           }
         }
+      }
+    }
 
+    if (array_pos === -1) {
+      return;
+    }
+
+    sunx_d = sunx!.values.get(array_pos) ?? 0;
+    suny_d = suny!.values.get(array_pos) ?? 0;
+    sunz_d = sunz!.values.get(array_pos) ?? 0;
+    new_sundir = new THREE.Vector3(sunx_d, suny_d, sunz_d);
+    new_sundir.normalize();
+    nadx_d = nadx!.values.get(array_pos) ?? 0;
+    nady_d = nady!.values.get(array_pos) ?? 0;
+    nadz_d = nadz!.values.get(array_pos) ?? 0;
+    new_naddir = new THREE.Vector3(nadx_d, nady_d, nadz_d);
+    new_naddir.normalize();
+    refSun.current!.setDirection(new_sundir);
+    refNad.current!.setDirection(new_naddir);
+
+    // set icrf_s base rotation values for LVLH or GEOC frames
+    if (refDS.current === 'GEOC' || refDS.current === 'LVLH') {
+      // set the s quaternion data values
+      if (
+        sqatt_x === undefined ||
+        sqatt_y === undefined ||
+        sqatt_z === undefined ||
+        sqatt_w === undefined ||
+        icrf_s_q_x === undefined ||
+        icrf_s_q_y === undefined ||
+        icrf_s_q_z === undefined ||
+        icrf_s_q_w === undefined
+      ) {
+        return;
+      }
+      // ICRF
+      icrf_s_q_x_d = icrf_s_q_x.values.get(array_pos) ?? 0;
+      icrf_s_q_y_d = icrf_s_q_y.values.get(array_pos) ?? 0;
+      icrf_s_q_z_d = icrf_s_q_z.values.get(array_pos) ?? 0;
+      icrf_s_q_w_d = icrf_s_q_w.values.get(array_pos) ?? 0;
+      icrf_s_quaternion = new THREE.Quaternion(icrf_s_q_x_d, icrf_s_q_y_d, icrf_s_q_z_d, icrf_s_q_w_d);
+      // LVLH or GEOC
+      sqatt_x_d = sqatt_x.values.get(array_pos) ?? 0;
+      sqatt_y_d = sqatt_y.values.get(array_pos) ?? 0;
+      sqatt_z_d = sqatt_z.values.get(array_pos) ?? 0;
+      sqatt_w_d = sqatt_w.values.get(array_pos) ?? 0;
+      s_quaternion = new THREE.Quaternion(sqatt_x_d, sqatt_y_d, sqatt_z_d, sqatt_w_d);
+    } else if (refDS.current === 'ICRF') {
+      if (
+        icrf_s_q_x === undefined ||
+        icrf_s_q_y === undefined ||
+        icrf_s_q_z === undefined ||
+        icrf_s_q_w === undefined
+      ) {
+        return;
+      }
+      // ICRF
+      icrf_s_q_x_d = icrf_s_q_x.values.get(array_pos) ?? 0;
+      icrf_s_q_y_d = icrf_s_q_y.values.get(array_pos) ?? 0;
+      icrf_s_q_z_d = icrf_s_q_z.values.get(array_pos) ?? 0;
+      icrf_s_q_w_d = icrf_s_q_w.values.get(array_pos) ?? 0;
+      icrf_s_quaternion = new THREE.Quaternion(icrf_s_q_x_d, icrf_s_q_y_d, icrf_s_q_z_d, icrf_s_q_w_d);
+    }
+
+    // Update field values
+    Object.entries(refInputs.current).forEach(([key, ref], i) => {
+      if (ref !== null) {
+        // input time reference
         if (key === 'TIME') {
           ref.value = timeValues.get(array_pos).toString();
         }
-
-        if (array_pos === -1) {
-          return;
-        }
-
-        sunx_d = sunx!.values.get(array_pos) ?? 0;
-        suny_d = suny!.values.get(array_pos) ?? 0;
-        sunz_d = sunz!.values.get(array_pos) ?? 0;
-        new_sundir = new THREE.Vector3(sunx_d, suny_d, sunz_d);
-        new_sundir.normalize();
-        nadx_d = nadx!.values.get(array_pos) ?? 0;
-        nady_d = nady!.values.get(array_pos) ?? 0;
-        nadz_d = nadz!.values.get(array_pos) ?? 0;
-        new_naddir = new THREE.Vector3(nadx_d, nady_d, nadz_d);
-        new_naddir.normalize();
-        refSun.current!.setDirection(new_sundir);
-        refNad.current!.setDirection(new_naddir);
-
         // Map appropriate columns for data frame
         // redefine new column names as map
         const keyMap: Object = {
@@ -370,49 +414,6 @@ export const useDomUpdate = (data: PanelData): DomUpdateReturn => {
         //     break;
         // }
 
-        // set icrf_s base rotation values for LVLH or GEOC frames
-        if (key === 'YAW' && (refDS.current === 'GEOC' || refDS.current === 'LVLH')) {
-          // set the s quaternion data values
-          if (
-            sqatt_x === undefined ||
-            sqatt_y === undefined ||
-            sqatt_z === undefined ||
-            sqatt_w === undefined ||
-            icrf_s_q_x === undefined ||
-            icrf_s_q_y === undefined ||
-            icrf_s_q_z === undefined ||
-            icrf_s_q_w === undefined
-          ) {
-            return;
-          }
-          // ICRF
-          icrf_s_q_x_d = icrf_s_q_x.values.get(array_pos) ?? 0;
-          icrf_s_q_y_d = icrf_s_q_y.values.get(array_pos) ?? 0;
-          icrf_s_q_z_d = icrf_s_q_z.values.get(array_pos) ?? 0;
-          icrf_s_q_w_d = icrf_s_q_w.values.get(array_pos) ?? 0;
-          icrf_s_quaternion = new THREE.Quaternion(icrf_s_q_x_d, icrf_s_q_y_d, icrf_s_q_z_d, icrf_s_q_w_d);
-          // LVLH or GEOC
-          sqatt_x_d = sqatt_x.values.get(array_pos) ?? 0;
-          sqatt_y_d = sqatt_y.values.get(array_pos) ?? 0;
-          sqatt_z_d = sqatt_z.values.get(array_pos) ?? 0;
-          sqatt_w_d = sqatt_w.values.get(array_pos) ?? 0;
-          s_quaternion = new THREE.Quaternion(sqatt_x_d, sqatt_y_d, sqatt_z_d, sqatt_w_d);
-        } else if (key === 'YAW' && refDS.current === 'ICRF') {
-          if (
-            icrf_s_q_x === undefined ||
-            icrf_s_q_y === undefined ||
-            icrf_s_q_z === undefined ||
-            icrf_s_q_w === undefined
-          ) {
-            return;
-          }
-          // ICRF
-          icrf_s_q_x_d = icrf_s_q_x.values.get(array_pos) ?? 0;
-          icrf_s_q_y_d = icrf_s_q_y.values.get(array_pos) ?? 0;
-          icrf_s_q_z_d = icrf_s_q_z.values.get(array_pos) ?? 0;
-          icrf_s_q_w_d = icrf_s_q_w.values.get(array_pos) ?? 0;
-          icrf_s_quaternion = new THREE.Quaternion(icrf_s_q_x_d, icrf_s_q_y_d, icrf_s_q_z_d, icrf_s_q_w_d);
-        }
         // round the 9 telem data points to sci notation 5 places
         // translate display ref.value units to Degrees when set; 3D display always in radians
         if (['YAW', 'VYAW', 'AYAW', 'PITCH', 'VPITCH', 'APITCH', 'ROLL', 'VROLL', 'AROLL'].some((x) => x === key)) {
