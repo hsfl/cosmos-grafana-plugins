@@ -5,9 +5,9 @@ import { Text } from '@visx/text';
 import { useCosmosTimeline, useDomUpdate } from '../helpers/hooks';
 import { UTCEvent, TimeEvent, Events } from '../types';
 import { EventBus, PanelData, TimeRange } from '@grafana/data';
-import { animate, motion, useMotionValue } from 'framer-motion';
+import { motion } from 'framer-motion';
 
-const tickHeight = 30;
+const tickHeight = 100;
 
 export const MissionEventsDisplay = (props: {
   data: PanelData;
@@ -17,6 +17,18 @@ export const MissionEventsDisplay = (props: {
   timeRange: TimeRange;
 }) => {
   const { data, width, height, eventBus, timeRange } = props;
+
+  //making data more readable
+  const utcData: UTCEvent[] = [];
+  const eventTimes = data.series[0].fields[0].values.toArray();
+  const nodeNames = data.series[0].fields[1].values.toArray();
+  const durations = data.series[0].fields[2].values.toArray();
+  //const eventIDs = data.series[0].fields[3].values.toArray();
+  const eventTypes = data.series[0].fields[4].values.toArray();
+  //const eventNames = data.series[0].fields[5].values.toArray();
+
+  console.log(nodeNames[0]);
+
   const columns = ['Umbra', 'kauai', 'surrey', 'payload1', 'child1'];
   const colOffset = width / 5;
   const colOffsetEnd = colOffset + 15 * columns.length;
@@ -29,16 +41,13 @@ export const MissionEventsDisplay = (props: {
   const [, setElapsedTime] = useState<number>(0);
   const [currentTime, setCurrentTime] = useState<number>(timeRange.from.unix() * 1000);
   const [tickVals, setTickVals] = useState<number[]>([]);
-
-  //making data more readable
-  const utcData: UTCEvent[] = [];
-  const eventTimes = data.series[0].fields[0].values.toArray();
-  //const nodeNames = data.series[0].fields[1].values.toArray();
-  const durations = data.series[0].fields[2].values.toArray();
-  //const eventIDs = data.series[0].fields[3].values.toArray();
-  const eventTypes = data.series[0].fields[4].values.toArray();
-  const eventNames = data.series[0].fields[5].values.toArray();
-  console.log(eventNames);
+  const pixPerMin = tickHeight / scale;
+  const gridHeight = height - topPartOffset;
+  const minPerGrid = gridHeight / pixPerMin;
+  const halfwayMin = Math.floor(minPerGrid / 2);
+  const startTime = timeRange.from.unix() * 1000;
+  const timeSpan = timeRange.to.unix() * 1000 - timeRange.from.unix() * 1000;
+  //console.log(halfwayMin);
 
   eventTimes.map((v, i) => {
     const utcStart = new Date(eventTimes[i]);
@@ -50,8 +59,6 @@ export const MissionEventsDisplay = (props: {
     });
   });
 
-  const startTime = timeRange.from.unix() * 1000;
-  const timeSpan = timeRange.to.unix() * 1000 - timeRange.from.unix() * 1000;
   // Update various parameters of the graph: height, ticks, etc.
   useEffect(() => {
     const newGraphHeight = tickHeight * (timeSpan / (60000 * scale));
@@ -65,27 +72,25 @@ export const MissionEventsDisplay = (props: {
     });
   }, [timeSpan, height, scale]);
 
-  const pixPerMin = tickHeight / scale;
-
   //Updates scrollbar and display position
-  const barPosition = useMotionValue(topPartOffset);
+  const [barPosition, setBarPosition] = useState(topPartOffset);
   const updateScrollBar = useCallback(
     (event: TimeEvent) => {
       requestAnimationFrame(() => {
         if (divElement && event.payload.time !== undefined) {
-          animate(barPosition, ((event.payload.time / 1000 - timeRange.from.unix()) / 60) * pixPerMin, {
-            type: 'tween',
-          });
-          if (barPosition.get() > height / 2) {
+          if (barPosition < topPartOffset + halfwayMin * pixPerMin) {
+            setBarPosition(topPartOffset + ((event.payload.time / 1000 - timeRange.from.unix()) / 60) * pixPerMin);
+          }
+          if (barPosition >= topPartOffset + halfwayMin * pixPerMin) {
             divElement.scrollTo({
-              top: ((event.payload.time / 1000 - timeRange.from.unix()) / 60) * pixPerMin - 5 * pixPerMin,
+              top: ((event.payload.time / 1000 - timeRange.from.unix()) / 60) * pixPerMin - halfwayMin * pixPerMin,
               behavior: 'smooth',
             });
           }
         }
       });
     },
-    [divElement, height, barPosition, pixPerMin, timeRange.from]
+    [divElement, barPosition, pixPerMin, timeRange.from, halfwayMin, topPartOffset]
   );
   useCosmosTimeline(eventBus, updateScrollBar);
 
@@ -171,13 +176,10 @@ export const MissionEventsDisplay = (props: {
       //eventColors.push('#0df');
     }
   }
-  console.log('event type ', eventTypes);
-  console.log('orbital ', orbitalEventStrings);
-  console.log('spacecraft ', spacecraftEventStrings);
-  console.log('color if orbital ', eventColors);
+
   return (
-    <div ref={refDiv} style={{ width: width, height: height, overflow: 'scroll' }}>
-      <div ref={refDiv} style={{ width: width, height: topPartOffset, position: 'fixed' }}>
+    <div id="scrollingMED" ref={refDiv} style={{ width: width, height: height, overflow: 'scroll' }}>
+      <div id="fixedHeader" ref={refDiv} style={{ width: width, height: topPartOffset, position: 'fixed' }}>
         <svg width={width} height={topPartOffset}>
           <Group top={0} left={0}>
             {/* Header Background */}
@@ -212,8 +214,6 @@ export const MissionEventsDisplay = (props: {
               Executed
             </Text> */}
             </Group>
-            {/* white horizontal line */}
-            <Line from={{ x: 0, y: topPartOffset }} to={{ x: width - 10, y: topPartOffset }} stroke={'#ffffff'} />
             {/* columns */}
             <Line from={{ x: colOffset, y: 0 }} to={{ x: colOffset, y: graphHeight }} stroke={'#ffff00'} />
             {columns.map((val, i) => (
@@ -229,7 +229,27 @@ export const MissionEventsDisplay = (props: {
               </Group>
             ))}
           </Group>
+          {/* white horizontal line */}
+          <Line from={{ x: 0, y: topPartOffset - 1 }} to={{ x: width - 10, y: topPartOffset - 1 }} stroke={'#ffffff'} />
         </svg>
+      </div>
+      {/*Scrollbar*/}
+      <div id="scrollBar" ref={refDiv} style={{ width: width, height: 5, position: 'fixed' }}>
+        <Group top={barPosition} left={0}>
+          <motion.rect
+            style={{
+              x: 0,
+              y: barPosition,
+              fill: '#00ff00',
+              opacity: 50,
+              width: width - 10,
+              height: 5,
+              position: 'fixed',
+              borderRadius: '5%',
+              background: '#00ff00',
+            }}
+          />
+        </Group>
       </div>
       <svg width={width - 10} height={graphHeight}>
         <rect width={width - 10} height={graphHeight} fill={'#000'} rx={14} />
@@ -256,8 +276,6 @@ export const MissionEventsDisplay = (props: {
               />
             ))}
           </Group>
-          {/* Horizontal time tracker line */}
-          {/* <Line from={{ x: 0, y: topPartOffset + scrollPercentage.current }} to={{ x: width, y: topPartOffset + scrollPercentage.current }} stroke={'#0f0'} /> */}
         </Group>
         {/* Example orbital events*/}
         <Group top={topPartOffset} left={0}>
@@ -269,9 +287,7 @@ export const MissionEventsDisplay = (props: {
               return a;
             }
             {
-              {
-                /* Orbital Events Rectangle */
-              }
+              /* Orbital Events Rectangle */
             }
             a.push(
               <Group key={`orbital-event-${i}`}>
@@ -346,7 +362,7 @@ export const MissionEventsDisplay = (props: {
                   y={((eventTimes[i] - startTime) / 60000) * tickHeight}
                   fontSize={10}
                   verticalAnchor="end"
-                  fill={'#00f'}
+                  fill={'#0df'}
                 >
                   {spacecraftEventStrings[i]}
                 </Text>
@@ -373,22 +389,6 @@ export const MissionEventsDisplay = (props: {
             );
             return a;
           }, [])}
-        </Group>
-        <Group top={topPartOffset} left={0}>
-          {/* Timeline Bar */}
-          <motion.rect
-            initial={{ y: 0 }}
-            style={{
-              x: 0,
-              y: barPosition,
-              fill: '#00ff00',
-              opacity: 100,
-              width: width - 11,
-              height: 5,
-              borderRadius: '5%',
-              background: '#00ff00',
-            }}
-          />
         </Group>
       </svg>
     </div>
