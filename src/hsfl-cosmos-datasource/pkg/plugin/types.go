@@ -373,19 +373,21 @@ type ssen struct {
 }
 
 type mtr struct {
-	Time      float64
-	Node_name string
-	Name      string
-	Amp   	  float64 `json:"amp,omitempty"`
-	Torq  	  float64 `json:"torq,omitempty"`
+	Time        float64 
+	Node_name   string  `json:"Node_name,omitempty"`
+	Device_name string  `json:"Device_name,omitempty"`
+	Didx   		uint8 `json:"didx,omitempty"`
+	Amp   	    float64 `json:"amp,omitempty"`
+	Torq  	    float64 `json:"torq,omitempty"`
 }
 
 type rw struct {
-	Time      float64
-	Node_name string
-	Name      string
-	Omg   	  float64 `json:"omg,omitempty"`
-	Torq   	  float64 `json:"torq,omitempty"`
+	Time        float64
+	Node_name   string  `json:"Node_name,omitempty"`
+	Device_name string  `json:"Device_name,omitempty"`
+	Didx   		uint8 `json:"didx,omitempty"`
+	Omg   	    float64 `json:"omg,omitempty"`
+	Torq   	    float64 `json:"torq,omitempty"`
 }
 
 type gps struct {

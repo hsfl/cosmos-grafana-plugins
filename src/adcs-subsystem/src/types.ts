@@ -22,6 +22,16 @@ export type input_field = 'theta_x' | 'theta_y' | 'theta_z' | 'theta_w' |
 // add types for controls; need to have single row, add other rows dynamically... 
 // query twice for controls panel for mtr and rw ? 
 
+// RefCont ... dictionary of 'device' | 'mtr_torq' | 'mtr_a' | 'rw_torq' | 'rw_rpm', with device:value objects for each, value as HTMLInputElement
+// export type RefCont = { [key in control_field]?: {} };
+// export type control_field = 'mtrs' | 'rws' | 'mtr_torq' | 'mtr_a' | 'rw_torq' | 'rw_rpm';
+// IdxCont
+export type RefMtr = { [key in mtr_field]?: HTMLInputElement | null };
+export type mtr_field = 'mtr_name' | 'mtr_torq' | 'mtr_a';
+export type RefRw = { [key in rw_field]?: HTMLInputElement | null };
+export type rw_field = 'rw_name' | 'rw_torq' | 'rw_rpm';
+
+
 export interface TimeEventPayload {
   // The starting time, positive unix timestamp
   time?: number;
