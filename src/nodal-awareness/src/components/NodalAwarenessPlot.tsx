@@ -22,10 +22,6 @@ import { PanelData } from '@grafana/data';
 // const getRadius = (d: Point) => d.r;
 // const formatTicks = (val: NumberLike) => String(val);
 
-// const padding = 20;
-
-// const blue = '#aeeef8';
-
 export const NodalAwarenessPlot = (props: {
   width: number;
   height: number;
@@ -57,12 +53,12 @@ export const NodalAwarenessPlot = (props: {
     const nameB = b.name!.toUpperCase();
 
     if (nameA < nameB) {
-      return -1; // a comes before b
+      return -1; 
     }
     if (nameA > nameB) {
-      return 1; // a comes after b
+      return 1; 
     }
-    return 0; // a and b have the same order
+    return 0; 
   });
 
   const yScale = useMemo(
@@ -87,10 +83,6 @@ export const NodalAwarenessPlot = (props: {
   const ringIdx = radialTicks.length;
   const tickSpacing = dimMax / 2 / (radialTicks.length + 1);
   const concentricR = tickSpacing * ringIdx;
-  //distance from center of concentric rings to indicator dot using elevation
-  //const nodeR = ((90 - Math.abs(dataArray[1].fields[3].values.get(0)) * (180 / Math.PI)) / 90) * concentricR;
-  //distance from center of concentric rings to indicator dot using slant range
-  //const nodeRSlant = ((1000 - Math.abs(dataArray[1].fields[4].values.get(0)))/1000) * concentricR;
   //x and y position of indicator dot using azimuth
   const nodeY =
     height -
@@ -140,32 +132,13 @@ export const NodalAwarenessPlot = (props: {
               fill="none"
               r={r}
               stroke="#f00"
-              //strokeWidth="4"
               strokeLinecap="round"
               //transition={{ ease: "easeInOut", repeat: Infinity, duration: 2 }}
             />
           );
         })}
-        {/** Tick labels (Elevation) */}
-        {/* {radialTicks.map((v, i) => {
-          const ringIdx = radialTicks.length - i;
-          const tickSpacing = dimMax / 2 / (radialTicks.length + 1);
-          const gridCenterX = (width * 0.6) / 2;
-          const gridCenterY = height / 2;
-          return (
-            <motion.text
-              key={`radial-tick-${i}`}
-              x={gridCenterX}
-              y={gridCenterY + tickSpacing * ringIdx}
-              fill="#f00"
-              pointerEvents="none"
-            >
-              {v}
-            </motion.text>
-          );
-        })} */}
 
-        {/** Tick labels (Slant) */}
+        {/** Tick labels */}
         {radialTicks.map((v, i) => {
           const ringIdx = radialTicks.length - i;
           const tickSpacing = dimMax / 2 / (radialTicks.length + 1);

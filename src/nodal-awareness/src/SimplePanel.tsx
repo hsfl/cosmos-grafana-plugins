@@ -45,7 +45,6 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
     const nodeR = ((90 - Math.abs(dataArray[1].fields[3].values.get(0)) * (180 / Math.PI)) / 90) * concentricR;
     //distance from center of concentric rings to indicator dot using slant range
     const nodeRSlant = (Math.abs(dataArray[1].fields[4].values.get(0)) / 2000) * concentricR;
-    //const [dotRadius, setDotRadius] = useState<number>(nodeR);
     let dotRadius = nodeR;
 
     const handleRadioButtonChange = (value: string) => {
