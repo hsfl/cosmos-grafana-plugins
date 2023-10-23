@@ -6,8 +6,9 @@ import { useCosmosTimeline, useDomUpdate } from '../helpers/hooks';
 import { UTCEvent, TimeEvent, Events } from '../types';
 import { EventBus, PanelData, TimeRange } from '@grafana/data';
 import { motion } from 'framer-motion';
+import { Slider } from '@grafana/ui';
 
-const tickHeight = 100;
+//const tickHeight = 50;
 
 export const MissionEventsDisplay = (props: {
   data: PanelData;
@@ -21,33 +22,40 @@ export const MissionEventsDisplay = (props: {
   //making data more readable
   const utcData: UTCEvent[] = [];
   const eventTimes = data.series[0].fields[0].values.toArray();
-  const nodeNames = data.series[0].fields[1].values.toArray();
+  //const nodeNames = data.series[0].fields[1].values.toArray();
   const durations = data.series[0].fields[2].values.toArray();
   //const eventIDs = data.series[0].fields[3].values.toArray();
   const eventTypes = data.series[0].fields[4].values.toArray();
   //const eventNames = data.series[0].fields[5].values.toArray();
-
-  console.log(nodeNames[0]);
-
   const columns = ['Umbra', 'kauai', 'surrey', 'payload1', 'child1'];
   const colOffset = width / 5;
   const colOffsetEnd = colOffset + 15 * columns.length;
   const topPartOffset = 10 + 10 * columns.reduce((max, current) => Math.max(max, current.length), 0);
   const [refTimeTickGroup] = useDomUpdate();
   // let's assume a scale of 1 means that each tick represents 1 minute
-  const [scale /*, setScale */] = useState<number>(1);
+  const [scale, setScale] = useState<number>(1);
   const [graphHeight, setGraphHeight] = useState<number>(height);
   const [divElement, setDivElement] = useState<HTMLDivElement>();
   const [, setElapsedTime] = useState<number>(0);
   const [currentTime, setCurrentTime] = useState<number>(timeRange.from.unix() * 1000);
   const [tickVals, setTickVals] = useState<number[]>([]);
+  const [scaleSliderValue, setscaleSliderValue] = useState<number>(10);
+  const [tickSliderValue, setTickSliderValue] = useState<number>(20);
+  const [tickHeight, setTickHeight] = useState<number>(50);
+  const handleScaleSliderChange = (value: number) => {
+    setscaleSliderValue(value);
+    setScale(value / 10);
+  };
+
+  const handleTickSliderChange = (value: number) => {
+    setTickSliderValue(value);
+    setTickHeight(value);
+  };
   const pixPerMin = tickHeight / scale;
   const gridHeight = height - topPartOffset;
-  const minPerGrid = gridHeight / pixPerMin;
-  const halfwayMin = Math.floor(minPerGrid / 2);
+  const halfwayMin = Math.floor(gridHeight / pixPerMin / 2);
   const startTime = timeRange.from.unix() * 1000;
   const timeSpan = timeRange.to.unix() * 1000 - timeRange.from.unix() * 1000;
-  //console.log(halfwayMin);
 
   eventTimes.map((v, i) => {
     const utcStart = new Date(eventTimes[i]);
@@ -70,7 +78,7 @@ export const MissionEventsDisplay = (props: {
       }
       return ret;
     });
-  }, [timeSpan, height, scale]);
+  }, [timeSpan, height, scale, tickHeight]);
 
   //Updates scrollbar and display position
   const [barPosition, setBarPosition] = useState(topPartOffset);
@@ -173,7 +181,7 @@ export const MissionEventsDisplay = (props: {
       }
     } else {
       spacecraftEventStrings.push(`${getEventName(eventTypes[i])}`);
-      //eventColors.push('#0df');
+      eventColors.push('#0df');
     }
   }
 
@@ -251,9 +259,38 @@ export const MissionEventsDisplay = (props: {
           />
         </Group>
       </div>
+      <div
+        id="stickyFooter"
+        ref={refDiv}
+        style={{ width: width - 10, height: 20, position: 'sticky', top: height - 80 }}
+      >
+        <div style={{ width: width - 10, height: 20, position: 'absolute' }}>
+          <Slider
+            included
+            max={50}
+            min={1}
+            orientation="horizontal"
+            value={scaleSliderValue}
+            onChange={handleScaleSliderChange}
+          />
+        </div>
+        <div style={{ width: width - 10, height: 20, position: 'absolute', top: 35 }}>
+          {/* <HorizontalGroup> */}
+          {/* <Text>Test</Text> */}
+          <Slider
+            included
+            max={200}
+            min={1}
+            orientation="horizontal"
+            value={tickSliderValue}
+            onChange={handleTickSliderChange}
+          />
+          {/* </HorizontalGroup> */}
+        </div>
+      </div>
       <svg width={width - 10} height={graphHeight}>
         <rect width={width - 10} height={graphHeight} fill={'#000'} rx={14} />
-        <Group top={topPartOffset} left={0}>
+        <Group top={topPartOffset - 20} left={0}>
           {/* columns*/}
           <Line from={{ x: colOffset, y: 0 }} to={{ x: colOffset, y: graphHeight }} stroke={'#ffff00'} />
           {columns.map((val, i) => (
@@ -293,9 +330,9 @@ export const MissionEventsDisplay = (props: {
               <Group key={`orbital-event-${i}`}>
                 <rect
                   x={colOffset + 15 * (getEventObj(eventTypes[i]) || 4)}
-                  y={((eventTimes[i] - startTime) / 60000) * tickHeight}
+                  y={(((eventTimes[i] - startTime) / 60000) * tickHeight) / scale}
                   width={15}
-                  height={((durations[i] * 86400) / 60) * tickHeight}
+                  height={(((durations[i] * 86400) / 60) * tickHeight) / scale}
                   fill={eventColors[i]}
                   fillOpacity={0.5}
                   strokeWidth={1}
@@ -304,7 +341,7 @@ export const MissionEventsDisplay = (props: {
                 {/* Orbital Events Text */}
                 <Text
                   x={0}
-                  y={((eventTimes[i] - startTime) / 60000) * tickHeight}
+                  y={(((eventTimes[i] - startTime) / 60000) * tickHeight) / scale}
                   fontSize={10}
                   verticalAnchor="end"
                   fill={'#f0f'}
@@ -314,7 +351,7 @@ export const MissionEventsDisplay = (props: {
                 {/* UTC Time */}
                 <Text
                   x={colOffsetEnd + 5}
-                  y={((eventTimes[i] - startTime) / 60000) * tickHeight}
+                  y={(((eventTimes[i] - startTime) / 60000) * tickHeight) / scale}
                   fontSize={10}
                   verticalAnchor="end"
                   fill={'#fff'}
@@ -324,7 +361,7 @@ export const MissionEventsDisplay = (props: {
                 {/* Countdown Timer */}
                 <Text
                   x={colOffsetEnd + 160}
-                  y={((eventTimes[i] - startTime) / 60000) * tickHeight}
+                  y={(((eventTimes[i] - startTime) / 60000) * tickHeight) / scale}
                   fontSize={10}
                   verticalAnchor="end"
                   fill={'#fff'}
@@ -349,9 +386,9 @@ export const MissionEventsDisplay = (props: {
               <Group key={`spacecraft-event-${i}`}>
                 <rect
                   x={colOffset + 15 * (getEventObj(eventTypes[i]) || 0)}
-                  y={((eventTimes[i] - startTime) / 60000) * tickHeight}
+                  y={(((eventTimes[i] - startTime) / 60000) * tickHeight) / scale}
                   width={15}
-                  height={((durations[i] * 86400) / 60) * tickHeight}
+                  height={(((durations[i] * 86400) / 60) * tickHeight) / scale}
                   fill={'#00f'}
                   fillOpacity={0.5}
                   strokeWidth={1}
@@ -359,7 +396,7 @@ export const MissionEventsDisplay = (props: {
                 />
                 <Text
                   x={colOffsetEnd + 55}
-                  y={((eventTimes[i] - startTime) / 60000) * tickHeight}
+                  y={(((eventTimes[i] - startTime) / 60000) * tickHeight) / scale}
                   fontSize={10}
                   verticalAnchor="end"
                   fill={'#0df'}
@@ -368,7 +405,7 @@ export const MissionEventsDisplay = (props: {
                 </Text>
                 <Text
                   x={colOffsetEnd + 5}
-                  y={((eventTimes[i] - startTime) / 60000) * tickHeight}
+                  y={(((eventTimes[i] - startTime) / 60000) * tickHeight) / scale}
                   fontSize={10}
                   verticalAnchor="end"
                   fill={'#fff'}
@@ -378,7 +415,7 @@ export const MissionEventsDisplay = (props: {
                 {/* Countdown Timer */}
                 <Text
                   x={colOffsetEnd + 160}
-                  y={((eventTimes[i] - startTime) / 60000) * tickHeight}
+                  y={(((eventTimes[i] - startTime) / 60000) * tickHeight) / scale}
                   fontSize={10}
                   verticalAnchor="end"
                   fill={'#fff'}
