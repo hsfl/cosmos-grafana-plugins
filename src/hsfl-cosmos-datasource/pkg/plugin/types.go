@@ -347,7 +347,7 @@ type target struct {
 type imu struct {
 	Time      float64
 	Node_name string
-	Name      string
+	Device_name string  `json:"Device_name,omitempty"`
 	Theta_x   float64 `json:"theta_x,omitempty"`
 	Theta_y   float64 `json:"theta_y,omitempty"`
 	Theta_z   float64 `json:"theta_z,omitempty"`
@@ -363,7 +363,7 @@ type imu struct {
 type ssen struct {
 	Time      float64
 	Node_name string
-	Name      string
+	Device_name string  `json:"Device_name,omitempty"`
 	Qva       float64 `json:"qva,omitempty"`
 	Qvb       float64 `json:"qvb,omitempty"`
 	Qvc       float64 `json:"qvc,omitempty"`
@@ -393,7 +393,7 @@ type rw struct {
 type gps struct {
 	Time      float64
 	Node_name string
-	Name      string
+	Device_name string  `json:"Device_name,omitempty"`
 	Geocs_x   float64 `json:"geocs_x,omitempty"`
 	Geocs_y   float64 `json:"geocs_y,omitempty"`
 	Geocs_z   float64 `json:"geocs_z,omitempty"`

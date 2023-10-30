@@ -5,7 +5,7 @@ import Controls from 'components/Controls';
 import GPS from 'components/GPS';
 import IMU from 'components/IMU';
 import SunSensor from 'components/SunSensor';
-import { SimpleOptions, RefMtr, RefRw } from './types';
+import { SimpleOptions, RefMtr, RefRw, RefImu, RefSsen, RefGps } from './types';
 import { useCosmosTimeline, useDomUpdate } from './helpers/hooks';
 
 interface Props extends PanelProps<SimpleOptions> {}
@@ -16,8 +16,9 @@ export const SimplePanel: React.FC<Props> = ({ data, eventBus, timeRange }) => {
   const [selectPanel, setSelectPanel] = useState<SelectableValue<string>>();
   // const [cpuSelectOptions, setCpuSelectOptions] = useState<Array<SelectableValue<string>>>([]);
   // Imperative animation hook -- the dictionary of refs and the animation callback function
-  const [refInputs, mtrList, rwList, updateDOMRefs] = useDomUpdate(data); // removed selectPanel
+  const [refInputs, mtrList, rwList, imuList, ssenList, gpsList, adcstotList, updateDOMRefs] = useDomUpdate(data); // removed selectPanel
   useCosmosTimeline(data, eventBus, updateDOMRefs);
+  console.log(ssenList, gpsList, adcstotList);
 
   // Data changes should cause rerender even without the timeline
   // useEffect(() => {
@@ -101,15 +102,109 @@ export const SimplePanel: React.FC<Props> = ({ data, eventBus, timeRange }) => {
           rwList.current.push(Rw_ob)
         });
       };
+    } else if (panel_type === 'imu') {
+      // define dynamic list of imu elements for node 
+      let imu_data = data.series.filter((row) => row.meta?.custom?.type === 'imu');
+      const imu_dev_fields = imu_data[0].fields.filter((field) => field.name === 'theta_x');
+      // if imu list is not equal to the refState List -1, clear refState and initialize
+      if ((imu_dev_fields).length !== ((imuList.current).length - 1)) {
+        imuList.current = [];
+        imu_dev_fields.forEach((field) => {
+          // let didx = field.values[0];
+          let imu_name_value = field.labels!.name;
+          let input_el_arr: HTMLInputElement[] = [];
+          for (let i = 0; i < 13; i++) {
+            const el: HTMLInputElement = document.createElement('input') as HTMLInputElement;
+            input_el_arr.push(el);
+          };
+          let Imu_ob: RefImu = new Object({
+            imu_name: input_el_arr[0],
+            theta_x: input_el_arr[1],
+            theta_y: input_el_arr[2],
+            theta_z: input_el_arr[3],
+            theta_w: input_el_arr[4],
+            omega_x: input_el_arr[5],
+            omega_y: input_el_arr[6],
+            omega_z: input_el_arr[7],
+            mag_x: input_el_arr[8],
+            mag_y: input_el_arr[9],
+            mag_z: input_el_arr[10],
+          });
+          Imu_ob.imu_name!.value = imu_name_value;
+          imuList.current.push(Imu_ob)
+          // console.log("useRef imu list", imuList);
+        });
+      };
+      //
+    } else if (panel_type === 'ssen') {
+      // define dynamic list of ssen elements for node 
+      let ssen_data = data.series.filter((row) => row.meta?.custom?.type === 'ssen');
+      const ssen_dev_fields = ssen_data[0].fields.filter((field) => field.name === 'qva');
+      // if ssen list is not equal to the refState List -1, clear refState and initialize
+      if ((ssen_dev_fields).length !== ((ssenList.current).length - 1)) {
+        ssenList.current = [];
+        ssen_dev_fields.forEach((field) => {
+          // let didx = field.values[0];
+          let ssen_name_value = field.labels!.name;
+          let input_el_arr: HTMLInputElement[] = [];
+          for (let i = 0; i < 9; i++) {
+            const el: HTMLInputElement = document.createElement('input') as HTMLInputElement;
+            input_el_arr.push(el);
+          };
+          let Ssen_ob: RefSsen = new Object({
+            ssen_name: input_el_arr[0],
+            qva: input_el_arr[1],
+            qvb: input_el_arr[2],
+            qvc: input_el_arr[3],
+            qvd: input_el_arr[4],
+            azi: input_el_arr[5],
+            elev: input_el_arr[6],
+          });
+          Ssen_ob.ssen_name!.value = ssen_name_value;
+          ssenList.current.push(Ssen_ob)
+          // console.log("useRef ssen list", ssenList);
+        });
+      };
+      //
+    } else if (panel_type === 'gps') {
+      // define dynamic list of gps elements for node 
+      let gps_data = data.series.filter((row) => row.meta?.custom?.type === 'gps');
+      const gps_dev_fields = gps_data[0].fields.filter((field) => field.name === 'geoc_s_x');
+      // if gps list is not equal to the refState List -1, clear refState and initialize
+      if ((gps_dev_fields).length !== ((gpsList.current).length - 1)) {
+        gpsList.current = [];
+        gps_dev_fields.forEach((field) => {
+          // let didx = field.values[0];
+          let gps_name_value = field.labels!.name;
+          let input_el_arr: HTMLInputElement[] = [];
+          for (let i = 0; i < 9; i++) {
+            const el: HTMLInputElement = document.createElement('input') as HTMLInputElement;
+            input_el_arr.push(el);
+          };
+          let Gps_ob: RefGps = new Object({
+            gps_name: input_el_arr[0],
+            geoc_s_x: input_el_arr[1],
+            geoc_s_y: input_el_arr[2],
+            geoc_s_z: input_el_arr[3],
+            geod_s_lat: input_el_arr[4],
+            geod_s_lon: input_el_arr[5],
+            geod_s_alt: input_el_arr[6],
+          });
+          Gps_ob.gps_name!.value = gps_name_value;
+          gpsList.current.push(Gps_ob)
+          // console.log("useRef gps list", gpsList);
+        });
+      };
+      //
     };
-  }, [data, mtrList, rwList]);
+  }, [data, mtrList, rwList, imuList, ssenList, gpsList]);
   // console.log("selectPanel: ", selectPanel);
 
 
   if (selectPanel?.label === 'imu') {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
-        <IMU {...refInputs} />
+        <IMU {...imuList} />
         {/* <SunSensor />
         <GPS />
         <Controls />
@@ -120,7 +215,7 @@ export const SimplePanel: React.FC<Props> = ({ data, eventBus, timeRange }) => {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
         {/* <IMU { ...refInputs } /> */}
-        <SunSensor {...refInputs} />
+        <SunSensor {...ssenList} />
         {/* <GPS />
         <Controls />
         <EstimatedStates /> */}
@@ -131,7 +226,7 @@ export const SimplePanel: React.FC<Props> = ({ data, eventBus, timeRange }) => {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
         {/* <IMU { ...refInputs } /> */}
         {/* <SunSensor /> */}
-        <GPS {...refInputs} />
+        <GPS {...gpsList} />
         {/* <Controls />
         <EstimatedStates /> */}
       </div>
@@ -161,9 +256,9 @@ export const SimplePanel: React.FC<Props> = ({ data, eventBus, timeRange }) => {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
         <h1>reset query</h1>
-        <IMU {...refInputs} />
-        <SunSensor {...refInputs} />
-        <GPS {...refInputs} />
+        <IMU {...imuList} />
+        <SunSensor {...ssenList} />
+        <GPS {...gpsList} />
         {/* <Controls {...mtrList} /> */}
         <EstimatedStates {...refInputs} />
       </div>

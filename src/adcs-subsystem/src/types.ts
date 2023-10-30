@@ -26,11 +26,30 @@ export type input_field = 'theta_x' | 'theta_y' | 'theta_z' | 'theta_w' |
 // export type RefCont = { [key in control_field]?: {} };
 // export type control_field = 'mtrs' | 'rws' | 'mtr_torq' | 'mtr_a' | 'rw_torq' | 'rw_rpm';
 // IdxCont
+export type input_types = 'imu' | 'ssen' | 'gps' |
+  'adcstotal' | 'mtr' | 'rw';
+
 export type RefMtr = { [key in mtr_field]?: HTMLInputElement | null };
 export type mtr_field = 'mtr_name' | 'mtr_torq' | 'mtr_a';
+
 export type RefRw = { [key in rw_field]?: HTMLInputElement | null };
 export type rw_field = 'rw_name' | 'rw_torq' | 'rw_rpm';
 
+export type RefImu = { [key in imu_field]?: HTMLInputElement | null };
+export type imu_field = 'imu_name' | 'theta_x' | 'theta_y' | 'theta_z' | 'theta_w' |
+  'omega_x' | 'omega_y' | 'omega_z' |
+  'mag_x' | 'mag_y' | 'mag_z';
+
+export type RefSsen = { [key in ssen_field]?: HTMLInputElement | null };
+export type ssen_field = 'ssen_name' | 'qva' | 'qvb' | 'qvc' | 'qvd' | 'azi' | 'elev';
+
+export type RefGps = { [key in gps_field]?: HTMLInputElement | null };
+export type gps_field = 'gps_name' | 'geoc_s_x' | 'geoc_s_y' | 'geoc_s_z' | 'geod_s_lat' | 'geod_s_lon' | 'geod_s_alt';
+
+export type RefAdcstot = { [key in adcstot_field]?: HTMLInputElement | null };
+export type adcstot_field = 'adcstot_name' | 'geod_s_lat' | 'geod_s_lon' | 'geod_s_alt' |
+  's_h' | 's_e' | 's_b' | 'v_x' | 'v_y' | 'v_z' |
+  'a_x' | 'a_y' | 'a_z' | 'v_deg_x' | 'v_deg_y' | 'v_deg_z';
 
 export interface TimeEventPayload {
   // The starting time, positive unix timestamp

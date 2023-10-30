@@ -484,7 +484,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
 			row[1] = &j.Node_name
-			row[2] = &j.Name
+			row[2] = &j.Device_name
 			row[3] = j.Theta_x
 			row[4] = j.Theta_y
 			row[5] = j.Theta_z
@@ -501,7 +501,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
 			row[1] = &j.Node_name
-			row[2] = &j.Name
+			row[2] = &j.Device_name
 			row[3] = j.Qva
 			row[4] = j.Qvb
 			row[5] = j.Qvc
@@ -514,7 +514,7 @@ func ConvertToFrame[T cosmostype](frames *data.Frames, jarg *[]T) error {
 			row := make([]interface{}, len(names))
 			row[0] = &timestamp
 			row[1] = &j.Node_name
-			row[2] = &j.Name
+			row[2] = &j.Device_name
 			row[3] = j.Geocs_x
 			row[4] = j.Geocs_y
 			row[5] = j.Geocs_z
