@@ -169,21 +169,20 @@ export const MissionEventsDisplay = (props: {
   }
 
   const orbitalEventStrings: string[] = [];
-  const spacecraftEventStrings: string[] = [];
+  {
+    /*const spacecraftEventStrings: string[] = [];*/
+  }
   const eventColors: string[] = [];
   for (let i = 0; i < eventTypes.length; i++) {
     if (getEventType(eventTypes[i]) === 0) {
       orbitalEventStrings.push(`${getEventName(eventTypes[i])}`);
-      if (getEventObj(eventTypes[i]) === 0) {
-        eventColors.push('#f00');
-      } else {
-        eventColors.push('#ff0');
-      }
+      eventColors.push('#f00');
     } else {
-      spacecraftEventStrings.push(`${getEventName(eventTypes[i])}`);
+      orbitalEventStrings.push(`${getEventName(eventTypes[i])}`);
       eventColors.push('#0df');
     }
   }
+  console.log(eventTypes);
 
   return (
     <div id="scrollingMED" ref={refDiv} style={{ width: width, height: height, overflow: 'scroll' }}>
@@ -329,7 +328,7 @@ export const MissionEventsDisplay = (props: {
             a.push(
               <Group key={`orbital-event-${i}`}>
                 <rect
-                  x={colOffset + 15 * (getEventObj(eventTypes[i]) || 4)}
+                  x={colOffset + 15 * (getEventObj(eventTypes[i]) || 0)}
                   y={(((eventTimes[i] - startTime) / 60000) * tickHeight) / scale}
                   width={15}
                   height={(((durations[i] * 86400) / 60) * tickHeight) / scale}
@@ -401,7 +400,7 @@ export const MissionEventsDisplay = (props: {
                   verticalAnchor="end"
                   fill={'#0df'}
                 >
-                  {spacecraftEventStrings[i]}
+                  {orbitalEventStrings[i]}
                 </Text>
                 <Text
                   x={colOffsetEnd + 5}
