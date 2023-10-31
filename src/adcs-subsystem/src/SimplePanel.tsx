@@ -16,9 +16,9 @@ export const SimplePanel: React.FC<Props> = ({ data, eventBus, timeRange }) => {
   const [selectPanel, setSelectPanel] = useState<SelectableValue<string>>();
   // const [cpuSelectOptions, setCpuSelectOptions] = useState<Array<SelectableValue<string>>>([]);
   // Imperative animation hook -- the dictionary of refs and the animation callback function
-  const [refInputs, mtrList, rwList, imuList, ssenList, gpsList, adcstotList, updateDOMRefs] = useDomUpdate(data); // removed selectPanel
+  const [mtrList, rwList, imuList, ssenList, gpsList, adcstotal, updateDOMRefs] = useDomUpdate(data); // removed selectPanel
   useCosmosTimeline(data, eventBus, updateDOMRefs);
-  console.log(ssenList, gpsList, adcstotList);
+  // console.log(adcstotal);
 
   // Data changes should cause rerender even without the timeline
   // useEffect(() => {
@@ -249,7 +249,7 @@ export const SimplePanel: React.FC<Props> = ({ data, eventBus, timeRange }) => {
         {/* <SunSensor /> */}
         {/* <GPS /> */}
         {/* <Controls /> */}
-        <EstimatedStates {...refInputs} />
+        <EstimatedStates {...adcstotal} />
       </div>
     );
   } else {
@@ -260,7 +260,7 @@ export const SimplePanel: React.FC<Props> = ({ data, eventBus, timeRange }) => {
         <SunSensor {...ssenList} />
         <GPS {...gpsList} />
         {/* <Controls {...mtrList} /> */}
-        <EstimatedStates {...refInputs} />
+        <EstimatedStates {...adcstotal} />
       </div>
     );
   }

@@ -1,7 +1,7 @@
 import { HorizontalGroup, VerticalGroup } from '@grafana/ui';
 import React from 'react';
 import './styles.css';
-import { RefDict } from 'types';
+import { RefAdcstot } from 'types';
 
 //Input Style
 const orbitStyle = {
@@ -18,10 +18,10 @@ const smallerStyle = {
   color: '#32CD32',
 };
 
-const EstimatedStates = (refInputs: React.MutableRefObject<RefDict>) => {
+const EstimatedStates = (refInputs: React.MutableRefObject<RefAdcstot>) => {
   return (
-    <div style={ { display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' } }>
-      {/*Estimated States*/ }
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridGap: '5px' }}>
+      {/*Estimated States*/}
       <VerticalGroup>
         <text className='smaller-font'>{"Total Attitude Matrix"}</text>
         <HorizontalGroup>

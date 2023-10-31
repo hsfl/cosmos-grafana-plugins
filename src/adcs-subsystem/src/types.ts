@@ -9,7 +9,7 @@ export interface SimpleOptions {
 }
 
 export type RefDict = { [key in input_field]?: HTMLInputElement | null };
-export type IdxDict = { [key in input_field]?: number };
+export type IdxDict = { [key in input_types]?: number };
 
 export type input_field = 'theta_x' | 'theta_y' | 'theta_z' | 'theta_w' |
   'omega_x' | 'omega_y' | 'omega_z' |
