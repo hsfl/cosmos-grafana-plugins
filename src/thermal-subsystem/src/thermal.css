@@ -1,0 +1,7 @@
+.rainbow-rectangle {
+    background: linear-gradient(to right, blue, dodgerblue, lightskyblue, cyan, lime, yellow, orange, darkorange, red);
+    width: 220px;
+    height: 30px;
+    position: relative;
+    top: 5px; 
+  }
