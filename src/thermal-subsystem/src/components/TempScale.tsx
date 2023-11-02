@@ -2,13 +2,6 @@ import { HorizontalGroup, VerticalGroup } from "@grafana/ui";
 import React from "react";
 import '../thermal.css';
 
-
-interface ColoredRectangleProps {
-  color: string;
-  width: number;
-  height: number;
-}
-
 // const nameStyle = {
 //   width: '60px',
 //   height: '30px', 
@@ -32,7 +25,7 @@ interface ColoredRectangleProps {
 //   return <div style={rectangleStyle}></div>;
 // };
 
-const TempScale: React.FC<ColoredRectangleProps> = () => {
+const TempScale = () => {
 return (
   <div style={{
     display: 'grid',
