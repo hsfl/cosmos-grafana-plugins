@@ -27,6 +27,7 @@ export const MissionEventsDisplay = (props: {
   //const eventIDs = data.series[0].fields[3].values.toArray();
   const eventTypes = data.series[0].fields[4].values.toArray();
   //const eventNames = data.series[0].fields[5].values.toArray();
+  
   const columns = ['Umbra', 'kauai', 'surrey', 'payload1', 'child1'];
   const colOffset = width / 5;
   const colOffsetEnd = colOffset + 15 * columns.length;
@@ -140,6 +141,7 @@ export const MissionEventsDisplay = (props: {
       countdownStrings.push(`+ ${currentString}`);
     }
   }
+
   // Callback for div reference acquisition
   const refDiv = useCallback((ref: HTMLDivElement | null) => {
     if (ref !== null) {
@@ -182,7 +184,6 @@ export const MissionEventsDisplay = (props: {
       eventColors.push('#0df');
     }
   }
-  console.log(eventTypes);
 
   return (
     <div id="scrollingMED" ref={refDiv} style={{ width: width, height: height, overflow: 'scroll' }}>
@@ -275,7 +276,6 @@ export const MissionEventsDisplay = (props: {
         </div>
         <div style={{ width: width - 10, height: 20, position: 'absolute', top: 35 }}>
           {/* <HorizontalGroup> */}
-          {/* <Text>Test</Text> */}
           <Slider
             included
             max={200}
