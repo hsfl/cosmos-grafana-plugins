@@ -1,3 +1,6 @@
+# TAG: hsfl2/grafana_plugins:latest
+# TAG: hsfl2/grafana_plugins:0.3.0
+
 FROM alpine as base
 WORKDIR /home/cosmos-grafana-plugins
 COPY ./cosmos-grafana-plugins ./build/cosmos-grafana-plugins
