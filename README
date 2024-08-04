@@ -1,0 +1,12 @@
+Build hsfl2/grafana_plugins:
+First open a terminal inside the cosmos_grafana_plugins_dev_env container, either with the below command or through some other means (Docker Desktop, vscode, etc.)
+docker exec -it cosmos_grafana_plugins_dev_env bash
+Navigate to the cosmos-grafana-plugins folder
+cd /home/cosmos/tools/cosmos-web/grafana-plugins/cosmos-grafana-plugins
+Run the script that builds all the plugins
+./build_plugins.sh --dist
+Wait for plugins to finish building, then back in the host side:
+Navigate to the build folder of cosmos-grafana-plugins
+cd ~/cosmos-docker/tools/cosmos-web/grafana-plugins/cosmos-grafana-plugins/build
+Build the docker image, be sure to change the version number to what is appropriate (here 0.2.0)
+docker buildx build --push --platform linux/amd64,linux/arm64 --tag hsfl2/grafana_plugins:0.2.0 --tag hsfl2/grafana_plugins:latest -f Dockerfile_dist .

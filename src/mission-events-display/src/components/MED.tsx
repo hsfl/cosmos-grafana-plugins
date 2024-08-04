@@ -27,7 +27,7 @@ export const MissionEventsDisplay = (props: {
   //const eventIDs = data.series[0].fields[3].values.toArray();
   const eventTypes = data.series[0].fields[4].values.toArray();
   //const eventNames = data.series[0].fields[5].values.toArray();
-  
+
   const columns = ['Umbra', 'kauai', 'surrey', 'payload1', 'child1'];
   const colOffset = width / 5;
   const colOffsetEnd = colOffset + 15 * columns.length;
